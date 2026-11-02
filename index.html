@@ -25,7 +25,7 @@
       </form>
       <div class="auth-links"><button id="auth-mode-toggle" type="button">Belum punya akun? Daftar</button><button id="auth-forgot" type="button">Lupa kata sandi?</button></div>
       <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
-      <p class="auth-privacy">Data keuangan tersimpan per akun di browser ini.</p>
+      <p class="auth-privacy">Data keuangan tersimpan aman pada akun Anda.</p>
     </div>
   </section>
   <div class="app-shell" id="app-shell" hidden>
@@ -41,7 +41,7 @@
       <div class="sidebar-bottom">
         <div class="side-label">RUANG PERSONAL</div>
         <div class="profile"><div class="avatar" id="profile-avatar">R</div><div><strong id="profile-email">Akun</strong><small>Catat Duit</small></div><button id="auth-logout" class="logout-button" type="button">Keluar</button></div>
-        <div class="privacy-note"><span>⌑</span><div><strong>Data tersimpan lokal</strong><small>Hanya di perangkat ini</small></div></div>
+        <div class="privacy-note"><span>⌑</span><div><strong>Data tersimpan aman</strong><small>Tersinkron antar perangkat</small></div></div>
       </div>
     </aside>
 
@@ -61,8 +61,8 @@
         <article class="metric-card"><div class="metric-top"><span class="metric-icon blue">◈</span><span class="metric-caption">ASET LIKUID</span></div><div class="metric-label">Total aset</div><div class="metric-value" id="assets-value">Rp 0</div></article>
       </section>
 
-      <section class="lower-grid"><article class="panel flow-panel"><div class="panel-heading"><div><h3>Arus energi</h3><p>Uang masuk dan keluar selama 6 bulan</p></div><button class="select-button">6 bulan <span>⌄</span></button></div><div class="chart-legend"><span><i class="legend-dot income-dot"></i> Uang masuk</span><span><i class="legend-dot expense-dot"></i> Uang keluar</span></div><div class="chart" aria-label="Grafik arus uang enam bulan"><div class="chart-grid"><span>10 jt</span><span>7,5 jt</span><span>5 jt</span><span>2,5 jt</span><span>0</span></div><div class="bars" id="bars"><div class="bar-group"><i class="bar income-bar" style="height:53%"></i><i class="bar expense-bar" style="height:38%"></i><small>Jun</small></div><div class="bar-group"><i class="bar income-bar" style="height:67%"></i><i class="bar expense-bar" style="height:43%"></i><small>Jul</small></div><div class="bar-group"><i class="bar income-bar" style="height:61%"></i><i class="bar expense-bar" style="height:51%"></i><small>Agu</small></div><div class="bar-group"><i class="bar income-bar" style="height:79%"></i><i class="bar expense-bar" style="height:49%"></i><small>Sep</small></div><div class="bar-group"><i class="bar income-bar" style="height:70%"></i><i class="bar expense-bar" style="height:57%"></i><small>Okt</small></div><div class="bar-group current"><i class="bar income-bar" style="height:85%"></i><i class="bar expense-bar" style="height:52%"></i><small>Nov</small></div></div></div></article>
-      <article class="panel spending-panel"><div class="panel-heading"><div><h3>Ke mana uang pergi?</h3><p>Pengeluaran bulan ini</p></div><button class="text-button" data-view="transactions">Lihat semua ↗</button></div><div class="spending-content"><div class="donut-wrap"><div class="donut"><div class="donut-center"><strong id="donut-total">5,24</strong><small>JUTA</small></div></div></div><div class="category-list"><div><span><i class="category-dot food"></i>Makan & minum</span><b>Rp 1,8 jt</b></div><div><span><i class="category-dot home"></i>Tempat tinggal</span><b>Rp 1,5 jt</b></div><div><span><i class="category-dot transport"></i>Transportasi</span><b>Rp 940 rb</b></div><div><span><i class="category-dot other"></i>Lainnya</span><b>Rp 1 jt</b></div></div></div></article></section>
+      <section class="lower-grid"><article class="panel flow-panel"><div class="panel-heading"><div><h3>Arus energi</h3><p>Uang masuk dan keluar selama 6 bulan</p></div><button class="select-button">6 bulan <span>⌄</span></button></div><div class="chart-legend"><span><i class="legend-dot income-dot"></i> Uang masuk</span><span><i class="legend-dot expense-dot"></i> Uang keluar</span></div><div class="chart" aria-label="Grafik arus uang enam bulan"><div class="chart-grid" id="chart-grid"></div><div class="bars" id="bars"></div></div></article>
+      <article class="panel spending-panel"><div class="panel-heading"><div><h3>Ke mana uang pergi?</h3><p>Pengeluaran bulan ini</p></div><button class="text-button" data-view="transactions">Lihat semua ↗</button></div><div class="spending-content"><div class="donut-wrap"><div class="donut"><div class="donut-center"><strong id="donut-total">0,00</strong><small>JUTA</small></div></div></div><div class="category-list" id="category-list"></div></div></article></section>
       <section class="panel transactions-panel"><div class="panel-heading"><div><h3>Aktivitas terbaru</h3><p>Catatan energi yang bergerak</p></div><button class="text-button" data-view="transactions">Semua transaksi ↗</button></div><div class="transaction-table"><div class="table-head"><span>TRANSAKSI</span><span>KATEGORI</span><span>TANGGAL</span><span>JUMLAH</span></div><div id="transaction-rows"></div></div></section>
       <section id="finance-workspace" class="workspace panel" hidden></section>
       <footer class="footer"><span>catat duit. <i>Uang adalah energi hidupmu.</i></span><span>Dirancang untuk lebih sadar, bukan lebih cemas.</span></footer>

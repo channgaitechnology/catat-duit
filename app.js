@@ -82,7 +82,22 @@ function render(){
   document.querySelector('#available-label').textContent=compact(totalAssets);document.querySelector('#cost-label').textContent=compact(monthlyCost);
   document.querySelector('.runway-help span').textContent=monthlyCost?'Perkiraan dari total aset yang Anda catat dan rata-rata pengeluaran hingga 3 bulan terakhir.':'Catat pengeluaran selama beberapa bulan untuk melihat perkiraan kemampuan bertahan.';
   document.querySelector('#donut-total').textContent=(expense/1e6).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2});
-  renderRows();if(!workspace.hidden)renderWorkspace(workspace.dataset.view||'transactions');
+  renderCharts();renderRows();if(!workspace.hidden)renderWorkspace(workspace.dataset.view||'transactions');
+}
+function renderCharts(){
+  const now=new Date(),months=[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,label:new Intl.DateTimeFormat('id-ID',{month:'short'}).format(d)})}
+  const totals=months.map(m=>({ ...m,income:0,expense:0 }));
+  records.forEach(r=>{const m=totals.find(item=>item.key===monthKey(r.record_date));if(m&&['income','expense'].includes(r.kind))m[r.kind]+=Number(r.amount)});
+  const max=Math.max(1,...totals.flatMap(m=>[m.income,m.expense]));
+  document.querySelector('#chart-grid').innerHTML=[1,.66,.33,0].map(n=>`<span>${n?compact(max*n):'0'}</span>`).join('');
+  document.querySelector('#bars').innerHTML=totals.map(m=>`<div class="bar-group ${m.key===months[5].key?'current':''}" title="${m.label}: masuk ${rupiah(m.income)}, keluar ${rupiah(m.expense)}"><i class="income-bar" style="height:${Math.max(m.income?2:0,m.income/max*100)}%"></i><i class="expense-bar" style="height:${Math.max(m.expense?2:0,m.expense/max*100)}%"></i><small>${m.label}</small></div>`).join('');
+  const currentKey=monthKey(today()),byCategory={};
+  records.filter(r=>r.kind==='expense'&&monthKey(r.record_date)===currentKey).forEach(r=>byCategory[r.category]=(byCategory[r.category]||0)+Number(r.amount));
+  const categories=Object.entries(byCategory).sort((a,b)=>b[1]-a[1]),sum=categories.reduce((s,x)=>s+x[1],0),colors=['#94b868','#e5bd79','#8eb4d8','#e8a18d','#b39bc8'];let cursor=0;
+  const stops=categories.map(([,v],i)=>{const start=cursor;cursor+=sum?v/sum*100:0;return `${colors[i%colors.length]} ${start}% ${cursor}%`});
+  document.querySelector('.donut').style.background=stops.length?`conic-gradient(${stops.join(',')})`:'#e9ede6';
+  document.querySelector('#category-list').innerHTML=categories.length?categories.map(([name,value],i)=>`<div><span><i class="category-dot" style="background:${colors[i%colors.length]}"></i>${escapeHtml(name)}</span><b>${compact(value)}</b></div>`).join(''):'<div class="empty-state">Belum ada pengeluaran bulan ini.</div>';
 }
 function renderRows(){
   const rows=records.filter(r=>['income','expense'].includes(r.kind)).slice(0,5);const host=document.querySelector('#transaction-rows');

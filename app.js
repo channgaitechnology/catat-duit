@@ -1,17 +1,119 @@
-const STORAGE_KEY='ruang-finance-v1';
-const initialTransactions=[{name:'Gaji bulanan',category:'Gaji',date:'2026-11-01',amount:8500000,type:'income'},{name:'Belanja kebutuhan',category:'Makan & minum',date:'2026-11-02',amount:485000,type:'expense'},{name:'Tagihan listrik & air',category:'Tempat tinggal',date:'2026-11-01',amount:735000,type:'expense'},{name:'Transportasi',category:'Transportasi',date:'2026-10-31',amount:125000,type:'expense'},{name:'Makan siang',category:'Makan & minum',date:'2026-10-30',amount:48000,type:'expense'}];
-let state=loadState();
-function loadState(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{transactions:initialTransactions,assets:42800000}}catch{return{transactions:initialTransactions,assets:42800000}}}
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
-function rupiah(value){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(value)}
-function compact(value){return value>=1e6?'Rp '+(value/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})+' jt':'Rp '+new Intl.NumberFormat('id-ID').format(value)}
-function displayDate(date){return new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'short'}).format(new Date(date+'T00:00:00'))}
-function monthKey(date){return date.slice(0,7)}
-function render(){const key=new Date().toISOString().slice(0,7),current=state.transactions.filter(t=>monthKey(t.date)===key),income=current.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0),expense=current.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0),grouped={};state.transactions.filter(t=>t.type==='expense').forEach(t=>grouped[monthKey(t.date)]=(grouped[monthKey(t.date)]||0)+t.amount);const values=Object.keys(grouped).sort().slice(-3).map(k=>grouped[k]),average=values.length?values.reduce((a,b)=>a+b,0)/values.length:0,months=average?state.assets/average:0;document.querySelector('#income-value').textContent=rupiah(income);document.querySelector('#expense-value').textContent=rupiah(expense);document.querySelector('#assets-value').textContent=rupiah(state.assets);document.querySelector('#runway-months').textContent=months.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1});document.querySelector('#runway-days').textContent=Math.round(months*30)+' hari';document.querySelector('#available-label').textContent=compact(state.assets);document.querySelector('#cost-label').textContent=compact(average);document.querySelector('#donut-total').textContent=(expense/1e6).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2});renderRows()}
-function renderRows(){const rows=[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5),host=document.querySelector('#transaction-rows');host.innerHTML=rows.length?rows.map(t=>'<div class="transaction-row"><div class="tx-name"><span class="tx-icon '+(t.type==='income'?'income':'')+'">'+(t.type==='income'?'↙':'↗')+'</span>'+escapeHtml(t.name)+'</div><span class="tx-category">'+escapeHtml(t.category)+'</span><span class="tx-date">'+displayDate(t.date)+'</span><span class="tx-amount '+(t.type==='income'?'positive':'')+'">'+(t.type==='income'?'+':'−')+' '+rupiah(t.amount)+'</span></div>').join(''):'<div class="empty-state">Belum ada transaksi. Catat gerak energi pertamamu.</div>'}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const SUPABASE_URL='https://boygncniytuhcacnshcd.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_-dOn_dVEEZDTvQjvM0Lgcw_9W3pWe0a';
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let activeUser=null;
+let records=[];
+let assets=[];
+let authMode='signin';
+let authBusy=false;
+const authView=document.querySelector('#auth-view');
+const appShell=document.querySelector('#app-shell');
+const authForm=document.querySelector('#auth-form');
+const authEmail=document.querySelector('#auth-email');
+const authPassword=document.querySelector('#auth-password');
+const authConfirm=document.querySelector('#auth-confirm-password');
+const workspace=document.querySelector('#finance-workspace');
+
+function rupiah(value){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(value)||0)}
+function compact(value){return Number(value)>=1e6?`Rp ${(value/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})} jt`:rupiah(value)}
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function today(){return new Date().toISOString().slice(0,10)}
+function monthKey(date){return String(date).slice(0,7)}
+function setAuthMessage(message='',type=''){const el=document.querySelector('#auth-message');el.textContent=message;el.className=`auth-message${type?` ${type}`:''}`}
+function setAuthMode(mode){
+  authMode=mode;const signup=mode==='signup',forgot=mode==='forgot',reset=mode==='reset';
+  document.querySelector('#auth-title').textContent=signup?'Buat akun Catat Duit':forgot?'Reset kata sandi':reset?'Buat kata sandi baru':'Masuk ke Catat Duit';
+  document.querySelector('#auth-description').textContent=reset?'Masukkan kata sandi baru untuk akun Anda.':'Gunakan akun Catat Duit Anda.';
+  document.querySelector('#auth-submit').textContent=signup?'Daftar':forgot?'Kirim tautan reset':reset?'Simpan kata sandi':'Masuk';
+  document.querySelector('#auth-password-label').hidden=forgot;authPassword.disabled=forgot;authPassword.required=!forgot;
+  authPassword.autocomplete=signup||reset?'new-password':'current-password';
+  document.querySelector('#auth-confirm-label').hidden=!(signup||reset);authConfirm.disabled=!(signup||reset);authConfirm.required=signup||reset;
+  document.querySelector('#auth-mode-toggle').hidden=forgot||reset;document.querySelector('#auth-forgot').hidden=mode!=='signin';
+  document.querySelector('#auth-mode-toggle').textContent=signup?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';setAuthMessage();
+}
+function showLogin(){activeUser=null;appShell.hidden=true;authView.hidden=false;setAuthMode('signin')}
+function translateAuthError(e){const m=e?.message||'Terjadi kesalahan. Coba lagi.';if(/invalid login credentials/i.test(m))return'Email atau kata sandi tidak cocok.';if(/email not confirmed/i.test(m))return'Konfirmasi email Anda sebelum masuk.';if(/already registered|already exists/i.test(m))return'Email sudah terdaftar. Silakan masuk.';if(/password should be at least/i.test(m))return'Kata sandi minimal 6 karakter.';if(/rate limit/i.test(m))return'Terlalu banyak percobaan. Coba lagi beberapa saat.';if(/redirect.*not allowed|redirect url/i.test(m))return'Alamat aplikasi belum terdaftar sebagai URL pengalihan Supabase.';return m}
+async function submitAuth(event){
+  event.preventDefault();if(authBusy)return;authBusy=true;document.querySelector('#auth-submit').disabled=true;setAuthMessage('Memproses…');
+  const email=authEmail.value.trim(),password=authPassword.value,redirectTo=location.origin+location.pathname;
+  try{
+    if(authMode==='signin'){const {error}=await db.auth.signInWithPassword({email,password});if(error)throw error}
+    if(authMode==='signup'){if(password!==authConfirm.value)throw Error('Ulangan kata sandi tidak cocok.');const {data,error}=await db.auth.signUp({email,password,options:{emailRedirectTo:redirectTo}});if(error)throw error;if(data.user&&!data.session)setAuthMessage('Akun dibuat. Periksa email untuk konfirmasi, lalu masuk.','success')}
+    if(authMode==='forgot'){const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo});if(error)throw error;setAuthMessage('Jika email terdaftar, tautan reset kata sandi akan dikirim.','success')}
+    if(authMode==='reset'){if(password!==authConfirm.value)throw Error('Ulangan kata sandi tidak cocok.');const {error}=await db.auth.updateUser({password});if(error)throw error;setAuthMessage('Kata sandi berhasil diperbarui.','success');setTimeout(()=>showLogin(),1300)}
+  }catch(e){setAuthMessage(translateAuthError(e),'error')}finally{authBusy=false;document.querySelector('#auth-submit').disabled=false}
+}
+authForm.addEventListener('submit',submitAuth);
+document.querySelector('#auth-mode-toggle').addEventListener('click',()=>setAuthMode(authMode==='signup'?'signin':'signup'));
+document.querySelector('#auth-forgot').addEventListener('click',()=>setAuthMode('forgot'));
+
+async function showApp(user){
+  activeUser=user;authView.hidden=true;appShell.hidden=false;
+  const email=user.email||'Akun Catat Duit';document.querySelector('#profile-email').textContent=email;
+  document.querySelector('#profile-avatar').textContent=(email[0]||'C').toUpperCase();document.querySelector('#profile-avatar-small').textContent=(email[0]||'C').toUpperCase();
+  document.querySelector('#welcome-title').innerHTML=`Halo, ${escapeHtml(email.split('@')[0])} <span class="wave">✳</span>`;
+  await refreshData();
+}
+async function refreshData(){
+  if(!activeUser)return;
+  const [r,a]=await Promise.all([
+    db.from('finance_records').select('*').eq('user_id',activeUser.id).order('record_date',{ascending:false}),
+    db.from('assets').select('*').eq('user_id',activeUser.id).order('name')
+  ]);
+  if(r.error||a.error){console.error(r.error||a.error);alert('Data belum dapat dimuat. Periksa koneksi lalu muat ulang halaman.');return}
+  records=r.data||[];assets=a.data||[];render();
+}
+db.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){appShell.hidden=true;authView.hidden=false;setAuthMode('reset');setAuthMessage('Masukkan kata sandi baru untuk akun Anda.');return}
+  if(session)showApp(session.user);else showLogin();
+});
+document.querySelector('#auth-logout').addEventListener('click',async()=>{const {error}=await db.auth.signOut();if(error)setAuthMessage(translateAuthError(error),'error')});
+
+function render(){
+  const key=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit'}).format(new Date());
+  const current=records.filter(r=>monthKey(r.record_date)===key);
+  const income=current.filter(r=>r.kind==='income').reduce((s,r)=>s+Number(r.amount),0);
+  const expense=current.filter(r=>r.kind==='expense').reduce((s,r)=>s+Number(r.amount),0);
+  const expenseByMonth={};records.filter(r=>r.kind==='expense').forEach(r=>expenseByMonth[monthKey(r.record_date)]=(expenseByMonth[monthKey(r.record_date)]||0)+Number(r.amount));
+  const lastMonths=Object.keys(expenseByMonth).sort().slice(-3);const monthlyCost=lastMonths.length?lastMonths.reduce((s,k)=>s+expenseByMonth[k],0)/lastMonths.length:0;
+  const totalAssets=assets.reduce((s,a)=>s+Number(a.amount),0);const runway=monthlyCost?totalAssets/monthlyCost:0;
+  document.querySelector('#income-value').textContent=rupiah(income);document.querySelector('#expense-value').textContent=rupiah(expense);document.querySelector('#assets-value').textContent=rupiah(totalAssets);
+  document.querySelector('#runway-months').textContent=runway.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1});document.querySelector('#runway-days').textContent=`${Math.round(runway*30)} hari`;
+  document.querySelector('#available-label').textContent=compact(totalAssets);document.querySelector('#cost-label').textContent=compact(monthlyCost);
+  document.querySelector('.runway-help span').textContent=monthlyCost?'Perkiraan dari total aset yang Anda catat dan rata-rata pengeluaran hingga 3 bulan terakhir.':'Catat pengeluaran selama beberapa bulan untuk melihat perkiraan kemampuan bertahan.';
+  document.querySelector('#donut-total').textContent=(expense/1e6).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2});
+  renderRows();if(!workspace.hidden)renderWorkspace(workspace.dataset.view||'transactions');
+}
+function renderRows(){
+  const rows=records.filter(r=>['income','expense'].includes(r.kind)).slice(0,5);const host=document.querySelector('#transaction-rows');
+  host.innerHTML=rows.length?rows.map(r=>`<div class="transaction-row"><div class="tx-name"><span class="tx-icon ${r.kind==='income'?'income':''}">${r.kind==='income'?'↙':'↗'}</span>${escapeHtml(r.title)}</div><span class="tx-category">${escapeHtml(r.category)}</span><span class="tx-date">${new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'short'}).format(new Date(`${r.record_date}T00:00:00`))}</span><span class="tx-amount ${r.kind==='income'?'positive':''}">${r.kind==='income'?'+':'−'} ${rupiah(r.amount)}</span></div>`).join(''):'<div class="empty-state">Belum ada transaksi. Catat gerak energi pertamamu.</div>';
+}
+function renderWorkspace(view){
+  workspace.dataset.view=view;workspace.hidden=false;const debts=records.filter(r=>r.kind.startsWith('debt_'));
+  if(view==='assets')workspace.innerHTML=`<div class="panel-heading"><div><h3>Aset likuid</h3><p>Saldo terkini yang menopang biaya hidup dan runway.</p></div><button class="primary-button" id="add-asset">＋ Catat aset</button></div><div class="workspace-list">${assets.length?assets.map(a=>`<div class="workspace-row"><b>${escapeHtml(a.name)}</b><strong>${rupiah(a.amount)}</strong><button data-delete-asset="${a.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada aset. Tambahkan tabungan atau saldo yang mudah digunakan.</div>'}</div>`;
+  else if(view==='debts')workspace.innerHTML=`<div class="panel-heading"><div><h3>Utang & piutang</h3><p>Catatan kewajiban dan uang yang akan diterima.</p></div><button class="primary-button" id="add-debt">＋ Catat utang/piutang</button></div><div class="workspace-list">${debts.length?debts.map(d=>`<div class="workspace-row"><span class="debt-kind">${d.kind==='debt_payable'?'Utang':'Piutang'}</span><b>${escapeHtml(d.title)}</b><strong>${rupiah(d.amount)}</strong><button data-toggle-debt="${d.id}" data-settled="${d.settled}" class="text-button">${d.settled?'Tandai belum lunas':'Tandai lunas'}</button><button data-delete-record="${d.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada catatan utang atau piutang.</div>'}</div>`;
+  else workspace.innerHTML=`<div class="panel-heading"><div><h3>Semua transaksi</h3><p>Uang masuk dan uang keluar Anda.</p></div><button class="primary-button" id="add-workspace-transaction">＋ Catat transaksi</button></div><div class="workspace-list">${records.filter(r=>['income','expense'].includes(r.kind)).length?records.filter(r=>['income','expense'].includes(r.kind)).map(r=>`<div class="workspace-row"><span class="debt-kind">${r.kind==='income'?'Masuk':'Keluar'}</span><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.category)}</span><strong>${rupiah(r.amount)}</strong><time>${escapeHtml(r.record_date)}</time><button data-delete-record="${r.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada transaksi.</div>'}</div>`;
+  workspace.querySelector('#add-asset')?.addEventListener('click',()=>document.querySelector('#asset-dialog').showModal());
+  workspace.querySelector('#add-debt')?.addEventListener('click',()=>{document.querySelector('[name=record_date]').value=today();document.querySelector('#debt-dialog').showModal()});
+  workspace.querySelector('#add-workspace-transaction')?.addEventListener('click',()=>document.querySelector('#add-transaction').click());
+  workspace.querySelectorAll('[data-delete-asset]').forEach(b=>b.addEventListener('click',()=>deleteAsset(b.dataset.deleteAsset)));
+  workspace.querySelectorAll('[data-delete-record]').forEach(b=>b.addEventListener('click',()=>deleteRecord(b.dataset.deleteRecord)));
+  workspace.querySelectorAll('[data-toggle-debt]').forEach(b=>b.addEventListener('click',()=>toggleDebt(b.dataset.toggleDebt,b.dataset.settled==='true')));
+}
+async function deleteRecord(id){if(!confirm('Hapus catatan ini?'))return;const {error}=await db.from('finance_records').delete().eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
+async function deleteAsset(id){if(!confirm('Hapus aset ini?'))return;const {error}=await db.from('assets').delete().eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
+async function toggleDebt(id,settled){const {error}=await db.from('finance_records').update({settled:!settled}).eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
+
 document.querySelector('#today').textContent=new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
-document.querySelector('#add-transaction').addEventListener('click',()=>{document.querySelector('[name=date]').value=new Date().toISOString().slice(0,10);document.querySelector('#transaction-dialog').showModal()});
-document.querySelector('#transaction-form').addEventListener('submit',event=>{event.preventDefault();const data=new FormData(event.currentTarget);state.transactions.push({name:data.get('name'),type:data.get('type'),category:data.get('category'),amount:Number(data.get('amount')),date:data.get('date')});save();render();document.querySelector('#transaction-dialog').close();event.currentTarget.reset()});
-document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.view===button.dataset.view));if(button.dataset.view==='transactions')document.querySelector('.transactions-panel').scrollIntoView({behavior:'smooth'});else if(!['overview','transactions'].includes(button.dataset.view))alert(button.textContent.trim()+' — bagian ini siap dikembangkan berikutnya.')}));
-render();
+document.querySelector('#add-transaction').addEventListener('click',()=>{document.querySelector('[name=date]').value=today();document.querySelector('#transaction-dialog').showModal()});
+document.querySelector('#transaction-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('finance_records').insert({user_id:activeUser.id,title:d.get('name'),kind:d.get('type'),category:d.get('category'),amount:Number(d.get('amount')),record_date:d.get('date')});if(error){alert(error.message);return}document.querySelector('#transaction-dialog').close();e.currentTarget.reset();await refreshData()});
+document.querySelector('#asset-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('assets').upsert({user_id:activeUser.id,name:d.get('name').trim(),amount:Number(d.get('amount')),updated_at:new Date().toISOString()},{onConflict:'user_id,name'});if(error){alert(error.message);return}document.querySelector('#asset-dialog').close();e.currentTarget.reset();await refreshData()});
+document.querySelector('#debt-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('finance_records').insert({user_id:activeUser.id,title:d.get('title'),kind:d.get('kind'),category:d.get('kind')==='debt_payable'?'Utang':'Piutang',amount:Number(d.get('amount')),record_date:d.get('record_date')});if(error){alert(error.message);return}document.querySelector('#debt-dialog').close();e.currentTarget.reset();await refreshData()});
+document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{
+  document.querySelectorAll('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.view===button.dataset.view));
+  const view=button.dataset.view;if(view==='overview'){workspace.hidden=true;document.querySelector('.runway-card').scrollIntoView({behavior:'smooth'});return}
+  if(view==='transactions')document.querySelector('.transactions-panel').scrollIntoView({behavior:'smooth'});else{renderWorkspace(view);workspace.scrollIntoView({behavior:'smooth'})}
+}));
+// Keep the unpublished starter design from showing fabricated sample values before login.
+showLogin();
+

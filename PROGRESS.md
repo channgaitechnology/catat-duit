@@ -1,0 +1,46 @@
+# Progres Catat Duit
+
+Catatan ini merangkum keadaan repo, deploy, dan integrasi per 2 November 2026 agar pekerjaan dapat dilanjutkan dari titik terakhir.
+
+## Sudah dikerjakan
+
+- Repo GitHub terpisah dan bernama [catat-duit](https://github.com/channgaitechnology/catat-duit); tidak mencampur kode atau database Dokter Laundry.
+- Frontend statis HTML, CSS, dan JavaScript terhubung ke Netlify dan deploy otomatis dari branch `main`.
+- Situs produksi saat ini: [catat-duit-keuangan.netlify.app](https://catat-duit-keuangan.netlify.app/).
+- Pembaruan dashboard terakhir sudah tayang dari commit `066ae5a`: angka, grafik enam bulan, dan kategori pengeluaran menggunakan data akun; data contoh tidak ditampilkan sebagai transaksi nyata.
+- Proyek Supabase terpisah untuk Catat Duit sudah dibuat. Tabel transaksi/aset menggunakan Row Level Security dan pembatasan data per pengguna.
+- UI Supabase Auth di aplikasi mencakup masuk, daftar, reset kata sandi, dan keluar akun.
+
+## Belum selesai
+
+- **Alamat Auth Supabase:** Site URL dan Redirect URLs untuk situs produksi belum disetel. Tautan konfirmasi dan reset email bisa gagal kembali ke aplikasi sebelum ini dikonfigurasi.
+- **Email Auth:** Custom SMTP belum disetel. Email pendaftaran/konfirmasi/reset belum siap untuk pengguna umum.
+- **Resend:** Belum masuk ke akun Resend dan belum dihubungkan ke Catat Duit. Tidak ada API key atau kredensial yang disimpan di repo.
+- **Domain:** Tidak ada domain milik sendiri. Nama subdomain Netlify `catatduit`, `catatbelanja`, dan `catatkeuangan` dicoba tetapi dinyatakan tidak tersedia. URL aktif tetap `catat-duit-keuangan.netlify.app`.
+- **Fitur SaaS tambahan:** Belum ada paket/langganan, pembayaran, maupun email notifikasi admin.
+
+## Temuan dari Dokter Laundry
+
+Pola Dokter Laundry menggunakan dua jalur email yang berbeda:
+
+1. Notifikasi internal admin dikirim lewat Resend dengan pengirim `onboarding@resend.dev`. Dokumentasinya menyebut mode tanpa verifikasi domain hanya untuk penerima yang sama dengan email akun Resend. API key diletakkan pada environment variable Netlify, tidak di Git.
+2. Email Supabase Auth (konfirmasi akun dan reset kata sandi) menggunakan Gmail SMTP di Supabase, bukan Resend.
+
+Rujukan: [panduan notifikasi Dokter Laundry](https://github.com/channgaitechnology/laundrybatapasid/blob/main/docs/notifikasi.md), [panduan email Auth](https://github.com/channgaitechnology/laundrybatapasid/blob/main/docs/setup-email-auth.md).
+
+Catat Duit belum meniru konfigurasi tersebut. Untuk melayani email Auth ke pengguna umum, tentukan provider/pengirim yang sesuai terlebih dahulu. Mode onboarding Resend tanpa domain tidak boleh diasumsikan bisa mengirim ke semua pengguna. Jangan menggunakan API key atau password Dokter Laundry; kalau Resend dipakai, buat kredensial tersendiri untuk Catat Duit.
+
+## Langkah berikutnya
+
+1. Pengguna masuk sendiri ke akun Resend di browser; jangan mengirim password atau API key ke chat.
+2. Tentukan cara mengirim email konfirmasi/reset untuk pengguna umum dan sender yang akan dipakai.
+3. Siapkan kredensial terpisah untuk Catat Duit langsung di pengaturan provider terkait; simpan rahasia hanya di dashboard provider.
+4. Setelah URL produksi final dipastikan, setel Site URL dan Redirect URLs pada proyek Supabase Catat Duit.
+5. Uji alur daftar, konfirmasi email, masuk, lupa kata sandi, dan reset sebelum mengundang pengguna umum.
+6. Jika notifikasi admin Resend dibutuhkan, implementasikan Netlify Function server-side dan letakkan key khusus Catat Duit pada Netlify environment variables; jangan pernah menaruhnya di frontend/Git.
+
+## Catatan keamanan
+
+- Repo ini publik. Jangan menambahkan kata sandi, App Password, API key, service-role key, token, webhook secret, atau environment file.
+- Frontend hanya boleh memakai Supabase publishable key. Semua kredensial server harus tersimpan pada environment variable provider yang sesuai.
+- Database harus mempertahankan RLS yang membatasi baris ke pemiliknya.

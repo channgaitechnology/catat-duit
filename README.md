@@ -13,19 +13,19 @@ Catat Duit adalah aplikasi keuangan pribadi dengan **Runway Keuangan** sebagai f
 
 - Frontend statis (HTML, CSS, JavaScript) di-deploy ke Netlify dari repository GitHub.
 - Supabase Catat Duit menangani Auth dan database; kebijakan RLS memastikan tiap pengguna hanya dapat mengakses datanya sendiri.
-- Resend digunakan sebagai SMTP Supabase untuk email konfirmasi dan reset kata sandi. Gunakan domain pengirim milik Catat Duit dan API key terpisah; jangan menaruh key di kode atau Git.
-- Netlify Functions akan dipakai untuk pekerjaan server-side yang membutuhkan rahasia, misalnya integrasi pembayaran ketika paket dan harga SaaS sudah ditentukan.
+- Konfigurasi pengiriman email Auth Supabase belum selesai. Resend belum dihubungkan dan belum ada SMTP khusus untuk Catat Duit.
+- Netlify Functions dapat dipakai untuk email server-side/notifikasi ketika fitur tersebut dibutuhkan; API key tidak boleh diletakkan di frontend.
+- Catatan status lengkap dan langkah berikutnya ada di [PROGRESS.md](PROGRESS.md).
 
 Netlify membaca konfigurasi deploy dari `netlify.toml`. Situs menggunakan root repository sebagai publish directory. Hubungkan repository ini ke Netlify dan aktifkan deploy otomatis dari branch `main`.
 
-### Persiapan email Resend
+### Status email
 
-1. Daftarkan domain milik Catat Duit di Resend dan pasang record DNS yang diminta sampai domain terverifikasi.
-2. Buat API key khusus Catat Duit.
-3. Di Supabase Catat Duit, buka **Authentication → Emails → SMTP Settings**, lalu isi host `smtp.resend.com`, port `465`, username `resend`, password dengan API key Resend, dan sender email dari domain yang terverifikasi.
-4. Atur Site URL ke domain production Catat Duit dan tambahkan URL yang sama ke Redirect URLs Supabase.
+Email konfirmasi dan reset kata sandi Supabase belum siap untuk pengguna umum karena pengaturan Redirect URL dan SMTP belum dilengkapi. Resend juga belum dikonfigurasi untuk Catat Duit.
 
-Jangan gunakan domain bawaan `*.netlify.app` sebagai domain pengirim email Resend; domain tersebut tidak berada di bawah kendali DNS Anda. Simpan semua API key dan kredensial hanya pada pengaturan provider, bukan di repository.
+Dokter Laundry memakai Resend `onboarding@resend.dev` hanya untuk notifikasi admin terbatas dan Gmail SMTP untuk email Auth. Pola tersebut belum diterapkan di Catat Duit. Jangan menganggap mode Resend tanpa domain dapat mengirim email ke semua pengguna. Lihat [PROGRESS.md](PROGRESS.md) untuk temuan dan langkah lanjutan.
+
+Jangan memasukkan API key, App Password, atau kredensial lain ke repo. Bila Resend/Gmail SMTP dipilih, gunakan kredensial baru khusus Catat Duit dan simpan langsung pada dashboard provider.
 
 ## Runway Keuangan
 

@@ -6,16 +6,26 @@ Catat Duit adalah aplikasi keuangan pribadi dengan **Runway Keuangan** sebagai f
 
 - Login, pendaftaran, konfirmasi email, reset kata sandi, dan keluar akun memakai Supabase Auth.
 - Proyek Supabase Catat Duit terpisah dari Dokter Laundry: `boygncniytuhcacnshcd`.
-- Data keuangan saat ini disimpan di browser per akun. Data belum tersinkron antar perangkat dan tidak memakai tabel atau database Dokter Laundry.
+- Transaksi, utang/piutang, dan aset disimpan di database proyek Catat Duit, terlindungi oleh Row Level Security sehingga pengguna hanya dapat melihat datanya sendiri.
 - Frontend hanya memakai Supabase publishable key. Jangan menambahkan `service_role` atau secret key ke kode browser.
 
-## Menjalankan
+## Tech stack dan deploy
 
-Buka `index.html` lewat server lokal atau host statis. Login Supabase di alamat lokal maupun production memerlukan alamat situs yang sesuai di **Authentication → URL Configuration → Redirect URLs**.
+- Frontend statis (HTML, CSS, JavaScript) di-deploy ke Netlify dari repository GitHub.
+- Supabase Catat Duit menangani Auth dan database; kebijakan RLS memastikan tiap pengguna hanya dapat mengakses datanya sendiri.
+- Resend digunakan sebagai SMTP Supabase untuk email konfirmasi dan reset kata sandi. Gunakan domain pengirim milik Catat Duit dan API key terpisah; jangan menaruh key di kode atau Git.
+- Netlify Functions akan dipakai untuk pekerjaan server-side yang membutuhkan rahasia, misalnya integrasi pembayaran ketika paket dan harga SaaS sudah ditentukan.
 
-Untuk GitHub Pages repo ini, tambahkan alamat berikut setelah Pages aktif:
+Netlify membaca konfigurasi deploy dari `netlify.toml`. Situs menggunakan root repository sebagai publish directory. Hubungkan repository ini ke Netlify dan aktifkan deploy otomatis dari branch `main`.
 
-`https://channgaitechnology.github.io/ruang-keuangan/`
+### Persiapan email Resend
+
+1. Daftarkan domain milik Catat Duit di Resend dan pasang record DNS yang diminta sampai domain terverifikasi.
+2. Buat API key khusus Catat Duit.
+3. Di Supabase Catat Duit, buka **Authentication → Emails → SMTP Settings**, lalu isi host `smtp.resend.com`, port `465`, username `resend`, password dengan API key Resend, dan sender email dari domain yang terverifikasi.
+4. Atur Site URL ke domain production Catat Duit dan tambahkan URL yang sama ke Redirect URLs Supabase.
+
+Jangan gunakan domain bawaan `*.netlify.app` sebagai domain pengirim email Resend; domain tersebut tidak berada di bawah kendali DNS Anda. Simpan semua API key dan kredensial hanya pada pengaturan provider, bukan di repository.
 
 ## Runway Keuangan
 
@@ -25,11 +35,12 @@ Rata-rata menggunakan hingga tiga bulan pengeluaran terakhir yang tercatat. Angk
 
 ## Status fitur
 
-- Ringkasan uang masuk/keluar, aset, arus uang, dan runway.
-- Pencatatan transaksi masuk/keluar.
-- Login Supabase, pendaftaran, reset kata sandi, dan data browser yang dipisahkan per akun.
-- Utang/piutang, aset per jenis, penghasilan berulang, sinkronisasi cloud, dan ekspor/impor masih dalam rencana pengembangan.
+- Ringkasan uang masuk/keluar, aset likuid, dan runway berdasarkan rata-rata pengeluaran sampai tiga bulan terakhir.
+- Pencatatan transaksi, pengelolaan utang/piutang beserta status pelunasan, dan aset per jenis.
+- Login Supabase, pendaftaran, konfirmasi email, reset kata sandi, dan sinkronisasi data lintas perangkat.
+- Penghasilan berulang dan ekspor/impor belum tersedia.
 
 ## Privasi
 
-Autentikasi akun dikelola proyek Supabase Catat Duit. Transaksi dan jumlah aset pada versi ini disimpan pada `localStorage` browser per user ID. Membersihkan data browser akan menghapus data finansial lokal tersebut.
+Autentikasi dan database memakai proyek Supabase Catat Duit, terpisah dari Dokter Laundry. Database menggunakan kebijakan Row Level Security per akun. Frontend memakai publishable key; jangan menambahkan `service_role` atau secret key ke kode browser.
+

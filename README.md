@@ -1,31 +1,35 @@
-# Ruang — uang sebagai energi hidup
+# Catat Duit — uang sebagai energi hidup
 
-Ruang adalah aplikasi pencatatan keuangan pribadi yang memandang uang sebagai energi untuk menjalani hidup. Fitur utamanya adalah **Runway Keuangan**: perkiraan berapa bulan dana yang tersedia bisa menopang biaya hidup berdasarkan rata-rata pengeluaran.
+Catat Duit adalah aplikasi keuangan pribadi dengan **Runway Keuangan** sebagai fitur utama: perkiraan berapa lama dana yang tersedia dapat menopang biaya hidup berdasarkan pengeluaran bulanan.
 
-## Fitur versi awal
+## Login dan penyimpanan
 
-- Ringkasan uang masuk, uang keluar, total aset, dan runway keuangan.
-- Pencatatan transaksi masuk/keluar dengan kategori dan tanggal.
-- Riwayat transaksi terbaru dan visualisasi arus uang.
-- Data disimpan di `localStorage` browser pada perangkat ini.
+- Login, pendaftaran, konfirmasi email, reset kata sandi, dan keluar akun memakai Supabase Auth.
+- Proyek Supabase Catat Duit terpisah dari Dokter Laundry: `boygncniytuhcacnshcd`.
+- Data keuangan saat ini disimpan di browser per akun. Data belum tersinkron antar perangkat dan tidak memakai tabel atau database Dokter Laundry.
+- Frontend hanya memakai Supabase publishable key. Jangan menambahkan `service_role` atau secret key ke kode browser.
 
 ## Menjalankan
 
-Buka `index.html` di browser. Tidak ada proses build atau dependensi.
+Buka `index.html` lewat server lokal atau host statis. Login Supabase di alamat lokal maupun production memerlukan alamat situs yang sesuai di **Authentication → URL Configuration → Redirect URLs**.
 
-## Perhitungan runway
+Untuk GitHub Pages repo ini, tambahkan alamat berikut setelah Pages aktif:
+
+`https://channgaitechnology.github.io/ruang-keuangan/`
+
+## Runway Keuangan
 
 `runway (bulan) = aset likuid ÷ rata-rata pengeluaran bulanan`
 
-Rata-rata dihitung dari bulan-bulan yang memiliki transaksi pengeluaran (maksimal tiga bulan terakhir yang tercatat). Ini adalah estimasi sederhana; versi berikutnya bisa memasukkan pendapatan berulang, utang/piutang, dan pemisahan aset likuid dari total aset.
+Rata-rata menggunakan hingga tiga bulan pengeluaran terakhir yang tercatat. Angka ini estimasi; hasil awal bergantung pada data yang dimasukkan pengguna.
 
-## Rencana pengembangan
+## Status fitur
 
-- Catatan utang dan piutang dengan status pelunasan.
-- Aset per jenis serta penghasilan bulanan.
-- Pengaturan biaya hidup dan sumber dana yang benar-benar likuid.
-- Ekspor/impor data, autentikasi, dan sinkronisasi lintas perangkat.
+- Ringkasan uang masuk/keluar, aset, arus uang, dan runway.
+- Pencatatan transaksi masuk/keluar.
+- Login Supabase, pendaftaran, reset kata sandi, dan data browser yang dipisahkan per akun.
+- Utang/piutang, aset per jenis, penghasilan berulang, sinkronisasi cloud, dan ekspor/impor masih dalam rencana pengembangan.
 
 ## Privasi
 
-Versi ini berjalan sepenuhnya di browser dan menyimpan data di perangkat pengguna. Belum ada akun, server, atau sinkronisasi cloud.
+Autentikasi akun dikelola proyek Supabase Catat Duit. Transaksi dan jumlah aset pada versi ini disimpan pada `localStorage` browser per user ID. Membersihkan data browser akan menghapus data finansial lokal tersebut.

@@ -17,7 +17,7 @@ Catat Duit adalah aplikasi keuangan pribadi dengan **Runway Keuangan** sebagai f
 - Netlify Functions dapat dipakai untuk email server-side/notifikasi ketika fitur tersebut dibutuhkan; API key tidak boleh diletakkan di frontend.
 - Catatan status lengkap dan langkah berikutnya ada di [PROGRESS.md](PROGRESS.md).
 
-Netlify membaca konfigurasi deploy dari `netlify.toml`. Situs menggunakan root repository sebagai publish directory. Hubungkan repository ini ke Netlify dan aktifkan deploy otomatis dari branch `main`.
+Netlify membaca konfigurasi deploy dari `netlify.toml`. Situs menggunakan root repository sebagai publish directory. Repository sudah terhubung ke Netlify; commit baru pada branch `main` memicu deploy otomatis.
 
 ### Status email
 

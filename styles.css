@@ -58,3 +58,52 @@
   border-color: #9bb87c;
   box-shadow: 0 0 0 3px #a5c38326;
 }
+.table-head, .transaction-row {
+  grid-template-columns: 1.5fr 1fr 0.8fr 1fr 1fr !important;
+  gap: 8px;
+}
+.tx-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.tx-actions .text-button {
+  padding: 3px 6px;
+  font-size: 10px;
+}
+.text-button.danger {
+  color: #bd5844;
+}
+.text-button.danger:hover {
+  color: #8c3625;
+}
+.transaction-table {
+  max-height: 480px;
+  overflow-y: auto;
+}
+#edit-transaction-form {
+  padding: 26px;
+}
+#edit-transaction-form label {
+  display: block;
+  font-size: 10px;
+  color: #738075;
+  margin-bottom: 14px;
+}
+#edit-transaction-form input, #edit-transaction-form select {
+  display: block;
+  width: 100%;
+  height: 39px;
+  border: 1px solid #e4e9e2;
+  border-radius: 6px;
+  margin-top: 6px;
+  padding: 0 10px;
+  font: 12px var(--sans);
+  color: var(--ink);
+  background: white;
+  outline: none;
+}
+#edit-transaction-form input:focus, #edit-transaction-form select:focus {
+  border-color: #9bb87c;
+  box-shadow: 0 0 0 3px #a5c38326;
+}

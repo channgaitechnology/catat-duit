@@ -138,8 +138,21 @@ function renderCharts(){
   document.querySelector('#category-list').innerHTML=categories.length?categories.map(([name,value],i)=>`<div><span><i class="category-dot" style="background:${colors[i%colors.length]}"></i>${escapeHtml(name)}</span><b>${compact(value)}</b></div>`).join(''):'<div class="empty-state">Belum ada pengeluaran bulan ini.</div>';
 }
 function renderRows(){
-  const rows=records.filter(r=>['income','expense'].includes(r.kind)).slice(0,5);const host=document.querySelector('#transaction-rows');
-  host.innerHTML=rows.length?rows.map(r=>`<div class="transaction-row"><div class="tx-name"><span class="tx-icon ${r.kind==='income'?'income':''}">${r.kind==='income'?'↙':'↗'}</span>${escapeHtml(r.title)}</div><span class="tx-category">${escapeHtml(r.category)}</span><span class="tx-date">${new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'short'}).format(new Date(`${r.record_date}T00:00:00`))}</span><span class="tx-amount ${r.kind==='income'?'positive':''}">${r.kind==='income'?'+':'−'} ${rupiah(r.amount)}</span></div>`).join(''):'<div class="empty-state">Belum ada transaksi. Catat gerak energi pertamamu.</div>';
+  const rows=records.filter(r=>['income','expense'].includes(r.kind));const host=document.querySelector('#transaction-rows');
+  host.innerHTML=rows.length?rows.map(r=>`
+    <div class="transaction-row">
+      <div class="tx-name"><span class="tx-icon ${r.kind==='income'?'income':''}">${r.kind==='income'?'↙':'↗'}</span>${escapeHtml(r.title)}</div>
+      <span class="tx-category">${escapeHtml(r.category)}</span>
+      <span class="tx-date">${new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'short'}).format(new Date(`${r.record_date}T00:00:00`))}</span>
+      <span class="tx-amount ${r.kind==='income'?'positive':''}">${r.kind==='income'?'+':'−'} ${rupiah(r.amount)}</span>
+      <div class="tx-actions">
+        <button class="text-button" data-edit-tx="${r.id}">Edit</button>
+        <button class="text-button danger" data-delete-record="${r.id}">Hapus</button>
+      </div>
+    </div>
+  `).join(''):'<div class="empty-state">Belum ada transaksi. Catat gerak energi pertamamu.</div>';
+  host.querySelectorAll('[data-edit-tx]').forEach(b=>b.addEventListener('click',()=>openEditTransaction(b.dataset.editTx)));
+  host.querySelectorAll('[data-delete-record]').forEach(b=>b.addEventListener('click',()=>deleteRecord(b.dataset.deleteRecord)));
 }
 function renderWorkspace(view){
   workspace.dataset.view=view;workspace.hidden=false;const debts=records.filter(r=>r.kind.startsWith('debt_'));
@@ -159,14 +172,44 @@ function renderWorkspace(view){
     `;
   }
   else if(view==='debts')workspace.innerHTML=`<div class="panel-heading"><div><h3>Utang & piutang</h3><p>Catatan kewajiban dan uang yang akan diterima.</p></div><button class="primary-button" id="add-debt">＋ Catat utang/piutang</button></div><div class="workspace-list">${debts.length?debts.map(d=>`<div class="workspace-row"><span class="debt-kind">${d.kind==='debt_payable'?'Utang':'Piutang'}</span><b>${escapeHtml(d.title)}</b><strong>${rupiah(d.amount)}</strong><button data-toggle-debt="${d.id}" data-settled="${d.settled}" class="text-button">${d.settled?'Tandai belum lunas':'Tandai lunas'}</button><button data-delete-record="${d.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada catatan utang atau piutang.</div>'}</div>`;
-  else workspace.innerHTML=`<div class="panel-heading"><div><h3>Semua transaksi</h3><p>Uang masuk dan uang keluar Anda.</p></div><button class="primary-button" id="add-workspace-transaction">＋ Catat transaksi</button></div><div class="workspace-list">${records.filter(r=>['income','expense'].includes(r.kind)).length?records.filter(r=>['income','expense'].includes(r.kind)).map(r=>`<div class="workspace-row"><span class="debt-kind">${r.kind==='income'?'Masuk':'Keluar'}</span><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.category)}</span><strong>${rupiah(r.amount)}</strong><time>${escapeHtml(r.record_date)}</time><button data-delete-record="${r.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada transaksi.</div>'}</div>`;
+  else workspace.innerHTML=`<div class="panel-heading"><div><h3>Semua transaksi</h3><p>Uang masuk dan uang keluar Anda.</p></div><button class="primary-button" id="add-workspace-transaction">＋ Catat transaksi</button></div><div class="workspace-list">${records.filter(r=>['income','expense'].includes(r.kind)).length?records.filter(r=>['income','expense'].includes(r.kind)).map(r=>`<div class="workspace-row"><span class="debt-kind">${r.kind==='income'?'Masuk':'Keluar'}</span><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.category)}</span><strong>${rupiah(r.amount)}</strong><time>${escapeHtml(r.record_date)}</time><div class="tx-actions"><button data-edit-tx="${r.id}" class="text-button">Edit</button><button data-delete-record="${r.id}" class="text-button danger">Hapus</button></div></div>`).join(''):'<div class="empty-state">Belum ada transaksi.</div>'}</div>`;
   workspace.querySelector('#add-asset')?.addEventListener('click',()=>document.querySelector('#asset-dialog').showModal());
   workspace.querySelector('#add-debt')?.addEventListener('click',()=>{document.querySelector('[name=record_date]').value=today();document.querySelector('#debt-dialog').showModal()});
   workspace.querySelector('#add-workspace-transaction')?.addEventListener('click',()=>document.querySelector('#add-transaction').click());
   workspace.querySelectorAll('[data-delete-asset]').forEach(b=>b.addEventListener('click',()=>deleteAsset(b.dataset.deleteAsset)));
+  workspace.querySelectorAll('[data-edit-tx]').forEach(b=>b.addEventListener('click',()=>openEditTransaction(b.dataset.editTx)));
   workspace.querySelectorAll('[data-delete-record]').forEach(b=>b.addEventListener('click',()=>deleteRecord(b.dataset.deleteRecord)));
   workspace.querySelectorAll('[data-toggle-debt]').forEach(b=>b.addEventListener('click',()=>toggleDebt(b.dataset.toggleDebt,b.dataset.settled==='true')));
 }
+function openEditTransaction(id){
+  const tx=records.find(r=>String(r.id)===String(id));
+  if(!tx)return;
+  document.querySelector('#edit-tx-id').value=tx.id;
+  document.querySelector('#edit-tx-name').value=tx.title;
+  document.querySelector('#edit-tx-type').value=tx.kind;
+  document.querySelector('#edit-tx-category').value=tx.category;
+  document.querySelector('#edit-tx-amount').value=tx.amount;
+  document.querySelector('#edit-tx-date').value=tx.record_date;
+  document.querySelector('#edit-transaction-dialog').showModal();
+}
+
+document.querySelector('#edit-transaction-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const d=new FormData(e.currentTarget);
+  const id=d.get('id');
+  const {error}=await db.from('finance_records').update({
+    title:d.get('name'),
+    kind:d.get('type'),
+    category:d.get('category'),
+    amount:Number(d.get('amount')),
+    record_date:d.get('date')
+  }).eq('id',id).eq('user_id',activeUser.id);
+  if(error){alert(error.message);return}
+  document.querySelector('#edit-transaction-dialog').close();
+  e.currentTarget.reset();
+  await refreshData();
+});
+
 async function deleteRecord(id){if(!confirm('Hapus catatan ini?'))return;const {error}=await db.from('finance_records').delete().eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
 async function deleteAsset(id){if(!confirm('Hapus aset ini?'))return;const {error}=await db.from('assets').delete().eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
 async function toggleDebt(id,settled){const {error}=await db.from('finance_records').update({settled:!settled}).eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
@@ -221,6 +264,9 @@ if('serviceWorker' in navigator){
     });
   });
 }
+
+// Expose test hooks for development/verification
+window.catatduit = { showApp, render, getRecords: () => records, setRecords: (r) => { records = r; } };
 
 // Keep the unpublished starter design from showing fabricated sample values before login.
 showLogin();

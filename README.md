@@ -19,9 +19,9 @@ Catat Duit adalah aplikasi keuangan pribadi dengan **Runway Keuangan** sebagai f
 
 Netlify membaca konfigurasi deploy dari `netlify.toml`. Situs menggunakan root repository sebagai publish directory. Repository sudah terhubung ke Netlify; commit baru pada branch `main` memicu deploy otomatis.
 
-### Status email
+### Status email & URL Auth
 
-Email konfirmasi dan reset kata sandi Supabase belum siap untuk pengguna umum karena pengaturan Redirect URL dan SMTP belum dilengkapi. Resend juga belum dikonfigurasi untuk Catat Duit.
+Pengaturan Site URL dan Redirect URLs untuk Supabase Auth dirinci di [docs/setup-supabase-url.md](docs/setup-supabase-url.md). Pengiriman email Auth masih memerlukan konfigurasi Custom SMTP sebelum siap melayani pengguna umum dalam skala besar. Resend juga belum dikonfigurasi untuk Catat Duit.
 
 Dokter Laundry memakai Resend `onboarding@resend.dev` hanya untuk notifikasi admin terbatas dan Gmail SMTP untuk email Auth. Pola tersebut belum diterapkan di Catat Duit. Jangan menganggap mode Resend tanpa domain dapat mengirim email ke semua pengguna. Lihat [PROGRESS.md](PROGRESS.md) untuk temuan dan langkah lanjutan.
 

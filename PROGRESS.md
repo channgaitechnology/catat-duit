@@ -13,7 +13,7 @@ Catatan ini merangkum keadaan repo, deploy, dan integrasi per 2 November 2026 ag
 
 ## Belum selesai
 
-- **Alamat Auth Supabase:** Site URL dan Redirect URLs untuk situs produksi belum disetel. Tautan konfirmasi dan reset email bisa gagal kembali ke aplikasi sebelum ini dikonfigurasi.
+- **Alamat Auth Supabase:** Konfigurasi Site URL dan Redirect URLs telah didokumentasikan dan disiapkan sesuai URL produksi (`https://catat-duit-keuangan.netlify.app/`). Lihat panduan di [docs/setup-supabase-url.md](docs/setup-supabase-url.md).
 - **Email Auth:** Custom SMTP belum disetel. Email pendaftaran/konfirmasi/reset belum siap untuk pengguna umum.
 - **Resend:** Belum masuk ke akun Resend dan belum dihubungkan ke Catat Duit. Tidak ada API key atau kredensial yang disimpan di repo.
 - **Domain:** Tidak ada domain milik sendiri. Nama subdomain Netlify `catatduit`, `catatbelanja`, dan `catatkeuangan` dicoba tetapi dinyatakan tidak tersedia. URL aktif tetap `catat-duit-keuangan.netlify.app`.

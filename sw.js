@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catatduit-v1';
+const CACHE_NAME = 'catatduit-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -32,27 +32,68 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Listener jika client mengirim request SKIP_WAITING
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Jangan cache request ke Supabase API atau eksternal non-GET
-  if (event.request.method !== 'GET' || url.origin.includes('supabase.co')) {
+  // Jangan cache request Supabase API, Netlify functions, atau method non-GET
+  if (
+    event.request.method !== 'GET' ||
+    url.origin.includes('supabase.co') ||
+    url.pathname.startsWith('/.netlify/functions')
+  ) {
     return;
   }
 
-  // Stale-while-revalidate strategy untuk aset statis internal
+  // Network-First untuk internal HTML, JS, CSS agar perubahan deploy selalu langsung didapat
   if (url.origin === location.origin) {
+    const isCoreAsset =
+      url.pathname === '/' ||
+      url.pathname === '/index.html' ||
+      url.pathname.endsWith('.js') ||
+      url.pathname.endsWith('.css');
+
+    if (isCoreAsset) {
+      event.respondWith(
+        fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseClone);
+              });
+            }
+            return networkResponse;
+          })
+          .catch(() => {
+            // Jika offline atau jaringan putus, ambil dari cache
+            return caches.match(event.request);
+          })
+      );
+      return;
+    }
+
+    // Cache-First untuk gambar/ikon/font
     event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
-        const cachedResponse = await cache.match(event.request);
-        const fetchPromise = fetch(event.request).then((networkResponse) => {
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, networkResponse.clone());
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
           }
           return networkResponse;
-        }).catch(() => cachedResponse);
-
-        return cachedResponse || fetchPromise;
+        });
       })
     );
   }

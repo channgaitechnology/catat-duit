@@ -254,13 +254,36 @@ document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener
   const view=button.dataset.view;if(view==='overview'){workspace.hidden=true;document.querySelector('.runway-card').scrollIntoView({behavior:'smooth'});return}
   if(view==='transactions')document.querySelector('.transactions-panel').scrollIntoView({behavior:'smooth'});else{renderWorkspace(view);workspace.scrollIntoView({behavior:'smooth'})}
 }));
-// PWA Service Worker Registration
+// PWA Service Worker Registration & Auto-Update
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('/sw.js').then((reg)=>{
       console.log('Catat Duit PWA Service Worker registered:', reg.scope);
+
+      // Cek pembaruan berkala dan saat halaman dimuat
+      reg.update();
+
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // Service Worker baru siap, langsung aktifkan
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
     }).catch((err)=>{
       console.error('Service Worker registration failed:', err);
+    });
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
     });
   });
 }

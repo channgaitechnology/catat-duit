@@ -40,6 +40,7 @@ Rata-rata menggunakan hingga tiga bulan pengeluaran terakhir yang tercatat. Angk
 - Ringkasan uang masuk/keluar, aset likuid, dan runway berdasarkan rata-rata pengeluaran sampai tiga bulan terakhir.
 - Pencatatan transaksi, pengelolaan utang/piutang beserta status pelunasan, dan aset per jenis.
 - Login Supabase, pendaftaran, konfirmasi email, reset kata sandi, dan sinkronisasi data lintas perangkat.
+- Progressive Web App (PWA): dapat di-install langsung di HP Android maupun iOS layaknya aplikasi native.
 - Penghasilan berulang dan ekspor/impor belum tersedia.
 
 ## Privasi

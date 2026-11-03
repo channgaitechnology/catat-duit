@@ -211,6 +211,17 @@ document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener
   const view=button.dataset.view;if(view==='overview'){workspace.hidden=true;document.querySelector('.runway-card').scrollIntoView({behavior:'smooth'});return}
   if(view==='transactions')document.querySelector('.transactions-panel').scrollIntoView({behavior:'smooth'});else{renderWorkspace(view);workspace.scrollIntoView({behavior:'smooth'})}
 }));
+// PWA Service Worker Registration
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').then((reg)=>{
+      console.log('Catat Duit PWA Service Worker registered:', reg.scope);
+    }).catch((err)=>{
+      console.error('Service Worker registration failed:', err);
+    });
+  });
+}
+
 // Keep the unpublished starter design from showing fabricated sample values before login.
 showLogin();
 

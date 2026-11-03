@@ -12,7 +12,25 @@ const authForm=document.querySelector('#auth-form');
 const authEmail=document.querySelector('#auth-email');
 const authPassword=document.querySelector('#auth-password');
 const authConfirm=document.querySelector('#auth-confirm-password');
+const togglePassword=document.querySelector('#toggle-password');
+const toggleConfirmPassword=document.querySelector('#toggle-confirm-password');
 const workspace=document.querySelector('#finance-workspace');
+
+function setupPasswordToggle(button,input){
+  if(!button||!input)return;
+  button.addEventListener('click',()=>{
+    const isPassword=input.type==='password';
+    input.type=isPassword?'text':'password';
+    button.textContent=isPassword?'Sembunyi':'Lihat';
+    button.setAttribute('aria-label',`${isPassword?'Sembunyikan':'Tampilkan'} ${button.id==='toggle-confirm-password'?'ulangi kata sandi':'kata sandi'}`);
+  });
+}
+function resetPasswordVisibility(){
+  if(authPassword){authPassword.type='password';if(togglePassword)togglePassword.textContent='Lihat'}
+  if(authConfirm){authConfirm.type='password';if(toggleConfirmPassword)toggleConfirmPassword.textContent='Lihat'}
+}
+setupPasswordToggle(togglePassword,authPassword);
+setupPasswordToggle(toggleConfirmPassword,authConfirm);
 
 function rupiah(value){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(value)||0)}
 function compact(value){return Number(value)>=1e6?`Rp ${(value/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})} jt`:rupiah(value)}
@@ -21,6 +39,7 @@ function today(){return new Date().toISOString().slice(0,10)}
 function monthKey(date){return String(date).slice(0,7)}
 function setAuthMessage(message='',type=''){const el=document.querySelector('#auth-message');el.textContent=message;el.className=`auth-message${type?` ${type}`:''}`}
 function setAuthMode(mode){
+  resetPasswordVisibility();
   authMode=mode;const signup=mode==='signup',forgot=mode==='forgot',reset=mode==='reset';
   document.querySelector('#auth-title').textContent=signup?'Buat akun Catat Duit':forgot?'Reset kata sandi':reset?'Buat kata sandi baru':'Masuk ke Catat Duit';
   document.querySelector('#auth-description').textContent=reset?'Masukkan kata sandi baru untuk akun Anda.':'Gunakan akun Catat Duit Anda.';

@@ -19,8 +19,18 @@
       <p id="auth-description" class="auth-description">Gunakan akun Catat Duit Anda.</p>
       <form id="auth-form">
         <label id="auth-email-label">Email<input id="auth-email" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
-        <label id="auth-password-label">Kata sandi<input id="auth-password" type="password" autocomplete="current-password" required minlength="6" placeholder="Minimal 6 karakter"></label>
-        <label id="auth-confirm-label" hidden>Ulangi kata sandi<input id="auth-confirm-password" type="password" autocomplete="new-password" minlength="6" placeholder="Ulangi kata sandi"></label>
+        <label id="auth-password-label">Kata sandi
+          <div class="password-field-wrap">
+            <input id="auth-password" type="password" autocomplete="current-password" required minlength="6" placeholder="Minimal 6 karakter">
+            <button type="button" class="password-toggle" id="toggle-password" aria-label="Tampilkan kata sandi">Lihat</button>
+          </div>
+        </label>
+        <label id="auth-confirm-label" hidden>Ulangi kata sandi
+          <div class="password-field-wrap">
+            <input id="auth-confirm-password" type="password" autocomplete="new-password" minlength="6" placeholder="Ulangi kata sandi">
+            <button type="button" class="password-toggle" id="toggle-confirm-password" aria-label="Tampilkan ulangi kata sandi">Lihat</button>
+          </div>
+        </label>
         <button id="auth-submit" class="primary-button auth-submit" type="submit">Masuk</button>
       </form>
       <div class="auth-links"><button id="auth-mode-toggle" type="button">Belum punya akun? Daftar</button><button id="auth-forgot" type="button">Lupa kata sandi?</button></div>

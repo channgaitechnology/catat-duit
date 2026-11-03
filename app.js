@@ -32,6 +32,17 @@ function resetPasswordVisibility(){
 setupPasswordToggle(togglePassword,authPassword);
 setupPasswordToggle(toggleConfirmPassword,authConfirm);
 
+function parseAssetName(fullName){
+  const match=String(fullName||'').match(/^\[(.*?)\]\s*(.*)$/);
+  if(match){
+    const tag=match[1],rawName=match[2];
+    const isNonLiquid=tag.startsWith('Tidak Cair')||['Tanah','Bangunan','Properti','Kendaraan','Saham / Bisnis','Lainnya'].some(k=>tag.includes(k));
+    return {isLiquid:!isNonLiquid,category:tag,displayName:rawName||fullName};
+  }
+  // Default legacy without prefix is treated as liquid
+  return {isLiquid:true,category:'Aset Cair',displayName:fullName};
+}
+
 function rupiah(value){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(value)||0)}
 function compact(value){return Number(value)>=1e6?`Rp ${(value/1e6).toLocaleString('id-ID',{maximumFractionDigits:1})} jt`:rupiah(value)}
 function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -48,6 +59,7 @@ function setAuthMode(mode){
   authPassword.autocomplete=signup||reset?'new-password':'current-password';
   document.querySelector('#auth-confirm-label').hidden=!(signup||reset);authConfirm.disabled=!(signup||reset);authConfirm.required=signup||reset;
   document.querySelector('#auth-mode-toggle').hidden=forgot||reset;document.querySelector('#auth-forgot').hidden=mode!=='signin';
+  const backToLogin=document.querySelector('#auth-back-to-login');if(backToLogin)backToLogin.hidden=!(forgot||reset);
   document.querySelector('#auth-mode-toggle').textContent=signup?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';setAuthMessage();
 }
 function showLogin(){activeUser=null;appShell.hidden=true;authView.hidden=false;setAuthMode('signin')}
@@ -65,6 +77,7 @@ async function submitAuth(event){
 authForm.addEventListener('submit',submitAuth);
 document.querySelector('#auth-mode-toggle').addEventListener('click',()=>setAuthMode(authMode==='signup'?'signin':'signup'));
 document.querySelector('#auth-forgot').addEventListener('click',()=>setAuthMode('forgot'));
+document.querySelector('#auth-back-to-login')?.addEventListener('click',()=>setAuthMode('signin'));
 
 async function showApp(user){
   activeUser=user;authView.hidden=true;appShell.hidden=false;
@@ -86,7 +99,9 @@ db.auth.onAuthStateChange((event,session)=>{
   if(event==='PASSWORD_RECOVERY'){appShell.hidden=true;authView.hidden=false;setAuthMode('reset');setAuthMessage('Masukkan kata sandi baru untuk akun Anda.');return}
   if(session)showApp(session.user);else showLogin();
 });
-document.querySelector('#auth-logout').addEventListener('click',async()=>{const {error}=await db.auth.signOut();if(error)setAuthMessage(translateAuthError(error),'error')});
+async function handleLogout(){const {error}=await db.auth.signOut();if(error)setAuthMessage(translateAuthError(error),'error')}
+document.querySelector('#auth-logout').addEventListener('click',handleLogout);
+document.querySelector('#auth-logout-top')?.addEventListener('click',handleLogout);
 
 function render(){
   const key=new Intl.DateTimeFormat('en-CA',{year:'numeric',month:'2-digit'}).format(new Date());
@@ -95,11 +110,15 @@ function render(){
   const expense=current.filter(r=>r.kind==='expense').reduce((s,r)=>s+Number(r.amount),0);
   const expenseByMonth={};records.filter(r=>r.kind==='expense').forEach(r=>expenseByMonth[monthKey(r.record_date)]=(expenseByMonth[monthKey(r.record_date)]||0)+Number(r.amount));
   const lastMonths=Object.keys(expenseByMonth).sort().slice(-3);const monthlyCost=lastMonths.length?lastMonths.reduce((s,k)=>s+expenseByMonth[k],0)/lastMonths.length:0;
-  const totalAssets=assets.reduce((s,a)=>s+Number(a.amount),0);const runway=monthlyCost?totalAssets/monthlyCost:0;
-  document.querySelector('#income-value').textContent=rupiah(income);document.querySelector('#expense-value').textContent=rupiah(expense);document.querySelector('#assets-value').textContent=rupiah(totalAssets);
+  const liquidAssets=assets.filter(a=>parseAssetName(a.name).isLiquid).reduce((s,a)=>s+Number(a.amount),0);
+  const nonLiquidAssets=assets.filter(a=>!parseAssetName(a.name).isLiquid).reduce((s,a)=>s+Number(a.amount),0);
+  const totalAssets=liquidAssets+nonLiquidAssets;
+  const runway=monthlyCost?liquidAssets/monthlyCost:0;
+  document.querySelector('#income-value').textContent=rupiah(income);document.querySelector('#expense-value').textContent=rupiah(expense);
+  document.querySelector('#assets-value').innerHTML=`${rupiah(totalAssets)}<div style="font-size:9px;color:#859288;font-weight:400;margin-top:4px;">Cair: ${compact(liquidAssets)} · Tetap: ${compact(nonLiquidAssets)}</div>`;
   document.querySelector('#runway-months').textContent=runway.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1});document.querySelector('#runway-days').textContent=`${Math.round(runway*30)} hari`;
-  document.querySelector('#available-label').textContent=compact(totalAssets);document.querySelector('#cost-label').textContent=compact(monthlyCost);
-  document.querySelector('.runway-help span').textContent=monthlyCost?'Perkiraan dari total aset yang Anda catat dan rata-rata pengeluaran hingga 3 bulan terakhir.':'Catat pengeluaran selama beberapa bulan untuk melihat perkiraan kemampuan bertahan.';
+  document.querySelector('#available-label').textContent=compact(liquidAssets);document.querySelector('#cost-label').textContent=compact(monthlyCost);
+  document.querySelector('.runway-help span').textContent=monthlyCost?'Perkiraan dari aset cair (likuid) yang Anda catat dan rata-rata pengeluaran hingga 3 bulan terakhir.':'Catat pengeluaran selama beberapa bulan untuk melihat perkiraan kemampuan bertahan.';
   document.querySelector('#donut-total').textContent=(expense/1e6).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2});
   renderCharts();renderRows();if(!workspace.hidden)renderWorkspace(workspace.dataset.view||'transactions');
 }
@@ -124,7 +143,21 @@ function renderRows(){
 }
 function renderWorkspace(view){
   workspace.dataset.view=view;workspace.hidden=false;const debts=records.filter(r=>r.kind.startsWith('debt_'));
-  if(view==='assets')workspace.innerHTML=`<div class="panel-heading"><div><h3>Aset likuid</h3><p>Saldo terkini yang menopang biaya hidup dan runway.</p></div><button class="primary-button" id="add-asset">＋ Catat aset</button></div><div class="workspace-list">${assets.length?assets.map(a=>`<div class="workspace-row"><b>${escapeHtml(a.name)}</b><strong>${rupiah(a.amount)}</strong><button data-delete-asset="${a.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada aset. Tambahkan tabungan atau saldo yang mudah digunakan.</div>'}</div>`;
+  if(view==='assets'){
+    const liquidList=assets.filter(a=>parseAssetName(a.name).isLiquid);
+    const nonLiquidList=assets.filter(a=>!parseAssetName(a.name).isLiquid);
+    workspace.innerHTML=`
+      <div class="panel-heading"><div><h3>Semua Aset</h3><p>Daftar aset cair (likuid) dan aset tidak cair (tetap/investasi).</p></div><button class="primary-button" id="add-asset">＋ Catat aset</button></div>
+      <div style="margin-top:20px;">
+        <h4 style="font-size:12px;margin:0 0 10px;color:#496333;">◈ Aset Cair (Likuid) — Menopang Runway</h4>
+        <div class="workspace-list" style="margin-top:0;">${liquidList.length?liquidList.map(a=>{const p=parseAssetName(a.name);return `<div class="workspace-row"><span class="debt-kind">${escapeHtml(p.category)}</span><b>${escapeHtml(p.displayName)}</b><strong>${rupiah(a.amount)}</strong><button data-delete-asset="${a.id}" class="text-button">Hapus</button></div>`}).join(''):'<div class="empty-state">Belum ada aset cair (cash, tabungan, emas).</div>'}</div>
+      </div>
+      <div style="margin-top:25px;">
+        <h4 style="font-size:12px;margin:0 0 10px;color:#708072;">❖ Aset Tidak Cair (Non-Likuid) — Kekayaan Tetap</h4>
+        <div class="workspace-list" style="margin-top:0;">${nonLiquidList.length?nonLiquidList.map(a=>{const p=parseAssetName(a.name);return `<div class="workspace-row"><span class="debt-kind">${escapeHtml(p.category)}</span><b>${escapeHtml(p.displayName)}</b><strong>${rupiah(a.amount)}</strong><button data-delete-asset="${a.id}" class="text-button">Hapus</button></div>`}).join(''):'<div class="empty-state">Belum ada aset tidak cair (kendaraan, tanah, bangunan).</div>'}</div>
+      </div>
+    `;
+  }
   else if(view==='debts')workspace.innerHTML=`<div class="panel-heading"><div><h3>Utang & piutang</h3><p>Catatan kewajiban dan uang yang akan diterima.</p></div><button class="primary-button" id="add-debt">＋ Catat utang/piutang</button></div><div class="workspace-list">${debts.length?debts.map(d=>`<div class="workspace-row"><span class="debt-kind">${d.kind==='debt_payable'?'Utang':'Piutang'}</span><b>${escapeHtml(d.title)}</b><strong>${rupiah(d.amount)}</strong><button data-toggle-debt="${d.id}" data-settled="${d.settled}" class="text-button">${d.settled?'Tandai belum lunas':'Tandai lunas'}</button><button data-delete-record="${d.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada catatan utang atau piutang.</div>'}</div>`;
   else workspace.innerHTML=`<div class="panel-heading"><div><h3>Semua transaksi</h3><p>Uang masuk dan uang keluar Anda.</p></div><button class="primary-button" id="add-workspace-transaction">＋ Catat transaksi</button></div><div class="workspace-list">${records.filter(r=>['income','expense'].includes(r.kind)).length?records.filter(r=>['income','expense'].includes(r.kind)).map(r=>`<div class="workspace-row"><span class="debt-kind">${r.kind==='income'?'Masuk':'Keluar'}</span><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.category)}</span><strong>${rupiah(r.amount)}</strong><time>${escapeHtml(r.record_date)}</time><button data-delete-record="${r.id}" class="text-button">Hapus</button></div>`).join(''):'<div class="empty-state">Belum ada transaksi.</div>'}</div>`;
   workspace.querySelector('#add-asset')?.addEventListener('click',()=>document.querySelector('#asset-dialog').showModal());
@@ -141,7 +174,37 @@ async function toggleDebt(id,settled){const {error}=await db.from('finance_recor
 document.querySelector('#today').textContent=new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
 document.querySelector('#add-transaction').addEventListener('click',()=>{document.querySelector('[name=date]').value=today();document.querySelector('#transaction-dialog').showModal()});
 document.querySelector('#transaction-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('finance_records').insert({user_id:activeUser.id,title:d.get('name'),kind:d.get('type'),category:d.get('category'),amount:Number(d.get('amount')),record_date:d.get('date')});if(error){alert(error.message);return}document.querySelector('#transaction-dialog').close();e.currentTarget.reset();await refreshData()});
-document.querySelector('#asset-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('assets').upsert({user_id:activeUser.id,name:d.get('name').trim(),amount:Number(d.get('amount')),updated_at:new Date().toISOString()},{onConflict:'user_id,name'});if(error){alert(error.message);return}document.querySelector('#asset-dialog').close();e.currentTarget.reset();await refreshData()});
+const assetCategoryType=document.querySelector('#asset-category-type');
+const assetSubCategory=document.querySelector('#asset-sub-category');
+if(assetCategoryType&&assetSubCategory){
+  assetCategoryType.addEventListener('change',()=>{
+    const isLiquid=assetCategoryType.value==='liquid';
+    assetSubCategory.innerHTML=isLiquid?`
+      <option value="Cash">Uang Tunai / Cash</option>
+      <option value="Tabungan Bank">Tabungan Bank</option>
+      <option value="Deposito">Deposito</option>
+      <option value="Emas">Emas / Logam Mulia</option>
+    `:`
+      <option value="Kendaraan">Kendaraan (Mobil/Motor)</option>
+      <option value="Tanah & Bangunan">Tanah / Bangunan / Properti</option>
+      <option value="Saham & Bisnis">Saham / Bisnis</option>
+      <option value="Barang Berharga">Barang Antik / Lainnya</option>
+    `;
+  });
+}
+document.querySelector('#asset-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const d=new FormData(e.currentTarget);
+  const type=d.get('asset_type')==='non_liquid'?'Tidak Cair':'Cair';
+  const sub=d.get('asset_sub')||'Lainnya';
+  const userTitle=d.get('name').trim();
+  const storedName=`[${type}: ${sub}] ${userTitle}`;
+  const {error}=await db.from('assets').upsert({user_id:activeUser.id,name:storedName,amount:Number(d.get('amount')),updated_at:new Date().toISOString()},{onConflict:'user_id,name'});
+  if(error){alert(error.message);return}
+  document.querySelector('#asset-dialog').close();
+  e.currentTarget.reset();
+  await refreshData();
+});
 document.querySelector('#debt-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('finance_records').insert({user_id:activeUser.id,title:d.get('title'),kind:d.get('kind'),category:d.get('kind')==='debt_payable'?'Utang':'Piutang',amount:Number(d.get('amount')),record_date:d.get('record_date')});if(error){alert(error.message);return}document.querySelector('#debt-dialog').close();e.currentTarget.reset();await refreshData()});
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.view===button.dataset.view));

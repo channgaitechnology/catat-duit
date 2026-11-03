@@ -184,6 +184,8 @@ function renderWorkspace(view){
 function openEditTransaction(id){
   const tx=records.find(r=>String(r.id)===String(id));
   if(!tx)return;
+  if (tx.category) saveCustomCategory(tx.category);
+  populateCategorySelects(tx.category);
   document.querySelector('#edit-tx-id').value=tx.id;
   document.querySelector('#edit-tx-name').value=tx.title;
   document.querySelector('#edit-tx-type').value=tx.kind;
@@ -214,8 +216,78 @@ async function deleteRecord(id){if(!confirm('Hapus catatan ini?'))return;const {
 async function deleteAsset(id){if(!confirm('Hapus aset ini?'))return;const {error}=await db.from('assets').delete().eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
 async function toggleDebt(id,settled){const {error}=await db.from('finance_records').update({settled:!settled}).eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
 
+const DEFAULT_CATEGORIES = ['Makan & minum', 'Tempat tinggal', 'Transportasi', 'Gaji', 'Freelance', 'Lainnya'];
+function getStoredCategories() {
+  try {
+    const custom = JSON.parse(localStorage.getItem('catatduit_custom_categories') || '[]');
+    return Array.from(new Set([...DEFAULT_CATEGORIES, ...custom]));
+  } catch (e) {
+    return DEFAULT_CATEGORIES;
+  }
+}
+function saveCustomCategory(cat) {
+  if (!cat || typeof cat !== 'string') return;
+  const trimmed = cat.trim();
+  if (!trimmed || DEFAULT_CATEGORIES.includes(trimmed)) return trimmed;
+  try {
+    const custom = JSON.parse(localStorage.getItem('catatduit_custom_categories') || '[]');
+    if (!custom.includes(trimmed)) {
+      custom.push(trimmed);
+      localStorage.setItem('catatduit_custom_categories', JSON.stringify(custom));
+    }
+  } catch (e) {}
+  return trimmed;
+}
+function populateCategorySelects(selectedCategory) {
+  const cats = getStoredCategories();
+  const selects = [document.querySelector('#transaction-category-select'), document.querySelector('#edit-tx-category')].filter(Boolean);
+  selects.forEach(sel => {
+    const currentVal = selectedCategory || sel.value;
+    sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') +
+      '<option value="__add_new__">+ Tambah kategori baru...</option>';
+    if (currentVal && cats.includes(currentVal)) {
+      sel.value = currentVal;
+    }
+  });
+}
+
+function handleCategoryChange(selectEl) {
+  if (selectEl.value === '__add_new__') {
+    const newCat = prompt('Masukkan nama kategori pengeluaran/pemasukan baru:');
+    if (newCat && newCat.trim()) {
+      const added = saveCustomCategory(newCat);
+      populateCategorySelects(added);
+      selectEl.value = added;
+    } else {
+      selectEl.value = 'Makan & minum';
+    }
+  }
+}
+
+document.querySelectorAll('#transaction-category-select, #edit-tx-category').forEach(sel => {
+  sel.addEventListener('change', () => handleCategoryChange(sel));
+});
+populateCategorySelects();
+
+// Event listener tombol close pada semua modal dialog agar tidak memicu validasi form
+document.querySelectorAll('.close-button').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const dialog = btn.closest('dialog');
+    if (dialog) {
+      dialog.close();
+      const form = dialog.querySelector('form');
+      if (form) form.reset();
+    }
+  });
+});
+
 document.querySelector('#today').textContent=new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
-document.querySelector('#add-transaction').addEventListener('click',()=>{document.querySelector('[name=date]').value=today();document.querySelector('#transaction-dialog').showModal()});
+document.querySelector('#add-transaction').addEventListener('click',()=>{
+  populateCategorySelects('Makan & minum');
+  document.querySelector('[name=date]').value=today();
+  document.querySelector('#transaction-dialog').showModal();
+});
 document.querySelector('#transaction-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('finance_records').insert({user_id:activeUser.id,title:d.get('name'),kind:d.get('type'),category:d.get('category'),amount:Number(d.get('amount')),record_date:d.get('date')});if(error){alert(error.message);return}document.querySelector('#transaction-dialog').close();e.currentTarget.reset();await refreshData()});
 const assetCategoryType=document.querySelector('#asset-category-type');
 const assetSubCategory=document.querySelector('#asset-sub-category');

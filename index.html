@@ -33,7 +33,11 @@
         </label>
         <button id="auth-submit" class="primary-button auth-submit" type="submit">Masuk</button>
       </form>
-      <div class="auth-links"><button id="auth-mode-toggle" type="button">Belum punya akun? Daftar</button><button id="auth-forgot" type="button">Lupa kata sandi?</button></div>
+      <div class="auth-links">
+        <button id="auth-mode-toggle" type="button">Belum punya akun? Daftar</button>
+        <button id="auth-forgot" type="button">Lupa kata sandi?</button>
+        <button id="auth-back-to-login" type="button" hidden>Kembali ke Masuk</button>
+      </div>
       <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
       <p class="auth-privacy">Data keuangan tersimpan aman pada akun Anda.</p>
     </div>
@@ -56,7 +60,7 @@
     </aside>
 
     <main class="main-content">
-      <header class="topbar"><div class="breadcrumb">Catat Duit <span>/</span> <strong>Ringkasan</strong></div><div class="top-actions"><span class="today" id="today"></span><button class="icon-button" aria-label="Notifikasi">♧</button><div class="avatar small" id="profile-avatar-small">R</div></div></header>
+      <header class="topbar"><div class="breadcrumb">Catat Duit <span>/</span> <strong>Ringkasan</strong></div><div class="top-actions"><span class="today" id="today"></span><button id="auth-logout-top" class="logout-button topbar-logout" type="button">Keluar</button><div class="avatar small" id="profile-avatar-small">R</div></div></header>
       <section class="page-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> SENIN YANG LEBIH TERARAH</div><h1 id="welcome-title">Halo, Catat Duit <span class="wave">✳</span></h1><p class="subtitle">Setiap rupiah adalah energi. Yuk, lihat seberapa jauh ia membawamu.</p></div><button id="add-transaction" class="primary-button"><span>＋</span> Catat transaksi</button></section>
 
       <section class="runway-card">
@@ -80,7 +84,27 @@
   </div>
   <dialog id="transaction-dialog"><form method="dialog" id="transaction-form"><div class="dialog-heading"><div><span class="eyebrow">CATAT ENERGI</span><h2>Transaksi baru</h2></div><button class="close-button" value="cancel" aria-label="Tutup">×</button></div><label>Nama transaksi<input name="name" placeholder="Contoh: Belanja mingguan" required /></label><div class="form-row"><label>Jenis<select name="type"><option value="expense">Uang keluar</option><option value="income">Uang masuk</option></select></label><label>Kategori<select name="category"><option>Makan & minum</option><option>Tempat tinggal</option><option>Transportasi</option><option>Gaji</option><option>Freelance</option><option>Lainnya</option></select></label></div><div class="form-row"><label>Jumlah (Rp)<input name="amount" type="number" min="1" placeholder="150000" required /></label><label>Tanggal<input name="date" type="date" required /></label></div><button class="primary-button submit-button" value="default">Simpan transaksi <span>→</span></button></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <dialog id="asset-dialog"><form id="asset-form" method="dialog"><div class="dialog-heading"><div><span class="eyebrow">ASET LIKUID</span><h2>Catat aset</h2></div><button class="close-button" value="cancel" aria-label="Tutup">×</button></div><label>Nama aset<input name="name" required maxlength="100" placeholder="Tabungan bank" /></label><label>Nilai saat ini (Rp)<input name="amount" type="number" min="0" required placeholder="10000000" /></label><button class="primary-button submit-button" value="default">Simpan aset</button></form></dialog>
+  <dialog id="asset-dialog"><form id="asset-form" method="dialog"><div class="dialog-heading"><div><span class="eyebrow">MANAJEMEN ASET</span><h2>Catat aset</h2></div><button class="close-button" value="cancel" aria-label="Tutup">×</button></div>
+    <div class="form-row">
+      <label>Kelompok aset
+        <select name="asset_type" id="asset-category-type" required>
+          <option value="liquid">Aset Cair (Likuid)</option>
+          <option value="non_liquid">Aset Tidak Cair (Non-Likuid)</option>
+        </select>
+      </label>
+      <label>Sub-kategori
+        <select name="asset_sub" id="asset-sub-category" required>
+          <option value="Cash">Uang Tunai / Cash</option>
+          <option value="Tabungan Bank">Tabungan Bank</option>
+          <option value="Deposito">Deposito</option>
+          <option value="Emas">Emas / Logam Mulia</option>
+        </select>
+      </label>
+    </div>
+    <label>Keterangan / Nama aset<input name="name" required maxlength="100" placeholder="Contoh: Tabungan BCA atau Rumah Utama" /></label>
+    <label>Nilai saat ini (Rp)<input name="amount" type="number" min="0" required placeholder="10000000" /></label>
+    <button class="primary-button submit-button" value="default">Simpan aset</button>
+  </form></dialog>
   <dialog id="debt-dialog"><form id="debt-form" method="dialog"><div class="dialog-heading"><div><span class="eyebrow">CATAT KEWAJIBAN</span><h2>Utang atau piutang</h2></div><button class="close-button" value="cancel" aria-label="Tutup">×</button></div><label>Catatan<input name="title" required maxlength="120" placeholder="Pinjaman ke Budi" /></label><div class="form-row"><label>Jenis<select name="kind"><option value="debt_payable">Utang saya</option><option value="debt_receivable">Piutang saya</option></select></label><label>Jumlah (Rp)<input name="amount" type="number" min="1" required /></label></div><label>Tanggal<input name="record_date" type="date" required /></label><button class="primary-button submit-button" value="default">Simpan catatan</button></form></dialog>
   <script src="app.js"></script>
 </body>

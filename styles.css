@@ -108,7 +108,6 @@
   box-shadow: 0 0 0 3px #a5c38326;
 }
 
-
 /* Sembunyikan badge Powered by Netlify */
 #nl-badge-frame, #nl-hud-frame, iframe[title*="Netlify"], iframe[srcdoc*="Powered by Netlify"] {
   display: none !important;

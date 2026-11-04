@@ -19,11 +19,13 @@ Catat Duit adalah aplikasi keuangan pribadi dengan **Runway Keuangan** sebagai f
 
 Netlify membaca konfigurasi deploy dari `netlify.toml`. Situs menggunakan root repository sebagai publish directory. Repository sudah terhubung ke Netlify; commit baru pada branch `main` memicu deploy otomatis.
 
-### Status email
+### Status email & URL Auth
 
-Email konfirmasi dan reset kata sandi Supabase belum siap untuk pengguna umum karena pengaturan Redirect URL dan SMTP belum dilengkapi. Resend juga belum dikonfigurasi untuk Catat Duit.
+Pengaturan Site URL dan Redirect URLs untuk Supabase Auth dirinci di [docs/setup-supabase-url.md](docs/setup-supabase-url.md). Pengiriman email Auth masih memerlukan konfigurasi Custom SMTP sebelum siap melayani pengguna umum dalam skala besar.
 
-Dokter Laundry memakai Resend `onboarding@resend.dev` hanya untuk notifikasi admin terbatas dan Gmail SMTP untuk email Auth. Pola tersebut belum diterapkan di Catat Duit. Jangan menganggap mode Resend tanpa domain dapat mengirim email ke semua pengguna. Lihat [PROGRESS.md](PROGRESS.md) untuk temuan dan langkah lanjutan.
+Untuk notifikasi admin via Resend, fungsi server-side telah disiapkan di `netlify/functions/notify-admin.js` dengan panduan penyiapan di [docs/setup-resend.md](docs/setup-resend.md).
+
+Dokter Laundry memakai Resend `onboarding@resend.dev` hanya untuk notifikasi admin terbatas dan Gmail SMTP untuk email Auth. Jangan menganggap mode Resend tanpa domain dapat mengirim email ke semua pengguna. Lihat [PROGRESS.md](PROGRESS.md) untuk temuan dan langkah lanjutan.
 
 Jangan memasukkan API key, App Password, atau kredensial lain ke repo. Bila Resend/Gmail SMTP dipilih, gunakan kredensial baru khusus Catat Duit dan simpan langsung pada dashboard provider.
 
@@ -38,6 +40,7 @@ Rata-rata menggunakan hingga tiga bulan pengeluaran terakhir yang tercatat. Angk
 - Ringkasan uang masuk/keluar, aset likuid, dan runway berdasarkan rata-rata pengeluaran sampai tiga bulan terakhir.
 - Pencatatan transaksi, pengelolaan utang/piutang beserta status pelunasan, dan aset per jenis.
 - Login Supabase, pendaftaran, konfirmasi email, reset kata sandi, dan sinkronisasi data lintas perangkat.
+- Progressive Web App (PWA): dapat di-install langsung di HP Android maupun iOS layaknya aplikasi native.
 - Penghasilan berulang dan ekspor/impor belum tersedia.
 
 ## Privasi

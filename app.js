@@ -6,6 +6,7 @@ let records=[];
 let assets=[];
 let authMode='signin';
 let authBusy=false;
+let txSearchQuery='';
 const authView=document.querySelector('#auth-view');
 const appShell=document.querySelector('#app-shell');
 const authForm=document.querySelector('#auth-form');
@@ -137,20 +138,86 @@ function renderCharts(){
   document.querySelector('.donut').style.background=stops.length?`conic-gradient(${stops.join(',')})`:'#e9ede6';
   document.querySelector('#category-list').innerHTML=categories.length?categories.map(([name,value],i)=>`<div><span><i class="category-dot" style="background:${colors[i%colors.length]}"></i>${escapeHtml(name)}</span><b>${compact(value)}</b></div>`).join(''):'<div class="empty-state">Belum ada pengeluaran bulan ini.</div>';
 }
+
+const collapsedDates = new Set();
+function toggleDateCollapse(dateKey) {
+  if (collapsedDates.has(dateKey)) {
+    collapsedDates.delete(dateKey);
+  } else {
+    collapsedDates.add(dateKey);
+  }
+  renderRows();
+}
+
 function renderRows(){
-  const rows=records.filter(r=>['income','expense'].includes(r.kind));const host=document.querySelector('#transaction-rows');
-  host.innerHTML=rows.length?rows.map(r=>`
-    <div class="transaction-row">
-      <div class="tx-name"><span class="tx-icon ${r.kind==='income'?'income':''}">${r.kind==='income'?'↙':'↗'}</span>${escapeHtml(r.title)}</div>
-      <span class="tx-category">${escapeHtml(r.category)}</span>
-      <span class="tx-date">${new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'short'}).format(new Date(`${r.record_date}T00:00:00`))}</span>
-      <span class="tx-amount ${r.kind==='income'?'positive':''}">${r.kind==='income'?'+':'−'} ${rupiah(r.amount)}</span>
-      <div class="tx-actions">
-        <button class="text-button" data-edit-tx="${r.id}">Edit</button>
-        <button class="text-button danger" data-delete-record="${r.id}">Hapus</button>
+  let rows=records.filter(r=>['income','expense'].includes(r.kind));
+  if (txSearchQuery) {
+    const q = txSearchQuery.toLowerCase().trim();
+    rows = rows.filter(r => (r.title && r.title.toLowerCase().includes(q)) || (r.category && r.category.toLowerCase().includes(q)) || (r.record_date && r.record_date.includes(q)));
+  }
+  const host=document.querySelector('#transaction-rows');
+  if (!rows.length) {
+    host.innerHTML = `<div class="empty-state">${txSearchQuery ? 'Tidak ada transaksi yang cocok dengan pencarian.' : 'Belum ada transaksi. Catat gerak energi pertamamu.'}</div>`;
+    return;
+  }
+
+  // Kelompokkan per tanggal
+  const groupsByDate = {};
+  rows.forEach(r => {
+    const d = r.record_date;
+    if (!groupsByDate[d]) groupsByDate[d] = [];
+    groupsByDate[d].push(r);
+  });
+  const sortedDates = Object.keys(groupsByDate).sort((a,b) => b.localeCompare(a));
+
+  host.innerHTML = sortedDates.map(dateKey => {
+    const items = groupsByDate[dateKey];
+    const isCollapsed = collapsedDates.has(dateKey);
+    const dayIncome = items.filter(r => r.kind === 'income').reduce((s, r) => s + Number(r.amount), 0);
+    const dayExpense = items.filter(r => r.kind === 'expense').reduce((s, r) => s + Number(r.amount), 0);
+    const dateFormatted = new Intl.DateTimeFormat('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${dateKey}T00:00:00`));
+
+    return `
+      <div class="tx-date-group" data-date="${dateKey}">
+        <div class="tx-date-header" data-toggle-date="${dateKey}">
+          <div class="tx-date-title">
+            <button type="button" class="tx-date-toggle-btn" aria-label="Buka tutup transaksi tanggal ${dateKey}">
+              ${isCollapsed ? '▶' : '▼'}
+            </button>
+            <span>${dateFormatted}</span>
+            <small style="font-weight:400;color:#718276;">(${items.length} transaksi)</small>
+          </div>
+          <div class="tx-date-header-summary">
+            ${dayIncome ? `<span style="color:#2f6e4a;">+${compact(dayIncome)}</span> ` : ''}
+            ${dayExpense ? `<span style="color:#b24c3d;">-${compact(dayExpense)}</span>` : ''}
+          </div>
+        </div>
+        <div class="tx-group-items" ${isCollapsed ? 'hidden' : ''}>
+          ${items.map(r => `
+            <div class="transaction-row">
+              <div class="tx-name"><span class="tx-icon ${r.kind==='income'?'income':''}">${r.kind==='income'?'↙':'↗'}</span>${escapeHtml(r.title)}</div>
+              <span class="tx-category">${escapeHtml(r.category)}</span>
+              <span class="tx-date">${new Intl.DateTimeFormat('id-ID',{day:'numeric',month:'short'}).format(new Date(`${r.record_date}T00:00:00`))}</span>
+              <span class="tx-amount ${r.kind==='income'?'positive':''}">${r.kind==='income'?'+':'−'} ${rupiah(r.amount)}</span>
+              <div class="tx-actions">
+                <button class="text-button" data-edit-tx="${r.id}">Edit</button>
+                <button class="text-button danger" data-delete-record="${r.id}">Hapus</button>
+              </div>
+            </div>
+          `).join('')}
+          <div class="tx-date-daily-footer">
+            <span>Total ${items.length} transaksi pada ${dateFormatted}</span>
+            <span>
+              ${dayIncome > 0 ? `Masuk: <b>${rupiah(dayIncome)}</b> ` : ''}
+              ${dayExpense > 0 ? `Keluar: <b>${rupiah(dayExpense)}</b>` : ''}
+            </span>
+          </div>
+        </div>
       </div>
-    </div>
-  `).join(''):'<div class="empty-state">Belum ada transaksi. Catat gerak energi pertamamu.</div>';
+    `;
+  }).join('');
+
+  host.querySelectorAll('[data-toggle-date]').forEach(el => el.addEventListener('click', () => toggleDateCollapse(el.dataset.toggleDate)));
   host.querySelectorAll('[data-edit-tx]').forEach(b=>b.addEventListener('click',()=>openEditTransaction(b.dataset.editTx)));
   host.querySelectorAll('[data-delete-record]').forEach(b=>b.addEventListener('click',()=>deleteRecord(b.dataset.deleteRecord)));
 }
@@ -217,20 +284,22 @@ async function deleteAsset(id){if(!confirm('Hapus aset ini?'))return;const {erro
 async function toggleDebt(id,settled){const {error}=await db.from('finance_records').update({settled:!settled}).eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
 
 const DEFAULT_CATEGORIES = ['Makan & minum', 'Tempat tinggal', 'Transportasi', 'Gaji', 'Freelance', 'Lainnya'];
-function getStoredCategories() {
+function getCustomCategories() {
   try {
-    const custom = JSON.parse(localStorage.getItem('catatduit_custom_categories') || '[]');
-    return Array.from(new Set([...DEFAULT_CATEGORIES, ...custom]));
+    return JSON.parse(localStorage.getItem('catatduit_custom_categories') || '[]');
   } catch (e) {
-    return DEFAULT_CATEGORIES;
+    return [];
   }
+}
+function getStoredCategories() {
+  return Array.from(new Set([...DEFAULT_CATEGORIES, ...getCustomCategories()]));
 }
 function saveCustomCategory(cat) {
   if (!cat || typeof cat !== 'string') return;
   const trimmed = cat.trim();
   if (!trimmed || DEFAULT_CATEGORIES.includes(trimmed)) return trimmed;
   try {
-    const custom = JSON.parse(localStorage.getItem('catatduit_custom_categories') || '[]');
+    const custom = getCustomCategories();
     if (!custom.includes(trimmed)) {
       custom.push(trimmed);
       localStorage.setItem('catatduit_custom_categories', JSON.stringify(custom));
@@ -238,13 +307,25 @@ function saveCustomCategory(cat) {
   } catch (e) {}
   return trimmed;
 }
+function deleteCustomCategory(cat) {
+  try {
+    let custom = getCustomCategories();
+    custom = custom.filter(c => c !== cat);
+    localStorage.setItem('catatduit_custom_categories', JSON.stringify(custom));
+  } catch (e) {}
+}
 function populateCategorySelects(selectedCategory) {
   const cats = getStoredCategories();
+  const custom = getCustomCategories();
   const selects = [document.querySelector('#transaction-category-select'), document.querySelector('#edit-tx-category')].filter(Boolean);
   selects.forEach(sel => {
     const currentVal = selectedCategory || sel.value;
-    sel.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') +
-      '<option value="__add_new__">+ Tambah kategori baru...</option>';
+    let optionsHtml = cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') +
+      '<option value="__add_new__">＋ Tambah kategori baru...</option>';
+    if (custom.length > 0) {
+      optionsHtml += '<option value="__manage_categories__">🗑 Hapus / kelola kategori tambahan...</option>';
+    }
+    sel.innerHTML = optionsHtml;
     if (currentVal && cats.includes(currentVal)) {
       sel.value = currentVal;
     }
@@ -261,6 +342,33 @@ function handleCategoryChange(selectEl) {
     } else {
       selectEl.value = 'Makan & minum';
     }
+  } else if (selectEl.value === '__manage_categories__') {
+    const custom = getCustomCategories();
+    if (!custom.length) {
+      alert('Belum ada kategori custom yang bisa dihapus.');
+      selectEl.value = 'Makan & minum';
+      return;
+    }
+    const catList = custom.map((c, i) => `${i + 1}. ${c}`).join('\n');
+    const input = prompt(`Pilih nomor kategori yang ingin dihapus:\n${catList}\n\nMasukkan nomor (1-${custom.length}):`);
+    if (input) {
+      const idx = parseInt(input.trim(), 10) - 1;
+      if (idx >= 0 && idx < custom.length) {
+        const toDelete = custom[idx];
+        if (confirm(`Hapus kategori "${toDelete}" dari daftar pilihan?`)) {
+          deleteCustomCategory(toDelete);
+          populateCategorySelects('Makan & minum');
+          selectEl.value = 'Makan & minum';
+        } else {
+          selectEl.value = 'Makan & minum';
+        }
+      } else {
+        alert('Nomor kategori tidak valid.');
+        selectEl.value = 'Makan & minum';
+      }
+    } else {
+      selectEl.value = 'Makan & minum';
+    }
   }
 }
 
@@ -268,6 +376,50 @@ document.querySelectorAll('#transaction-category-select, #edit-tx-category').for
   sel.addEventListener('change', () => handleCategoryChange(sel));
 });
 populateCategorySelects();
+
+// Keyboard navigation untuk form transaksi (Up, Down, Home, End, Enter)
+function setupFormKeyboardNavigation(formSelector) {
+  const form = document.querySelector(formSelector);
+  if (!form) return;
+  form.addEventListener('keydown', (e) => {
+    // Abaikan jika user sedang di select dropdown yang terbuka dengan navigasi bawaan browser saat Alt/buka
+    const focusableSelectors = 'input:not([type="hidden"]), select, button[type="submit"], .submit-button';
+    const fields = Array.from(form.querySelectorAll(focusableSelectors)).filter(el => !el.disabled && el.offsetParent !== null);
+    const currentIndex = fields.indexOf(document.activeElement);
+    if (currentIndex === -1) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % fields.length;
+      fields[nextIndex].focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + fields.length) % fields.length;
+      fields[prevIndex].focus();
+    } else if (e.key === 'Home' && !['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
+      e.preventDefault();
+      fields[0].focus();
+    } else if (e.key === 'End' && !['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
+      e.preventDefault();
+      fields[fields.length - 1].focus();
+    } else if (e.key === 'Enter') {
+      // Jika di tombol submit, biarkan form submit berjalan secara alami
+      if (document.activeElement.tagName.toLowerCase() === 'button' && document.activeElement.type === 'submit') {
+        return;
+      }
+      // Jika di input terakhir sebelum submit atau tombol submit, submit form
+      if (currentIndex === fields.length - 2 || currentIndex === fields.length - 1) {
+        // Tombol submit atau field terakhir: trigger submit
+        return;
+      }
+      // Jika di kolom perantara: jadikan Enter sebagai OK dan pindah ke kolom berikutnya
+      e.preventDefault();
+      fields[currentIndex + 1].focus();
+    }
+  });
+}
+setupFormKeyboardNavigation('#transaction-form');
+setupFormKeyboardNavigation('#edit-transaction-form');
 
 // Event listener tombol close pada semua modal dialog agar tidak memicu validasi form
 document.querySelectorAll('.close-button').forEach(btn => {
@@ -282,13 +434,46 @@ document.querySelectorAll('.close-button').forEach(btn => {
   });
 });
 
+const searchInput = document.querySelector('#tx-search-input');
+if (searchInput) {
+  searchInput.addEventListener('input', (e) => {
+    txSearchQuery = e.target.value;
+    renderRows();
+  });
+}
+
 document.querySelector('#today').textContent=new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(new Date());
-document.querySelector('#add-transaction').addEventListener('click',()=>{
+function openAddTransactionDialog(){
+  const form = document.querySelector('#transaction-form');
+  if (form) form.reset();
   populateCategorySelects('Makan & minum');
-  document.querySelector('[name=date]').value=today();
+  const dateInput = form ? form.querySelector('[name=date]') : null;
+  if (dateInput) dateInput.value = today();
+  const nameInput = form ? form.querySelector('[name=name]') : null;
+  if (nameInput) {
+    nameInput.value = '';
+    setTimeout(() => nameInput.focus(), 50);
+  }
   document.querySelector('#transaction-dialog').showModal();
+}
+
+document.querySelector('#add-transaction').addEventListener('click', openAddTransactionDialog);
+document.querySelector('#transaction-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const d=new FormData(e.currentTarget);
+  const {error}=await db.from('finance_records').insert({
+    user_id:activeUser.id,
+    title:d.get('name'),
+    kind:d.get('type'),
+    category:d.get('category'),
+    amount:Number(d.get('amount')),
+    record_date:d.get('date')
+  });
+  if(error){alert(error.message);return}
+  document.querySelector('#transaction-dialog').close();
+  e.currentTarget.reset();
+  await refreshData();
 });
-document.querySelector('#transaction-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('finance_records').insert({user_id:activeUser.id,title:d.get('name'),kind:d.get('type'),category:d.get('category'),amount:Number(d.get('amount')),record_date:d.get('date')});if(error){alert(error.message);return}document.querySelector('#transaction-dialog').close();e.currentTarget.reset();await refreshData()});
 const assetCategoryType=document.querySelector('#asset-category-type');
 const assetSubCategory=document.querySelector('#asset-sub-category');
 if(assetCategoryType&&assetSubCategory){
@@ -359,6 +544,14 @@ if('serviceWorker' in navigator){
     });
   });
 }
+
+// Bersihkan dan sembunyikan Netlify badge / HUD jika diinjeksi
+const removeNetlifyBadge = () => {
+  document.querySelectorAll('#nl-badge-frame, #nl-hud-frame, iframe[title*="Netlify"], script[src*="hud?variant=public"]').forEach(el => el.remove());
+};
+removeNetlifyBadge();
+const badgeObserver = new MutationObserver(removeNetlifyBadge);
+badgeObserver.observe(document.documentElement, { childList: true, subtree: true });
 
 // Expose test hooks for development/verification
 window.catatduit = { showApp, render, getRecords: () => records, setRecords: (r) => { records = r; } };

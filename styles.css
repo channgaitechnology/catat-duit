@@ -107,3 +107,104 @@
   border-color: #9bb87c;
   box-shadow: 0 0 0 3px #a5c38326;
 }
+
+.tx-heading-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tx-search {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #d9dfd7;
+  font-size: 13px;
+  outline: none;
+  background: #ffffff;
+  color: var(--ink);
+  transition: all 0.2s;
+  width: 220px;
+}
+.tx-search:focus {
+  border-color: #9bb87c;
+  box-shadow: 0 0 0 3px #a5c38326;
+  width: 260px;
+}
+
+/* Pengelompokan Tanggal dan Pembatas Transaksi */
+.tx-date-group {
+  margin-bottom: 8px;
+}
+.tx-date-group + .tx-date-group {
+  border-top: 2px solid #18231e;
+  padding-top: 10px;
+}
+.tx-date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f7f9f6;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.tx-date-header:hover {
+  background: #edf1ea;
+}
+.tx-date-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #27382f;
+}
+.tx-date-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #617367;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tx-date-header-summary {
+  font-size: 12px;
+  color: #55675c;
+  font-family: var(--mono);
+}
+.tx-group-items {
+  transition: max-height 0.2s ease-out;
+}
+.tx-date-group .transaction-row {
+  border-bottom: 1px dashed #cbd5e1;
+}
+.tx-date-group .transaction-row:last-child {
+  border-bottom: 1px dashed #cbd5e1;
+}
+.tx-date-daily-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #fafbfa;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: #3b4d42;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+/* Sembunyikan badge Powered by Netlify */
+#nl-badge-frame, #nl-hud-frame, iframe[title*="Netlify"], iframe[srcdoc*="Powered by Netlify"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip-path: path("M0 0Z") !important;
+  width: 0 !important;
+  height: 0 !important;
+}

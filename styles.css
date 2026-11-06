@@ -62,6 +62,10 @@
   grid-template-columns: 1.5fr 1fr 0.8fr 1fr 1fr !important;
   gap: 8px;
 }
+
+.lower-grid.single-panel {
+  grid-template-columns: 1fr;
+}
 .tx-actions {
   display: flex;
   justify-content: flex-end;
@@ -207,4 +211,107 @@
   clip-path: path("M0 0Z") !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+/* Horizontal Bar Chart Styling for Spending */
+.spending-panel {
+  height: auto;
+  min-height: 200px;
+}
+.horizontal-spending {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+.spending-summary-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f7f9f6;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #3f5246;
+}
+.spending-summary-badge strong {
+  font-size: 16px;
+  color: #b24c3d;
+  font-family: var(--mono);
+}
+.horizontal-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.h-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.h-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+}
+.h-bar-track {
+  width: 100%;
+  height: 12px;
+  background: #edf1ea;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.h-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease-in-out;
+}
+.h-bar-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #6a7c70;
+}
+.h-bar-label {
+  font-weight: 600;
+  color: #27382f;
+}
+.h-bar-percentage {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #395243;
+}
+
+/* Tombol & Modal Unduh Laporan */
+.secondary-button {
+  background: #f1f5ef;
+  color: #27382f;
+  border: 1px solid #d4dec9;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.secondary-button:hover {
+  background: #e2ebd9;
+  border-color: #bccbb1;
+}
+
+.report-preview-notice {
+  font-size: 12px;
+  color: #4b6152;
+  background: #f4f7f2;
+  border-left: 3px solid #6b9e50;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 6px 0 16px;
 }

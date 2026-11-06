@@ -81,8 +81,24 @@
         <article class="metric-card"><div class="metric-top"><span class="metric-icon blue">◈</span><span class="metric-caption">ASET LIKUID</span></div><div class="metric-label">Total aset</div><div class="metric-value" id="assets-value">Rp 0</div></article>
       </section>
 
-      <section class="lower-grid"><article class="panel flow-panel"><div class="panel-heading"><div><h3>Arus energi</h3><p>Uang masuk dan keluar selama 6 bulan</p></div><button class="select-button">6 bulan <span>⌄</span></button></div><div class="chart-legend"><span><i class="legend-dot income-dot"></i> Uang masuk</span><span><i class="legend-dot expense-dot"></i> Uang keluar</span></div><div class="chart" aria-label="Grafik arus uang enam bulan"><div class="chart-grid" id="chart-grid"></div><div class="bars" id="bars"></div></div></article>
-      <article class="panel spending-panel"><div class="panel-heading"><div><h3>Ke mana uang pergi?</h3><p>Pengeluaran bulan ini</p></div><button class="text-button" data-view="transactions">Lihat semua ↗</button></div><div class="spending-content"><div class="donut-wrap"><div class="donut"><div class="donut-center"><strong id="donut-total">0,00</strong><small>JUTA</small></div></div></div><div class="category-list" id="category-list"></div></div></article></section>
+      <section class="lower-grid single-panel">
+        <article class="panel spending-panel">
+          <div class="panel-heading">
+            <div>
+              <h3>Ke mana uang pergi?</h3>
+              <p>Pengeluaran bulan ini berdasarkan kategori</p>
+            </div>
+            <button class="text-button" data-view="transactions">Lihat semua ↗</button>
+          </div>
+          <div class="spending-content horizontal-spending">
+            <div class="spending-summary-badge">
+              <span>Total pengeluaran bulan ini:</span>
+              <strong id="spending-total-amount">Rp 0</strong>
+            </div>
+            <div class="horizontal-bar-chart" id="horizontal-bar-chart"></div>
+          </div>
+        </article>
+      </section>
       <section class="panel transactions-panel">
         <div class="panel-heading">
           <div>
@@ -91,6 +107,7 @@
           </div>
           <div class="tx-heading-controls">
             <input type="search" id="tx-search-input" class="tx-search" placeholder="🔍 Cari transaksi / kategori..." aria-label="Cari transaksi" />
+            <button class="secondary-button" id="open-report-btn">📥 Unduh Laporan</button>
             <button class="text-button" id="scroll-to-workspace" data-view="transactions">Kelola di Workspace ↗</button>
           </div>
         </div>
@@ -135,9 +152,58 @@
     <button class="primary-button submit-button" value="default">Simpan aset</button>
   </form></dialog>
   <dialog id="debt-dialog"><form id="debt-form" method="dialog"><div class="dialog-heading"><div><span class="eyebrow">CATAT KEWAJIBAN</span><h2>Utang atau piutang</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Catatan<input name="title" required maxlength="120" placeholder="Pinjaman ke Budi" /></label><div class="form-row"><label>Jenis<select name="kind"><option value="debt_payable">Utang saya</option><option value="debt_receivable">Piutang saya</option></select></label><label>Jumlah (Rp)<input name="amount" type="number" min="1" required /></label></div><label>Tanggal<input name="record_date" type="date" required /></label><button class="primary-button submit-button" value="default">Simpan catatan</button></form></dialog>
+
+  <dialog id="report-dialog">
+    <form id="report-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow">LAPORAN KEUANGAN</span>
+          <h2>Unduh Laporan Transaksi</h2>
+        </div>
+        <button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button>
+      </div>
+
+      <div class="form-row">
+        <label>Mode Periode
+          <select id="report-filter-mode">
+            <option value="month">Pilih Bulan</option>
+            <option value="custom">Rentang Tanggal Khusus</option>
+          </select>
+        </label>
+        <label id="report-month-group">Bulan
+          <input type="month" id="report-month-input" />
+        </label>
+      </div>
+
+      <div class="form-row" id="report-range-group" hidden>
+        <label>Dari Tanggal
+          <input type="date" id="report-start-date" />
+        </label>
+        <label>Sampai Tanggal
+          <input type="date" id="report-end-date" />
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label>Format File Unduhan
+          <select id="report-format-select" required>
+            <option value="excel">Excel (.xls / Spreadsheet)</option>
+            <option value="pdf">PDF (Siap Cetak / Simpan PDF)</option>
+            <option value="jpg">Gambar JPG (High Resolution)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="report-preview-notice">
+        ℹ Laporan mencakup rekapitulasi semua transaksi dan ranking pengeluaran terbesar berdasarkan kategori.
+      </div>
+
+      <button type="submit" class="primary-button submit-button" id="btn-generate-report">
+        Unduh Sekarang <span>↓</span>
+      </button>
+    </form>
+  </dialog>
+
   <script src="app.js"></script>
 </body>
 </html>
-
-
-

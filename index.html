@@ -83,7 +83,28 @@
 
       <section class="lower-grid"><article class="panel flow-panel"><div class="panel-heading"><div><h3>Arus energi</h3><p>Uang masuk dan keluar selama 6 bulan</p></div><button class="select-button">6 bulan <span>⌄</span></button></div><div class="chart-legend"><span><i class="legend-dot income-dot"></i> Uang masuk</span><span><i class="legend-dot expense-dot"></i> Uang keluar</span></div><div class="chart" aria-label="Grafik arus uang enam bulan"><div class="chart-grid" id="chart-grid"></div><div class="bars" id="bars"></div></div></article>
       <article class="panel spending-panel"><div class="panel-heading"><div><h3>Ke mana uang pergi?</h3><p>Pengeluaran bulan ini</p></div><button class="text-button" data-view="transactions">Lihat semua ↗</button></div><div class="spending-content"><div class="donut-wrap"><div class="donut"><div class="donut-center"><strong id="donut-total">0,00</strong><small>JUTA</small></div></div></div><div class="category-list" id="category-list"></div></div></article></section>
-      <section class="panel transactions-panel"><div class="panel-heading"><div><h3>Daftar Transaksi</h3><p>Semua catatan uang masuk dan uang keluar Anda</p></div><button class="text-button" id="scroll-to-workspace" data-view="transactions">Kelola di Workspace ↗</button></div><div class="transaction-table"><div class="table-head"><span>TRANSAKSI</span><span>KATEGORI</span><span>TANGGAL</span><span style="text-align:right;">JUMLAH</span><span style="text-align:right;">AKSI</span></div><div id="transaction-rows"></div></div></section>
+      <section class="panel transactions-panel">
+        <div class="panel-heading">
+          <div>
+            <h3>Daftar Transaksi</h3>
+            <p>Semua catatan uang masuk dan uang keluar Anda</p>
+          </div>
+          <div class="tx-heading-controls">
+            <input type="search" id="tx-search-input" class="tx-search" placeholder="🔍 Cari transaksi / kategori..." aria-label="Cari transaksi" />
+            <button class="text-button" id="scroll-to-workspace" data-view="transactions">Kelola di Workspace ↗</button>
+          </div>
+        </div>
+        <div class="transaction-table">
+          <div class="table-head">
+            <span>TRANSAKSI</span>
+            <span>KATEGORI</span>
+            <span>TANGGAL</span>
+            <span style="text-align:right;">JUMLAH</span>
+            <span style="text-align:right;">AKSI</span>
+          </div>
+          <div id="transaction-rows"></div>
+        </div>
+      </section>
       <section id="finance-workspace" class="workspace panel" hidden></section>
       <footer class="footer"><span>catat duit. <i>Uang adalah energi hidupmu.</i></span><span>Dirancang untuk lebih sadar, bukan lebih cemas.</span></footer>
     </main>

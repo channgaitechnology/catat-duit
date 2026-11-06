@@ -3,4 +3,315 @@
 
 [hidden]{display:none!important}.workspace{margin-top:15px;min-height:210px}.workspace-list{margin-top:18px}.workspace-row{display:grid;grid-template-columns:minmax(70px,.7fr) minmax(100px,1.5fr) minmax(90px,1fr) auto auto;align-items:center;gap:12px;padding:13px 8px;border-bottom:1px solid #eff1ee;font-size:11px;color:#68766b}.workspace-row strong{font:600 12px var(--mono);color:var(--ink);text-align:right}.workspace-row b{color:#435248}.workspace-row time{color:#9aa39c;font:10px var(--mono)}.debt-kind{color:#85947f;font-size:10px}.workspace .primary-button{white-space:nowrap}@media(max-width:650px){.workspace-row{grid-template-columns:1fr auto;gap:7px}.workspace-row>*{grid-column:auto}.workspace-row strong{text-align:right}.workspace-row .text-button{justify-self:start}.auth-card{padding:26px 22px}}
 .category-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex:none}.bar-group i{display:block;width:10px;min-height:0;border-radius:3px 3px 0 0}.category-list .empty-state{justify-content:center;text-align:center;white-space:normal}
+.password-field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.password-field-wrap input {
+  padding-right: 58px !important;
+  margin-top: 7px;
+  width: 100%;
+}
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(calc(-50% + 3.5px));
+  background: none;
+  border: 0;
+  color: #708c58;
+  font: 500 11px var(--sans);
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+}
+.password-toggle:hover {
+  color: #496333;
+  background: #eef4e8;
+}
+#asset-form {
+  padding: 26px;
+}
+#asset-form label {
+  display: block;
+  font-size: 10px;
+  color: #738075;
+  margin-bottom: 14px;
+}
+#asset-form input, #asset-form select {
+  display: block;
+  width: 100%;
+  height: 39px;
+  border: 1px solid #e4e9e2;
+  border-radius: 6px;
+  margin-top: 6px;
+  padding: 0 10px;
+  font: 12px var(--sans);
+  color: var(--ink);
+  background: white;
+  outline: none;
+}
+#asset-form input:focus, #asset-form select:focus {
+  border-color: #9bb87c;
+  box-shadow: 0 0 0 3px #a5c38326;
+}
+.table-head, .transaction-row {
+  grid-template-columns: 1.5fr 1fr 0.8fr 1fr 1fr !important;
+  gap: 8px;
+}
 
+.lower-grid.single-panel {
+  grid-template-columns: 1fr;
+}
+.tx-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.tx-actions .text-button {
+  padding: 3px 6px;
+  font-size: 10px;
+}
+.text-button.danger {
+  color: #bd5844;
+}
+.text-button.danger:hover {
+  color: #8c3625;
+}
+.transaction-table {
+  max-height: 480px;
+  overflow-y: auto;
+}
+#edit-transaction-form {
+  padding: 26px;
+}
+#edit-transaction-form label {
+  display: block;
+  font-size: 10px;
+  color: #738075;
+  margin-bottom: 14px;
+}
+#edit-transaction-form input, #edit-transaction-form select {
+  display: block;
+  width: 100%;
+  height: 39px;
+  border: 1px solid #e4e9e2;
+  border-radius: 6px;
+  margin-top: 6px;
+  padding: 0 10px;
+  font: 12px var(--sans);
+  color: var(--ink);
+  background: white;
+  outline: none;
+}
+#edit-transaction-form input:focus, #edit-transaction-form select:focus {
+  border-color: #9bb87c;
+  box-shadow: 0 0 0 3px #a5c38326;
+}
+
+.tx-heading-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tx-search {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #d9dfd7;
+  font-size: 13px;
+  outline: none;
+  background: #ffffff;
+  color: var(--ink);
+  transition: all 0.2s;
+  width: 220px;
+}
+.tx-search:focus {
+  border-color: #9bb87c;
+  box-shadow: 0 0 0 3px #a5c38326;
+  width: 260px;
+}
+
+/* Pengelompokan Tanggal dan Pembatas Transaksi */
+.tx-date-group {
+  margin-bottom: 8px;
+}
+.tx-date-group + .tx-date-group {
+  border-top: 2px solid #18231e;
+  padding-top: 10px;
+}
+.tx-date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f7f9f6;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.tx-date-header:hover {
+  background: #edf1ea;
+}
+.tx-date-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: #27382f;
+}
+.tx-date-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #617367;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tx-date-header-summary {
+  font-size: 12px;
+  color: #55675c;
+  font-family: var(--mono);
+}
+.tx-group-items {
+  transition: max-height 0.2s ease-out;
+}
+.tx-date-group .transaction-row {
+  border-bottom: 1px dashed #cbd5e1;
+}
+.tx-date-group .transaction-row:last-child {
+  border-bottom: 1px dashed #cbd5e1;
+}
+.tx-date-daily-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #fafbfa;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: #3b4d42;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
+/* Sembunyikan badge Powered by Netlify */
+#nl-badge-frame, #nl-hud-frame, iframe[title*="Netlify"], iframe[srcdoc*="Powered by Netlify"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip-path: path("M0 0Z") !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Horizontal Bar Chart Styling for Spending */
+.spending-panel {
+  height: auto;
+  min-height: 200px;
+}
+.horizontal-spending {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+.spending-summary-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: #f7f9f6;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #3f5246;
+}
+.spending-summary-badge strong {
+  font-size: 16px;
+  color: #b24c3d;
+  font-family: var(--mono);
+}
+.horizontal-bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+.h-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.h-bar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+}
+.h-bar-track {
+  width: 100%;
+  height: 12px;
+  background: #edf1ea;
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+.h-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease-in-out;
+}
+.h-bar-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #6a7c70;
+}
+.h-bar-label {
+  font-weight: 600;
+  color: #27382f;
+}
+.h-bar-percentage {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #395243;
+}
+
+/* Tombol & Modal Unduh Laporan */
+.secondary-button {
+  background: #f1f5ef;
+  color: #27382f;
+  border: 1px solid #d4dec9;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+.secondary-button:hover {
+  background: #e2ebd9;
+  border-color: #bccbb1;
+}
+
+.report-preview-notice {
+  font-size: 12px;
+  color: #4b6152;
+  background: #f4f7f2;
+  border-left: 3px solid #6b9e50;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 6px 0 16px;
+}

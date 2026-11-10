@@ -63,7 +63,7 @@ function setAuthMode(mode){
   const backToLogin=document.querySelector('#auth-back-to-login');if(backToLogin)backToLogin.hidden=!(forgot||reset);
   document.querySelector('#auth-mode-toggle').textContent=signup?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';setAuthMessage();
 }
-function showLogin(){activeUser=null;appShell.hidden=true;authView.hidden=false;setAuthMode('signin')}
+function showLogin(){cleanupRealtime();activeUser=null;appShell.hidden=true;authView.hidden=false;setAuthMode('signin')}
 function translateAuthError(e){const m=e?.message||'Terjadi kesalahan. Coba lagi.';if(/invalid login credentials/i.test(m))return'Email atau kata sandi tidak cocok.';if(/email not confirmed/i.test(m))return'Konfirmasi email Anda sebelum masuk.';if(/already registered|already exists/i.test(m))return'Email sudah terdaftar. Silakan masuk.';if(/password should be at least/i.test(m))return'Kata sandi minimal 6 karakter.';if(/rate limit/i.test(m))return'Terlalu banyak percobaan. Coba lagi beberapa saat.';if(/redirect.*not allowed|redirect url/i.test(m))return'Alamat aplikasi belum terdaftar sebagai URL pengalihan Supabase.';return m}
 async function submitAuth(event){
   event.preventDefault();if(authBusy)return;authBusy=true;document.querySelector('#auth-submit').disabled=true;setAuthMessage('Memproses…');
@@ -80,11 +80,111 @@ document.querySelector('#auth-mode-toggle').addEventListener('click',()=>setAuth
 document.querySelector('#auth-forgot').addEventListener('click',()=>setAuthMode('forgot'));
 document.querySelector('#auth-back-to-login')?.addEventListener('click',()=>setAuthMode('signin'));
 
+let realtimeChannel=null;
+
+function cleanupRealtime(){
+  if(realtimeChannel){
+    try{
+      db.removeChannel(realtimeChannel);
+    }catch(e){
+      console.warn('Gagal menghapus realtime channel:', e);
+    }
+    realtimeChannel=null;
+  }
+}
+
+function handleRealtimeRecordChange(payload){
+  const { eventType, new: newRec, old: oldRec } = payload;
+  if(eventType === 'INSERT'){
+    if(!records.some(r => String(r.id) === String(newRec.id))){
+      records.push(newRec);
+    } else {
+      const idx = records.findIndex(r => String(r.id) === String(newRec.id));
+      if(idx !== -1) records[idx] = newRec;
+    }
+  } else if(eventType === 'UPDATE'){
+    const idx = records.findIndex(r => String(r.id) === String(newRec.id));
+    if(idx !== -1){
+      records[idx] = newRec;
+    } else {
+      records.push(newRec);
+    }
+  } else if(eventType === 'DELETE'){
+    const delId = oldRec?.id;
+    if(delId){
+      records = records.filter(r => String(r.id) !== String(delId));
+    }
+  }
+  render();
+}
+
+function handleRealtimeAssetChange(payload){
+  const { eventType, new: newAsset, old: oldAsset } = payload;
+  if(eventType === 'INSERT'){
+    if(!assets.some(a => String(a.id) === String(newAsset.id))){
+      assets.push(newAsset);
+    } else {
+      const idx = assets.findIndex(a => String(a.id) === String(newAsset.id));
+      if(idx !== -1) assets[idx] = newAsset;
+    }
+  } else if(eventType === 'UPDATE'){
+    const idx = assets.findIndex(a => String(a.id) === String(newAsset.id));
+    if(idx !== -1){
+      assets[idx] = newAsset;
+    } else {
+      assets.push(newAsset);
+    }
+  } else if(eventType === 'DELETE'){
+    const delId = oldAsset?.id;
+    if(delId){
+      assets = assets.filter(a => String(a.id) !== String(delId));
+    }
+  }
+  render();
+}
+
+function setupRealtime(userId){
+  cleanupRealtime();
+  if(!userId) return;
+
+  realtimeChannel = db.channel('user-realtime-' + userId)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'finance_records',
+        filter: 'user_id=eq.' + userId
+      },
+      (payload) => {
+        handleRealtimeRecordChange(payload);
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'assets',
+        filter: 'user_id=eq.' + userId
+      },
+      (payload) => {
+        handleRealtimeAssetChange(payload);
+      }
+    )
+    .subscribe((status, err) => {
+      if(err){
+        console.warn('Realtime subscription error:', err);
+      }
+    });
+}
+
 async function showApp(user){
   activeUser=user;authView.hidden=true;appShell.hidden=false;
   const email=user.email||'Akun Catat Duit';document.querySelector('#profile-email').textContent=email;
   document.querySelector('#profile-avatar').textContent=(email[0]||'C').toUpperCase();document.querySelector('#profile-avatar-small').textContent=(email[0]||'C').toUpperCase();
   document.querySelector('#welcome-title').innerHTML=`Halo, ${escapeHtml(email.split('@')[0])} <span class="wave">✳</span>`;
+  setupRealtime(user.id);
   await refreshData();
 }
 async function refreshData(){
@@ -100,7 +200,7 @@ db.auth.onAuthStateChange((event,session)=>{
   if(event==='PASSWORD_RECOVERY'){appShell.hidden=true;authView.hidden=false;setAuthMode('reset');setAuthMessage('Masukkan kata sandi baru untuk akun Anda.');return}
   if(session)showApp(session.user);else showLogin();
 });
-async function handleLogout(){const {error}=await db.auth.signOut();if(error)setAuthMessage(translateAuthError(error),'error')}
+async function handleLogout(){cleanupRealtime();const {error}=await db.auth.signOut();if(error)setAuthMessage(translateAuthError(error),'error')}
 document.querySelector('#auth-logout').addEventListener('click',handleLogout);
 document.querySelector('#auth-logout-top')?.addEventListener('click',handleLogout);
 
@@ -301,22 +401,92 @@ document.querySelector('#edit-transaction-form').addEventListener('submit',async
   e.preventDefault();
   const d=new FormData(e.currentTarget);
   const id=d.get('id');
-  const {error}=await db.from('finance_records').update({
+  const previousIndex=records.findIndex(r=>String(r.id)===String(id));
+  const previousRecord=previousIndex!==-1?{...records[previousIndex]}:null;
+
+  if(previousIndex!==-1){
+    records[previousIndex]={
+      ...records[previousIndex],
+      title:d.get('name'),
+      kind:d.get('type'),
+      category:d.get('category'),
+      amount:Number(d.get('amount')),
+      record_date:d.get('date')
+    };
+    render();
+  }
+
+  document.querySelector('#edit-transaction-dialog').close();
+  e.currentTarget.reset();
+
+  const {data,error}=await db.from('finance_records').update({
     title:d.get('name'),
     kind:d.get('type'),
     category:d.get('category'),
     amount:Number(d.get('amount')),
     record_date:d.get('date')
-  }).eq('id',id).eq('user_id',activeUser.id);
-  if(error){alert(error.message);return}
-  document.querySelector('#edit-transaction-dialog').close();
-  e.currentTarget.reset();
-  await refreshData();
+  }).eq('id',id).eq('user_id',activeUser.id).select();
+
+  if(error){
+    if(previousIndex!==-1&&previousRecord){
+      records[previousIndex]=previousRecord;
+      render();
+    }
+    alert(error.message);
+    return;
+  }
+  if(data&&data[0]){
+    const idx=records.findIndex(r=>String(r.id)===String(id));
+    if(idx!==-1)records[idx]=data[0];
+    render();
+  }
 });
 
-async function deleteRecord(id){if(!confirm('Hapus catatan ini?'))return;const {error}=await db.from('finance_records').delete().eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
-async function deleteAsset(id){if(!confirm('Hapus aset ini?'))return;const {error}=await db.from('assets').delete().eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
-async function toggleDebt(id,settled){const {error}=await db.from('finance_records').update({settled:!settled}).eq('id',id).eq('user_id',activeUser.id);if(error)return alert(error.message);await refreshData()}
+async function deleteRecord(id){
+  if(!confirm('Hapus catatan ini?'))return;
+  const previousIndex=records.findIndex(r=>String(r.id)===String(id));
+  const previousRecord=previousIndex!==-1?records[previousIndex]:null;
+  records=records.filter(r=>String(r.id)!==String(id));
+  render();
+  const {error}=await db.from('finance_records').delete().eq('id',id).eq('user_id',activeUser.id);
+  if(error){
+    if(previousRecord){
+      records.splice(previousIndex,0,previousRecord);
+      render();
+    }
+    return alert(error.message);
+  }
+}
+async function deleteAsset(id){
+  if(!confirm('Hapus aset ini?'))return;
+  const previousIndex=assets.findIndex(a=>String(a.id)===String(id));
+  const previousAsset=previousIndex!==-1?assets[previousIndex]:null;
+  assets=assets.filter(a=>String(a.id)!==String(id));
+  render();
+  const {error}=await db.from('assets').delete().eq('id',id).eq('user_id',activeUser.id);
+  if(error){
+    if(previousAsset){
+      assets.splice(previousIndex,0,previousAsset);
+      render();
+    }
+    return alert(error.message);
+  }
+}
+async function toggleDebt(id,settled){
+  const targetIndex=records.findIndex(r=>String(r.id)===String(id));
+  if(targetIndex!==-1){
+    records[targetIndex]={...records[targetIndex],settled:!settled};
+    render();
+  }
+  const {error}=await db.from('finance_records').update({settled:!settled}).eq('id',id).eq('user_id',activeUser.id);
+  if(error){
+    if(targetIndex!==-1){
+      records[targetIndex]={...records[targetIndex],settled:settled};
+      render();
+    }
+    return alert(error.message);
+  }
+}
 
 const DEFAULT_CATEGORIES = ['Makan & minum', 'Tempat tinggal', 'Transportasi', 'Gaji', 'Freelance', 'Lainnya'];
 function getCustomCategories() {
@@ -496,18 +666,43 @@ document.querySelector('#add-transaction').addEventListener('click', openAddTran
 document.querySelector('#transaction-form').addEventListener('submit',async e=>{
   e.preventDefault();
   const d=new FormData(e.currentTarget);
-  const {error}=await db.from('finance_records').insert({
+  const tempId='temp-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  const newRecord={
+    id:tempId,
     user_id:activeUser.id,
     title:d.get('name'),
     kind:d.get('type'),
     category:d.get('category'),
     amount:Number(d.get('amount')),
-    record_date:d.get('date')
-  });
-  if(error){alert(error.message);return}
+    record_date:d.get('date'),
+    settled:false,
+    created_at:new Date().toISOString()
+  };
+  records.push(newRecord);
+  render();
   document.querySelector('#transaction-dialog').close();
   e.currentTarget.reset();
-  await refreshData();
+
+  const {data,error}=await db.from('finance_records').insert({
+    user_id:activeUser.id,
+    title:newRecord.title,
+    kind:newRecord.kind,
+    category:newRecord.category,
+    amount:newRecord.amount,
+    record_date:newRecord.record_date
+  }).select();
+
+  if(error){
+    records=records.filter(r=>r.id!==tempId);
+    render();
+    alert(error.message);
+    return;
+  }
+  if(data&&data[0]){
+    const idx=records.findIndex(r=>r.id===tempId);
+    if(idx!==-1)records[idx]=data[0];
+    render();
+  }
 });
 const assetCategoryType=document.querySelector('#asset-category-type');
 const assetSubCategory=document.querySelector('#asset-sub-category');
@@ -534,13 +729,80 @@ document.querySelector('#asset-form').addEventListener('submit',async e=>{
   const sub=d.get('asset_sub')||'Lainnya';
   const userTitle=d.get('name').trim();
   const storedName=`[${type}: ${sub}] ${userTitle}`;
-  const {error}=await db.from('assets').upsert({user_id:activeUser.id,name:storedName,amount:Number(d.get('amount')),updated_at:new Date().toISOString()},{onConflict:'user_id,name'});
-  if(error){alert(error.message);return}
+  const amount=Number(d.get('amount'));
+  const tempId='temp-asset-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  const existingIdx=assets.findIndex(a=>a.name===storedName);
+  const previousAsset=existingIdx!==-1?{...assets[existingIdx]}:null;
+
+  if(existingIdx!==-1){
+    assets[existingIdx]={...assets[existingIdx],amount:amount,updated_at:new Date().toISOString()};
+  }else{
+    assets.push({id:tempId,user_id:activeUser.id,name:storedName,amount:amount,updated_at:new Date().toISOString()});
+  }
+  render();
+
   document.querySelector('#asset-dialog').close();
   e.currentTarget.reset();
-  await refreshData();
+
+  const {data,error}=await db.from('assets').upsert({user_id:activeUser.id,name:storedName,amount:amount,updated_at:new Date().toISOString()},{onConflict:'user_id,name'}).select();
+  if(error){
+    if(existingIdx!==-1&&previousAsset){
+      assets[existingIdx]=previousAsset;
+    }else{
+      assets=assets.filter(a=>a.id!==tempId);
+    }
+    render();
+    alert(error.message);
+    return;
+  }
+  if(data&&data[0]){
+    const idx=assets.findIndex(a=>a.name===storedName);
+    if(idx!==-1)assets[idx]=data[0];
+    render();
+  }
 });
-document.querySelector('#debt-form').addEventListener('submit',async e=>{e.preventDefault();const d=new FormData(e.currentTarget);const {error}=await db.from('finance_records').insert({user_id:activeUser.id,title:d.get('title'),kind:d.get('kind'),category:d.get('kind')==='debt_payable'?'Utang':'Piutang',amount:Number(d.get('amount')),record_date:d.get('record_date')});if(error){alert(error.message);return}document.querySelector('#debt-dialog').close();e.currentTarget.reset();await refreshData()});
+document.querySelector('#debt-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const d=new FormData(e.currentTarget);
+  const tempId='temp-debt-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  const newDebt={
+    id:tempId,
+    user_id:activeUser.id,
+    title:d.get('title'),
+    kind:d.get('kind'),
+    category:d.get('kind')==='debt_payable'?'Utang':'Piutang',
+    amount:Number(d.get('amount')),
+    record_date:d.get('record_date'),
+    settled:false,
+    created_at:new Date().toISOString()
+  };
+  records.push(newDebt);
+  render();
+
+  document.querySelector('#debt-dialog').close();
+  e.currentTarget.reset();
+
+  const {data,error}=await db.from('finance_records').insert({
+    user_id:activeUser.id,
+    title:newDebt.title,
+    kind:newDebt.kind,
+    category:newDebt.category,
+    amount:newDebt.amount,
+    record_date:newDebt.record_date
+  }).select();
+
+  if(error){
+    records=records.filter(r=>r.id!==tempId);
+    render();
+    alert(error.message);
+    return;
+  }
+  if(data&&data[0]){
+    const idx=records.findIndex(r=>r.id===tempId);
+    if(idx!==-1)records[idx]=data[0];
+    render();
+  }
+});
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('.nav-item').forEach(item=>item.classList.toggle('active',item.dataset.view===button.dataset.view));
   const view=button.dataset.view;if(view==='overview'){workspace.hidden=true;document.querySelector('.runway-card').scrollIntoView({behavior:'smooth'});return}

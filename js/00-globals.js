@@ -8,6 +8,7 @@ const db = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE
 var activeUser = null;
 var records = [];
 var assets = [];
+var customCategories = [];
 var authMode = 'signin';
 var authBusy = false;
 var txSearchQuery = '';

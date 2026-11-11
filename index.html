@@ -130,6 +130,32 @@
 
   <dialog id="edit-transaction-dialog"><form method="dialog" id="edit-transaction-form"><input type="hidden" name="id" id="edit-tx-id" /><div class="dialog-heading"><div><span class="eyebrow">PERBARUI ENERGI</span><h2>Edit Transaksi</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Nama transaksi<input name="name" id="edit-tx-name" required /></label><div class="form-row"><label>Jenis<select name="type" id="edit-tx-type"><option value="expense">Uang keluar</option><option value="income">Uang masuk</option></select></label><label>Kategori<select name="category" id="edit-tx-category"><option>Makan & minum</option><option>Tempat tinggal</option><option>Transportasi</option><option>Gaji</option><option>Freelance</option><option>Lainnya</option><option value="__add_new__">+ Tambah kategori baru...</option></select></label></div><div class="form-row"><label>Jumlah (Rp)<input name="amount" id="edit-tx-amount" type="number" min="1" required /></label><label>Tanggal<input name="date" id="edit-tx-date" type="date" required /></label></div><button class="primary-button submit-button" value="default">Simpan Perubahan <span>✓</span></button></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <dialog id="manage-categories-dialog">
+    <div style="padding:24px;">
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow">PENGATURAN KATEGORI</span>
+          <h2>Kelola Kategori</h2>
+        </div>
+        <button type="button" class="close-button" aria-label="Tutup">×</button>
+      </div>
+      <p style="font-size:12px;color:#6d7d71;margin:-10px 0 16px;">
+        Ubah nama atau hapus kategori kustom Anda. Kategori akan tersinkron otomatis antar HP & desktop.
+      </p>
+
+      <div id="manage-categories-list" class="manage-categories-list"></div>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #ebede9;display:flex;justify-content:space-between;align-items:center;">
+        <button type="button" class="secondary-button" id="btn-add-category-in-manager">
+          ＋ Tambah Kategori Baru
+        </button>
+        <button type="button" class="primary-button close-manager-dialog" style="padding:8px 18px;">
+          Selesai
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="asset-dialog"><form id="asset-form" method="dialog"><div class="dialog-heading"><div><span class="eyebrow">MANAJEMEN ASET</span><h2>Catat aset</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div>
     <div class="form-row">
       <label>Kelompok aset

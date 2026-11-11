@@ -26,9 +26,10 @@ async function showApp(user) {
 
 async function refreshData() {
   if (!activeUser || !db) return;
-  const [r, a] = await Promise.all([
+  const [r, a, c] = await Promise.all([
     db.from('finance_records').select('*').eq('user_id', activeUser.id).order('record_date', { ascending: false }).order('created_at', { ascending: true }),
-    db.from('assets').select('*').eq('user_id', activeUser.id).order('name')
+    db.from('assets').select('*').eq('user_id', activeUser.id).order('name'),
+    db.from('categories').select('*').eq('user_id', activeUser.id).order('name')
   ]);
   if (r.error || a.error) {
     console.error(r.error || a.error);
@@ -37,6 +38,13 @@ async function refreshData() {
   }
   records = r.data || [];
   assets = a.data || [];
+  if (c && !c.error && c.data) {
+    customCategories = c.data.map(item => item.name);
+    syncCategoriesToLocal(customCategories);
+  } else {
+    customCategories = getCustomCategories();
+  }
+  populateCategorySelects();
   render();
 }
 

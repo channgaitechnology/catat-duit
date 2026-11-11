@@ -46,7 +46,7 @@ Tambahkan URL berikut pada daftar **Redirect URLs** (klik tombol **Add URL** unt
 
 ## 3. Cara Kerja Redirect di Aplikasi
 
-Di kode aplikasi (`app.js`), URL pengalihan ditentukan secara dinamis menggunakan:
+Di kode aplikasi (`js/01-auth.js`), URL pengalihan ditentukan secara dinamis menggunakan:
 ```javascript
 const redirectTo = window.location.origin + window.location.pathname;
 ```

@@ -643,3 +643,8 @@
   font-size: 22px;
   margin: 0 0 18px;
 }
+
+/* Chrome HP dengan "Situs desktop": perbesar layar login sesuai faktor yang dihitung di index.html */
+html.desktop-site-mode .auth-screen {
+  zoom: var(--ui-zoom, 1);
+}

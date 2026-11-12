@@ -59,6 +59,12 @@ if ('serviceWorker' in navigator) {
 }
 
 // Event listener tombol close pada semua modal dialog agar tidak memicu validasi form
+document.querySelectorAll('.close-manager-dialog').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelector('#manage-categories-dialog')?.close();
+  });
+});
+
 document.querySelectorAll('.close-button').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -90,7 +96,11 @@ window.catatduit = {
   getFilteredTransactionsForReport,
   exportToExcel,
   exportToPDF,
-  exportToJPG
+  exportToJPG,
+  saveCustomCategory,
+  updateCustomCategory,
+  deleteCustomCategory,
+  getCustomCategories: () => customCategories
 };
 
 // Keep the unpublished starter design from showing fabricated sample values before login.

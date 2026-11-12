@@ -100,8 +100,14 @@ window.catatduit = {
   saveCustomCategory,
   updateCustomCategory,
   deleteCustomCategory,
-  getCustomCategories: () => customCategories
+  getCustomCategories: () => customCategories,
+  syncOfflineQueue
 };
 
-// Keep the unpublished starter design from showing fabricated sample values before login.
-showLogin();
+// Inisialisasi awal: jika offline dan ada user di cache, langsung buka app
+const cachedUser = getCachedData(STORAGE_KEY_USER, null);
+if (!navigator.onLine && cachedUser) {
+  showApp(cachedUser);
+} else {
+  showLogin();
+}

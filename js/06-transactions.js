@@ -134,6 +134,7 @@ if (editTxForm) {
         amount: Number(d.get('amount')),
         record_date: d.get('date')
       };
+      setCachedData(STORAGE_KEY_RECORDS, records);
       render();
     }
 
@@ -141,44 +142,56 @@ if (editTxForm) {
     if (editDialog) editDialog.close();
     e.currentTarget.reset();
 
-    const { data, error } = await db.from('finance_records').update({
+    const updates = {
       title: d.get('name'),
       kind: d.get('type'),
       category: d.get('category'),
       amount: Number(d.get('amount')),
       record_date: d.get('date')
-    }).eq('id', id).eq('user_id', activeUser.id).select();
+    };
 
-    if (error) {
-      if (previousIndex !== -1 && previousRecord) {
-        records[previousIndex] = previousRecord;
-        render();
-      }
-      alert(error.message);
+    if (!navigator.onLine || !db) {
+      addToOfflineQueue({ type: 'update_record', id, data: updates });
+      showToast('Perubahan tersimpan lokal (Offline).', 'warning');
       return;
     }
-    if (data && data[0]) {
-      const idx = records.findIndex(r => String(r.id) === String(id));
-      if (idx !== -1) records[idx] = data[0];
-      render();
+
+    try {
+      const { data, error } = await db.from('finance_records').update(updates).eq('id', id).eq('user_id', activeUser.id).select();
+      if (error) throw error;
+      if (data && data[0]) {
+        const idx = records.findIndex(r => String(r.id) === String(id));
+        if (idx !== -1) records[idx] = data[0];
+        setCachedData(STORAGE_KEY_RECORDS, records);
+        render();
+      }
+      showToast('Perubahan berhasil disimpan.', 'success');
+    } catch (err) {
+      addToOfflineQueue({ type: 'update_record', id, data: updates });
+      showToast('Koneksi terputus. Perubahan disimpan offline.', 'warning');
     }
   });
 }
 
 async function deleteRecord(id) {
   if (!confirm('Hapus catatan ini?')) return;
-  const previousIndex = records.findIndex(r => String(r.id) === String(id));
-  const previousRecord = previousIndex !== -1 ? records[previousIndex] : null;
   records = records.filter(r => String(r.id) !== String(id));
+  setCachedData(STORAGE_KEY_RECORDS, records);
   render();
 
-  const { error } = await db.from('finance_records').delete().eq('id', id).eq('user_id', activeUser.id);
-  if (error) {
-    if (previousRecord) {
-      records.splice(previousIndex, 0, previousRecord);
-      render();
-    }
-    return alert(error.message);
+  if (!navigator.onLine || !db) {
+    addToOfflineQueue({ type: 'delete_record', id });
+    showToast('Catatan dihapus secara offline.', 'warning');
+    return;
+  }
+
+  try {
+    const { error } = await db.from('finance_records').delete().eq('id', id).eq('user_id', activeUser.id);
+    if (error) throw error;
+    showToast('Catatan berhasil dihapus.', 'success');
+  } catch (err) {
+    addToOfflineQueue({ type: 'delete_record', id });
+    showToast('Catatan dihapus offline (akan disinkronkan).', 'warning');
   }
 }
 
@@ -217,31 +230,54 @@ if (txForm) {
       created_at: new Date().toISOString()
     };
     records.push(newRecord);
+    setCachedData(STORAGE_KEY_RECORDS, records);
     render();
 
     const txDialog = document.querySelector('#transaction-dialog');
     if (txDialog) txDialog.close();
     e.currentTarget.reset();
 
-    const { data, error } = await db.from('finance_records').insert({
-      user_id: activeUser.id,
-      title: newRecord.title,
-      kind: newRecord.kind,
-      category: newRecord.category,
-      amount: newRecord.amount,
-      record_date: newRecord.record_date
-    }).select();
-
-    if (error) {
-      records = records.filter(r => r.id !== tempId);
-      render();
-      alert(error.message);
+    if (!navigator.onLine || !db) {
+      addToOfflineQueue({ type: 'insert_record', data: {
+        user_id: activeUser.id,
+        title: newRecord.title,
+        kind: newRecord.kind,
+        category: newRecord.category,
+        amount: newRecord.amount,
+        record_date: newRecord.record_date
+      }, tempId });
+      showToast('Transaksi tersimpan lokal (Mode Offline).', 'warning');
       return;
     }
-    if (data && data[0]) {
-      const idx = records.findIndex(r => r.id === tempId);
-      if (idx !== -1) records[idx] = data[0];
-      render();
+
+    try {
+      const { data, error } = await db.from('finance_records').insert({
+        user_id: activeUser.id,
+        title: newRecord.title,
+        kind: newRecord.kind,
+        category: newRecord.category,
+        amount: newRecord.amount,
+        record_date: newRecord.record_date
+      }).select();
+
+      if (error) throw error;
+      if (data && data[0]) {
+        const idx = records.findIndex(r => r.id === tempId);
+        if (idx !== -1) records[idx] = data[0];
+        setCachedData(STORAGE_KEY_RECORDS, records);
+        render();
+      }
+      showToast('Transaksi berhasil disimpan.', 'success');
+    } catch (err) {
+      addToOfflineQueue({ type: 'insert_record', data: {
+        user_id: activeUser.id,
+        title: newRecord.title,
+        kind: newRecord.kind,
+        category: newRecord.category,
+        amount: newRecord.amount,
+        record_date: newRecord.record_date
+      }, tempId });
+      showToast('Koneksi terputus. Transaksi disimpan lokal dan akan disinkronkan saat online.', 'warning');
     }
   });
 }

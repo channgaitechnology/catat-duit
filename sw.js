@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catatduit-v5';
+const CACHE_NAME = 'catatduit-v6';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -16,12 +16,21 @@ const STATIC_ASSETS = [
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  '/icons/icon.svg'
+  '/icons/icon.svg',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      for (const asset of STATIC_ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (err) {
+          console.warn('Gagal caching aset saat install:', asset, err);
+        }
+      }
+    })
   );
   self.skipWaiting();
 });
@@ -51,16 +60,43 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Jangan cache request Supabase API, Netlify functions, atau method non-GET
+  // Jangan cache request Supabase API (kecuali CDN library), Netlify functions, atau method non-GET
   if (
     event.request.method !== 'GET' ||
-    url.origin.includes('supabase.co') ||
+    (url.origin.includes('supabase.co') && !url.pathname.endsWith('.js')) ||
     url.pathname.startsWith('/.netlify/functions')
   ) {
     return;
   }
 
-  // Network-First untuk internal HTML, JS, CSS agar perubahan deploy selalu langsung didapat
+  // Dukungan Cache untuk CDN pihak ketiga (Supabase JS SDK dan Google Fonts)
+  if (
+    url.origin.includes('cdn.jsdelivr.net') ||
+    url.origin.includes('fonts.googleapis.com') ||
+    url.origin.includes('fonts.gstatic.com')
+  ) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseClone);
+              });
+            }
+            return networkResponse;
+          })
+          .catch(() => caches.match(event.request));
+      })
+    );
+    return;
+  }
+
+  // Penanganan Same-Origin
   if (url.origin === location.origin) {
     const isCoreAsset =
       url.pathname === '/' ||
@@ -81,14 +117,19 @@ self.addEventListener('fetch', (event) => {
             return networkResponse;
           })
           .catch(() => {
-            // Jika offline atau jaringan putus, ambil dari cache
-            return caches.match(event.request);
+            // Jika offline atau jaringan terputus, ambil dari cache
+            return caches.match(event.request).then((res) => {
+              if (res) return res;
+              if (event.request.mode === 'navigate') {
+                return caches.match('/index.html');
+              }
+            });
           })
       );
       return;
     }
 
-    // Cache-First untuk gambar/ikon/font
+    // Cache-First untuk gambar/ikon
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {

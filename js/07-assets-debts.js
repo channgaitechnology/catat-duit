@@ -1,5 +1,5 @@
 // js/07-assets-debts.js
-// Pengelolaan workspace, pencatatan & pelunasan utang-piutang, serta aset cair & tetap
+// Pengelolaan workspace, pencatatan & pelunasan utang-piutang, serta aset cair & tetap (dengan dukungan offline)
 
 function renderWorkspace(view) {
   if (!workspace) return;
@@ -42,18 +42,23 @@ function renderWorkspace(view) {
 
 async function deleteAsset(id) {
   if (!confirm('Hapus aset ini?')) return;
-  const previousIndex = assets.findIndex(a => String(a.id) === String(id));
-  const previousAsset = previousIndex !== -1 ? assets[previousIndex] : null;
   assets = assets.filter(a => String(a.id) !== String(id));
+  setCachedData(STORAGE_KEY_ASSETS, assets);
   render();
 
-  const { error } = await db.from('assets').delete().eq('id', id).eq('user_id', activeUser.id);
-  if (error) {
-    if (previousAsset) {
-      assets.splice(previousIndex, 0, previousAsset);
-      render();
-    }
-    return alert(error.message);
+  if (!navigator.onLine || !db) {
+    addToOfflineQueue({ type: 'delete_asset', id });
+    showToast('Aset dihapus secara offline.', 'warning');
+    return;
+  }
+
+  try {
+    const { error } = await db.from('assets').delete().eq('id', id).eq('user_id', activeUser.id);
+    if (error) throw error;
+    showToast('Aset berhasil dihapus.', 'success');
+  } catch (err) {
+    addToOfflineQueue({ type: 'delete_asset', id });
+    showToast('Aset dihapus offline.', 'warning');
   }
 }
 
@@ -61,15 +66,22 @@ async function toggleDebt(id, settled) {
   const targetIndex = records.findIndex(r => String(r.id) === String(id));
   if (targetIndex !== -1) {
     records[targetIndex] = { ...records[targetIndex], settled: !settled };
+    setCachedData(STORAGE_KEY_RECORDS, records);
     render();
   }
-  const { error } = await db.from('finance_records').update({ settled: !settled }).eq('id', id).eq('user_id', activeUser.id);
-  if (error) {
-    if (targetIndex !== -1) {
-      records[targetIndex] = { ...records[targetIndex], settled: settled };
-      render();
-    }
-    return alert(error.message);
+
+  if (!navigator.onLine || !db) {
+    addToOfflineQueue({ type: 'toggle_debt', id, settled: !settled });
+    showToast('Status diperbarui secara offline.', 'warning');
+    return;
+  }
+
+  try {
+    const { error } = await db.from('finance_records').update({ settled: !settled }).eq('id', id).eq('user_id', activeUser.id);
+    if (error) throw error;
+  } catch (err) {
+    addToOfflineQueue({ type: 'toggle_debt', id, settled: !settled });
+    showToast('Status diperbarui secara offline.', 'warning');
   }
 }
 
@@ -104,33 +116,39 @@ if (assetForm) {
     const amount = Number(d.get('amount'));
     const tempId = 'temp-asset-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
     const existingIdx = assets.findIndex(a => a.name === storedName);
-    const previousAsset = existingIdx !== -1 ? { ...assets[existingIdx] } : null;
 
     if (existingIdx !== -1) {
       assets[existingIdx] = { ...assets[existingIdx], amount: amount, updated_at: new Date().toISOString() };
     } else {
       assets.push({ id: tempId, user_id: activeUser.id, name: storedName, amount: amount, updated_at: new Date().toISOString() });
     }
+    setCachedData(STORAGE_KEY_ASSETS, assets);
     render();
 
     document.querySelector('#asset-dialog')?.close();
     e.currentTarget.reset();
 
-    const { data, error } = await db.from('assets').upsert({ user_id: activeUser.id, name: storedName, amount: amount, updated_at: new Date().toISOString() }, { onConflict: 'user_id,name' }).select();
-    if (error) {
-      if (existingIdx !== -1 && previousAsset) {
-        assets[existingIdx] = previousAsset;
-      } else {
-        assets = assets.filter(a => a.id !== tempId);
-      }
-      render();
-      alert(error.message);
+    const assetPayload = { user_id: activeUser.id, name: storedName, amount: amount, updated_at: new Date().toISOString() };
+
+    if (!navigator.onLine || !db) {
+      addToOfflineQueue({ type: 'insert_asset', data: assetPayload });
+      showToast('Aset tersimpan lokal (Mode Offline).', 'warning');
       return;
     }
-    if (data && data[0]) {
-      const idx = assets.findIndex(a => a.name === storedName);
-      if (idx !== -1) assets[idx] = data[0];
-      render();
+
+    try {
+      const { data, error } = await db.from('assets').upsert(assetPayload, { onConflict: 'user_id,name' }).select();
+      if (error) throw error;
+      if (data && data[0]) {
+        const idx = assets.findIndex(a => a.name === storedName);
+        if (idx !== -1) assets[idx] = data[0];
+        setCachedData(STORAGE_KEY_ASSETS, assets);
+        render();
+      }
+      showToast('Aset berhasil disimpan.', 'success');
+    } catch (err) {
+      addToOfflineQueue({ type: 'insert_asset', data: assetPayload });
+      showToast('Koneksi terputus. Aset tersimpan offline.', 'warning');
     }
   });
 }
@@ -153,30 +171,40 @@ if (debtForm) {
       created_at: new Date().toISOString()
     };
     records.push(newDebt);
+    setCachedData(STORAGE_KEY_RECORDS, records);
     render();
 
     document.querySelector('#debt-dialog')?.close();
     e.currentTarget.reset();
 
-    const { data, error } = await db.from('finance_records').insert({
+    const debtPayload = {
       user_id: activeUser.id,
       title: newDebt.title,
       kind: newDebt.kind,
       category: newDebt.category,
       amount: newDebt.amount,
       record_date: newDebt.record_date
-    }).select();
+    };
 
-    if (error) {
-      records = records.filter(r => r.id !== tempId);
-      render();
-      alert(error.message);
+    if (!navigator.onLine || !db) {
+      addToOfflineQueue({ type: 'insert_record', data: debtPayload, tempId });
+      showToast('Catatan tersimpan lokal (Mode Offline).', 'warning');
       return;
     }
-    if (data && data[0]) {
-      const idx = records.findIndex(r => r.id === tempId);
-      if (idx !== -1) records[idx] = data[0];
-      render();
+
+    try {
+      const { data, error } = await db.from('finance_records').insert(debtPayload).select();
+      if (error) throw error;
+      if (data && data[0]) {
+        const idx = records.findIndex(r => r.id === tempId);
+        if (idx !== -1) records[idx] = data[0];
+        setCachedData(STORAGE_KEY_RECORDS, records);
+        render();
+      }
+      showToast('Catatan berhasil disimpan.', 'success');
+    } catch (err) {
+      addToOfflineQueue({ type: 'insert_record', data: debtPayload, tempId });
+      showToast('Koneksi terputus. Catatan disimpan offline.', 'warning');
     }
   });
 }

@@ -7,7 +7,10 @@ Catatan ini merangkum keadaan repo, deploy, dan integrasi per 2 November 2026 ag
 - Repo GitHub terpisah dan bernama [catat-duit](https://github.com/channgaitechnology/catat-duit); tidak mencampur kode atau database Dokter Laundry.
 - Frontend statis HTML, CSS, dan JavaScript terhubung ke Netlify dan deploy otomatis dari branch `main`.
 - Situs produksi saat ini: [catat-duit-keuangan.netlify.app](https://catat-duit-keuangan.netlify.app/).
-- Pembaruan dashboard terakhir sudah tayang dari commit `066ae5a`: angka, grafik enam bulan, dan kategori pengeluaran menggunakan data akun; data contoh tidak ditampilkan sebagai transaksi nyata.
+- **Sinkronisasi Saldo Kas Real-Time:** Penambahan kartu metrik Sisa Saldo (Arus Kas Bersih) yang menghitung selisih uang masuk dan uang keluar bulan ini, status Surplus/Defisit, akumulasi saldo kas berjalan all-time, serta sinkronisasi otomatis ke energi Runway Keuangan.
+- **Mode Offline Penuh (PWA & Offline Sync Queue):** Service Worker v6 dengan caching offline SDK Supabase & Google Fonts; LocalStorage persistence untuk records, assets, dan user; kemampuan mencatat/mengedit/menghapus secara offline dengan antrean sinkronisasi otomatis saat terhubung kembali; badge status jaringan online/offline dan notifikasi toast.
+- **Halaman Depan / Edukasi Auth:** Desain dual-layout pada layar login/daftar yang memuat informasi lengkap tentang filosofi aplikasi, 4 fungsi utama (Runway, Arus Kas, Klasifikasi Aset, Utang-Piutang), dan 4 keunggulan aplikasi.
+- Pembaruan dashboard: angka, grafik enam bulan, dan kategori pengeluaran menggunakan data akun; data contoh tidak ditampilkan sebagai transaksi nyata.
 - Proyek Supabase terpisah untuk Catat Duit sudah dibuat. Tabel transaksi/aset menggunakan Row Level Security dan pembatasan data per pengguna.
 - UI Supabase Auth di aplikasi mencakup masuk, daftar, reset kata sandi, dan keluar akun.
 

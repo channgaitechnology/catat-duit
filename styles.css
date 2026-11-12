@@ -594,3 +594,52 @@
 .app-toast.success { border-left: 4px solid #c4ef6d; }
 .app-toast.warning { border-left: 4px solid #f0b5a8; }
 .app-toast.info { border-left: 4px solid #7da7d8; }
+
+/* ========================================================
+   AUTH — MOBILE / TOUCH LAYOUT
+   Aktif di layar sempit ATAU perangkat sentuh dengan layar kecil
+   (termasuk saat Chrome HP memakai "Situs desktop" / viewport 980px).
+   ======================================================== */
+@media (max-width: 900px), (pointer: coarse) and (max-device-width: 900px) {
+  .auth-screen {
+    display: block;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  }
+  .auth-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  /* Form masuk tampil lebih dulu, info aplikasi di bawahnya */
+  .auth-card {
+    order: -1;
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 20px;
+  }
+  .auth-card h1 { font-size: 24px; }
+  .auth-card label { font-size: 13px; }
+  .auth-card input { height: 48px; font-size: 16px; } /* 16px mencegah auto-zoom di iOS */
+  .auth-submit { height: 48px; font-size: 15px; }
+  .auth-links { flex-wrap: wrap; row-gap: 4px; }
+  .auth-links button { font-size: 13px; padding: 8px 0; }
+  .auth-privacy { font-size: 12px; }
+
+  .auth-info-pane { padding: 22px 18px; border-radius: 14px; }
+  .auth-info-title { font-size: 20px; }
+  .auth-info-desc { font-size: 13px; margin-bottom: 20px; }
+  .feat-content strong { font-size: 13px; }
+  .feat-content p { font-size: 12px; }
+  .perk-pill { font-size: 11px; }
+}
+
+/* Logo di panel login tidak ikut menyusut seperti logo sidebar (aturan sidebar ≤800px memakai font-size:0) */
+.auth-info-pane .brand {
+  font-size: 22px;
+  margin: 0 0 18px;
+}

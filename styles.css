@@ -648,3 +648,40 @@
 html.desktop-site-mode .auth-screen {
   zoom: var(--ui-zoom, 1);
 }
+
+/* ========================================================
+   AUTH — PILIHAN AWAL (Masuk / Daftar)
+   ======================================================== */
+.auth-choice {
+  display: grid;
+  gap: 12px;
+  margin-top: 6px;
+}
+.auth-choice .auth-submit {
+  margin-top: 0;
+}
+.auth-choice-secondary {
+  width: 100%;
+  height: 42px;
+  border: 1.5px solid #18231e;
+  border-radius: 8px;
+  background: #fff;
+  color: #18231e;
+  font: 600 13px var(--sans);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.auth-choice-secondary:hover { background: #f0f4ec; }
+.auth-back {
+  border: 0;
+  background: none;
+  color: #708c58;
+  font: 11px var(--sans);
+  padding: 0;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+@media (max-width: 900px), (pointer: coarse) and (max-device-width: 900px) {
+  .auth-choice-secondary { height: 48px; font-size: 15px; }
+  .auth-back { font-size: 13px; padding: 6px 0; }
+}

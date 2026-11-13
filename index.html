@@ -98,11 +98,16 @@
       <!-- Kartu Form Masuk / Daftar -->
       <div class="auth-card">
         <div class="auth-card-head">
+          <button id="auth-back-choice" class="auth-back" type="button" hidden>‹ Kembali</button>
           <div class="eyebrow">AKUN PENGGUNA</div>
-          <h1 id="auth-title">Masuk ke Catat Duit</h1>
-          <p id="auth-description" class="auth-description">Gunakan akun Catat Duit Anda.</p>
+          <h1 id="auth-title">Selamat datang</h1>
+          <p id="auth-description" class="auth-description">Masuk atau daftar untuk mulai mencatat.</p>
         </div>
-        <form id="auth-form">
+        <div id="auth-choice" class="auth-choice">
+          <button id="auth-choose-signin" class="primary-button auth-submit" type="button">Masuk</button>
+          <button id="auth-choose-signup" class="auth-choice-secondary" type="button">Daftar</button>
+        </div>
+        <form id="auth-form" hidden>
           <label id="auth-email-label">Email<input id="auth-email" type="email" autocomplete="email" required placeholder="nama@email.com"></label>
           <label id="auth-password-label">Kata sandi
             <div class="password-field-wrap">
@@ -118,7 +123,7 @@
           </label>
           <button id="auth-submit" class="primary-button auth-submit" type="submit">Masuk</button>
         </form>
-        <div class="auth-links">
+        <div id="auth-links" class="auth-links" hidden>
           <button id="auth-mode-toggle" type="button">Belum punya akun? Daftar</button>
           <button id="auth-forgot" type="button">Lupa kata sandi?</button>
           <button id="auth-back-to-login" type="button" hidden>Kembali ke Masuk</button>

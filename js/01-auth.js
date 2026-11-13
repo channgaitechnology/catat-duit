@@ -35,12 +35,23 @@ function setAuthMessage(message = '', type = '') {
 function setAuthMode(mode) {
   resetPasswordVisibility();
   authMode = mode;
+  const choose = mode === 'choose';
   const signup = mode === 'signup', forgot = mode === 'forgot', reset = mode === 'reset';
+
+  // Mode "choose": hanya tombol Masuk & Daftar. Kolom email/sandi baru muncul setelah salah satu diklik.
+  const choiceBox = document.querySelector('#auth-choice');
+  if (choiceBox) choiceBox.hidden = !choose;
+  if (authForm) authForm.hidden = choose;
+  const linksBox = document.querySelector('#auth-links');
+  if (linksBox) linksBox.hidden = choose;
+  const backChoice = document.querySelector('#auth-back-choice');
+  if (backChoice) backChoice.hidden = choose || reset;
+
   const authTitle = document.querySelector('#auth-title');
-  if (authTitle) authTitle.textContent = signup ? 'Buat akun Catat Duit' : forgot ? 'Reset kata sandi' : reset ? 'Buat kata sandi baru' : 'Masuk ke Catat Duit';
+  if (authTitle) authTitle.textContent = choose ? 'Selamat datang' : signup ? 'Buat akun Catat Duit' : forgot ? 'Reset kata sandi' : reset ? 'Buat kata sandi baru' : 'Masuk ke Catat Duit';
 
   const authDesc = document.querySelector('#auth-description');
-  if (authDesc) authDesc.textContent = reset ? 'Masukkan kata sandi baru untuk akun Anda.' : 'Gunakan akun Catat Duit Anda.';
+  if (authDesc) authDesc.textContent = choose ? 'Masuk atau daftar untuk mulai mencatat.' : reset ? 'Masukkan kata sandi baru untuk akun Anda.' : 'Gunakan akun Catat Duit Anda.';
 
   const authSubmitBtn = document.querySelector('#auth-submit');
   if (authSubmitBtn) authSubmitBtn.textContent = signup ? 'Daftar' : forgot ? 'Kirim tautan reset' : reset ? 'Simpan kata sandi' : 'Masuk';
@@ -80,7 +91,7 @@ function showLogin() {
   activeUser = null;
   if (appShell) appShell.hidden = true;
   if (authView) authView.hidden = false;
-  setAuthMode('signin');
+  setAuthMode('choose');
 }
 
 function translateAuthError(e) {
@@ -141,6 +152,9 @@ if (authForm) authForm.addEventListener('submit', submitAuth);
 document.querySelector('#auth-mode-toggle')?.addEventListener('click', () => setAuthMode(authMode === 'signup' ? 'signin' : 'signup'));
 document.querySelector('#auth-forgot')?.addEventListener('click', () => setAuthMode('forgot'));
 document.querySelector('#auth-back-to-login')?.addEventListener('click', () => setAuthMode('signin'));
+document.querySelector('#auth-choose-signin')?.addEventListener('click', () => { setAuthMode('signin'); authEmail?.focus(); });
+document.querySelector('#auth-choose-signup')?.addEventListener('click', () => { setAuthMode('signup'); authEmail?.focus(); });
+document.querySelector('#auth-back-choice')?.addEventListener('click', () => setAuthMode('choose'));
 
 async function handleLogout() {
   cleanupRealtime();

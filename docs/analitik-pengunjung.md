@@ -1,29 +1,37 @@
-# Analitik Pengunjung
+# Analitik Pengunjung & Admin Platform
 
-Fitur ini meniru **Analitik Pengunjung Dokter Laundry**: setiap kali ada yang
-membuka Catat Duit, satu baris kunjungan anonim dicatat ke tabel
-`visitor_logs`. Ringkasannya (total kunjungan, pengunjung unik, kunjungan hari
-ini, tren harian, perangkat, halaman populer) dilihat di
-**`/analitik.html`** — halaman khusus admin.
+Meniru panel admin **Dokter Laundry**, tapi satu di dalam aplikasi: akun admin
+platform mendapat menu **Analitik** di sidebar (akun lain tidak melihat menu itu
+sama sekali). Isinya:
+
+- **Pengguna Terdaftar**: total terdaftar, aktif, tidak aktif, dan daftar baru
+  7 hari terakhir, lengkap dengan daftar akun (email, tanggal daftar, terakhir
+  aktif, status).
+- **Analitik Pengunjung**: total kunjungan, pengunjung unik, kunjungan hari ini,
+  tren harian, perangkat, dan halaman populer.
 
 ## Cara kerja
 
-- `js/10-visitor-tracker.js` berjalan otomatis saat aplikasi dibuka (termasuk
-  halaman login), tanpa menunggu pengguna masuk.
-- `visitor_id` acak & anonim disimpan di `localStorage` (`cd_visitor_id`),
-  tidak terhubung ke akun/email siapa pun.
-- Satu halaman hanya dicatat **1x per sesi tab** (`sessionStorage`), jadi
-  refresh berkali-kali tidak menggandakan hitungan.
-- Pencatatan non-blocking: kalau gagal (offline, tabel belum dibuat, kena
-  batas laju), aplikasi tetap jalan normal dan tidak menampilkan error.
-- Data yang dicatat: `visitor_id`, `page_path`, `referrer`, `user_agent`,
-  `device_type` (`mobile`/`desktop`), `created_at`. Tidak ada data keuangan.
+- **Pelacak** (`js/10-visitor-tracker.js`) berjalan otomatis saat aplikasi
+  dibuka (termasuk halaman login). `visitor_id` acak & anonim di `localStorage`
+  (`cd_visitor_id`), tidak terhubung ke akun. Satu halaman dicatat 1x per sesi
+  tab. Kegagalan apa pun diabaikan diam-diam. Data: `visitor_id`, `page_path`,
+  `referrer`, `user_agent`, `device_type`, `created_at`.
+- **Menu Analitik** (`js/11-admin-analytics.js`) muncul hanya jika fungsi server
+  `is_platform_admin()` mengembalikan `true`. Daftar admin ada di database,
+  bukan di kode browser.
+- **Pengguna aktif** = masuk (`last_sign_in_at`) **atau** mencatat sesuatu
+  (`finance_records` terbaru) dalam 30 hari terakhir. Nama akun = email.
+- Admin hanya melihat metadata akun (email, tanggal daftar, terakhir aktif).
+  **Isi catatan keuangan pengguna tidak ikut terbaca.**
 
 ## Langkah pasang (sekali saja)
 
 Buka **Supabase → proyek Catat Duit → SQL Editor**, ganti
-`EMAIL_ADMIN_ANDA@contoh.com` dengan email akun admin Anda (huruf kecil
-semua), lalu jalankan:
+`EMAIL_ADMIN_ANDA@contoh.com` dengan email admin (huruf kecil semua), lalu
+jalankan **bagian 1** dan **bagian 2**.
+
+### Bagian 1 — Tabel kunjungan
 
 ```sql
 create table if not exists visitor_logs (
@@ -41,7 +49,6 @@ create index if not exists visitor_logs_created_at_idx
 
 alter table visitor_logs enable row level security;
 
--- Siapa saja (termasuk pengunjung anonim) boleh MENCATAT kunjungan
 drop policy if exists "Siapa saja bisa catat kunjungan" on visitor_logs;
 create policy "Siapa saja bisa catat kunjungan"
 on visitor_logs
@@ -49,7 +56,6 @@ for insert
 to anon, authenticated
 with check (true);
 
--- Hanya admin yang boleh MEMBACA data analitik
 drop policy if exists "Hanya admin yang bisa baca analitik pengunjung" on visitor_logs;
 create policy "Hanya admin yang bisa baca analitik pengunjung"
 on visitor_logs
@@ -57,7 +63,6 @@ for select
 to authenticated
 using (lower(auth.jwt() ->> 'email') = 'EMAIL_ADMIN_ANDA@contoh.com');
 
--- Pembatas laju global: maksimal 300 kunjungan tercatat per 10 menit
 create or replace function visitor_logs_rate_limit()
 returns trigger
 language plpgsql
@@ -90,28 +95,76 @@ create trigger visitor_logs_rate_limit_trigger
   execute function visitor_logs_rate_limit();
 ```
 
-Setelah itu buka `https://<alamat-situs>/analitik.html` dalam keadaan **sudah
-masuk dengan akun admin** (sesi login dibagi dengan aplikasi karena satu
-alamat situs). Akun lain yang membuka halaman itu hanya melihat data kosong,
-karena kebijakan baca di atas.
+### Bagian 2 — Admin platform & daftar pengguna
+
+```sql
+create or replace function is_platform_admin()
+returns boolean
+language sql
+stable
+as $$
+  select lower(coalesce(auth.jwt() ->> 'email', '')) = 'EMAIL_ADMIN_ANDA@contoh.com'
+$$;
+
+create index if not exists finance_records_user_id_created_at_idx
+  on finance_records (user_id, created_at desc);
+
+create or replace function admin_user_overview()
+returns table (
+  user_id uuid,
+  email text,
+  created_at timestamptz,
+  last_sign_in_at timestamptz,
+  last_record_at timestamptz,
+  email_confirmed boolean
+)
+language sql
+stable
+security definer
+set search_path = public, auth
+as $$
+  select u.id,
+         u.email::text,
+         u.created_at,
+         u.last_sign_in_at,
+         (select max(r.created_at) from public.finance_records r where r.user_id = u.id),
+         (u.email_confirmed_at is not null)
+  from auth.users u
+  where public.is_platform_admin()
+  order by u.created_at desc
+  limit 5000
+$$;
+
+revoke all on function is_platform_admin() from public, anon;
+grant execute on function is_platform_admin() to authenticated;
+revoke all on function admin_user_overview() from public, anon;
+grant execute on function admin_user_overview() to authenticated;
+```
+
+Setelah itu masuk dengan akun admin: menu **Analitik** muncul di sidebar. Akun
+lain tidak melihatnya, dan kalau memanggil fungsinya langsung hasilnya kosong.
 
 ## Cek keamanan (4 poin)
 
-1. **Butuh login?** Insert sengaja terbuka untuk anonim (pengunjung belum
-   masuk). Efeknya murah: satu baris kecil, tanpa email/push/pihak ketiga.
-   Baca data hanya untuk admin lewat RLS.
-2. **Query dibatasi?** Dashboard mengambil data bertahap 1.000 baris per
-   permintaan dan berhenti di 20.000 baris; kalau terpotong, ada peringatan.
-3. **Ukuran input?** Dibatasi di sisi database (`check` panjang kolom) dan
-   dipotong di sisi browser. `device_type` hanya boleh `mobile`/`desktop`.
-4. **Dipanggil ribuan kali dari 1 sumber?** Pembatas laju global 300 baris per
-   10 menit menjaga ukuran tabel dan beban database. Akibat wajarnya hanya
-   sebagian kunjungan tidak tercatat saat banjir permintaan, tidak ada
-   kuota pihak ketiga yang jebol. Angka dapat diubah dengan
-   `create or replace function` ulang.
+1. **Butuh login?** Insert kunjungan sengaja terbuka untuk anonim dan murah
+   (satu baris kecil, tanpa email/push/pihak ketiga). Membaca kunjungan dan
+   daftar akun hanya untuk admin: RLS untuk `visitor_logs`, dan pemeriksaan
+   `is_platform_admin()` di dalam `admin_user_overview()` (fungsi itu
+   `security definer` karena membaca `auth.users`, jadi pemeriksaan di dalam
+   fungsi adalah pagarnya; `anon` dicabut hak eksekusinya).
+2. **Query dibatasi?** Kunjungan diambil bertahap 1.000 baris per permintaan,
+   berhenti di 20.000 (ada peringatan jika terpotong). Daftar akun dibatasi
+   5.000 baris.
+3. **Ukuran input?** Dibatasi di database (`check` panjang kolom,
+   `device_type` hanya `mobile`/`desktop`) dan dipotong di browser. Nilai dari
+   pengunjung selalu di-escape saat ditampilkan.
+4. **Dipanggil ribuan kali dari 1 sumber?** Pembatas laju global 300 kunjungan
+   per 10 menit menjaga ukuran tabel. Akibatnya hanya sebagian kunjungan tidak
+   tercatat saat banjir permintaan; tidak ada kuota pihak ketiga yang jebol.
 
 ## Catatan
 
-- Kunjungan Anda sendiri ikut terhitung (sama seperti di Dokter Laundry).
+- Kunjungan admin sendiri ikut terhitung (sama seperti Dokter Laundry).
 - "Hari ini" dihitung dengan tanggal lokal browser, bukan UTC.
-- Halaman `analitik.html` ditandai `noindex` dan tidak tampil di menu aplikasi.
+- Mengganti admin: jalankan ulang bagian 1 (kebijakan baca) dan bagian 2
+  (`is_platform_admin`) dengan email baru.

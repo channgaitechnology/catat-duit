@@ -25,7 +25,7 @@ Pengaturan Site URL dan Redirect URLs untuk Supabase Auth dirinci di [docs/setup
 
 Untuk notifikasi admin via Resend, fungsi server-side telah disiapkan di `netlify/functions/notify-admin.js` dengan panduan penyiapan di [docs/setup-resend.md](docs/setup-resend.md).
 
-Analitik pengunjung (jumlah kunjungan, pengunjung unik, perangkat, tren harian) mengikuti pola Dokter Laundry; dashboard admin di `/analitik.html`, penyiapan tabel dan aturan akses di [docs/analitik-pengunjung.md](docs/analitik-pengunjung.md).
+Menu **Analitik** (khusus admin platform, pola Dokter Laundry): jumlah pengguna terdaftar/aktif beserta daftar akun, dan analitik pengunjung. Penyiapan SQL dan aturan akses di [docs/analitik-pengunjung.md](docs/analitik-pengunjung.md).
 
 Dokter Laundry memakai Resend `onboarding@resend.dev` hanya untuk notifikasi admin terbatas dan Gmail SMTP untuk email Auth. Jangan menganggap mode Resend tanpa domain dapat mengirim email ke semua pengguna. Lihat [PROGRESS.md](PROGRESS.md) untuk temuan dan langkah lanjutan.
 

@@ -104,7 +104,8 @@ function render() {
 
   renderSpendingBarChart(expense);
   renderRows();
-  if (workspace && !workspace.hidden) renderWorkspace(workspace.dataset.view || 'transactions');
+  // Tampilan Analitik punya render sendiri; jangan ditimpa setiap data berubah (mis. realtime)
+  if (workspace && !workspace.hidden && workspace.dataset.view !== 'analytics') renderWorkspace(workspace.dataset.view || 'transactions');
 }
 
 function renderSpendingBarChart(totalExpense) {

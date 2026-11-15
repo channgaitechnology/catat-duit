@@ -16,7 +16,14 @@ document.querySelectorAll('[data-view]').forEach(button => button.addEventListen
     document.querySelector('.runway-card')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
+  if (view === 'analytics') {
+    if (typeof renderAnalyticsView === 'function') renderAnalyticsView();
+    workspace?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
   if (view === 'transactions') {
+    // Kalau panel Analitik sedang terbuka, tutup supaya tidak tertinggal di bawah daftar transaksi
+    if (workspace && workspace.dataset.view === 'analytics') { workspace.hidden = true; workspace.dataset.view = ''; }
     document.querySelector('.transactions-panel')?.scrollIntoView({ behavior: 'smooth' });
   } else {
     renderWorkspace(view);

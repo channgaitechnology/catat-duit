@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catatduit-v9';
+const CACHE_NAME = 'catatduit-v10';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -13,6 +13,7 @@ const STATIC_ASSETS = [
   '/js/07-assets-debts.js',
   '/js/08-reports.js',
   '/js/09-app.js',
+  '/js/10-visitor-tracker.js',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',

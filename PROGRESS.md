@@ -18,7 +18,7 @@ Catatan ini merangkum keadaan repo, deploy, dan integrasi per 2 November 2026 ag
 
 - **Alamat Auth Supabase:** Konfigurasi Site URL dan Redirect URLs telah didokumentasikan dan disiapkan sesuai URL produksi (`https://catat-duit-keuangan.netlify.app/`). Lihat panduan di [docs/setup-supabase-url.md](docs/setup-supabase-url.md).
 - **Email Auth:** Custom SMTP belum disetel. Email pendaftaran/konfirmasi/reset belum siap untuk pengguna umum.
-- **Resend:** Backend Netlify Function (`netlify/functions/notify-admin.js`) dan panduan integrasi [docs/setup-resend.md](docs/setup-resend.md) telah disiapkan. Tinggal memasukkan `RESEND_API_KEY` dan `ADMIN_NOTIFY_EMAIL` pada environment variables Netlify.
+- **Resend:** Backend Netlify Function (`netlify/functions/notify-admin.js`) dan panduan integrasi [docs/setup-resend.md](docs/setup-resend.md) telah disiapkan. Tinggal memasukkan `RESEND_API_KEY`, `ADMIN_NOTIFY_EMAIL`, dan `NOTIFY_WEBHOOK_SECRET` (wajib) pada environment variables Netlify.
 - **Domain:** Tidak ada domain milik sendiri. Nama subdomain Netlify `catatduit`, `catatbelanja`, dan `catatkeuangan` dicoba tetapi dinyatakan tidak tersedia. URL aktif tetap `catat-duit-keuangan.netlify.app`.
 - **PWA (Progressive Web App):** Telah diaktifkan dengan `manifest.json`, icon 192/512px, dan `sw.js` agar aplikasi dapat di-install langsung di HP Android maupun iOS.
 - **Fitur SaaS tambahan:** Belum ada paket/langganan dan pembayaran.

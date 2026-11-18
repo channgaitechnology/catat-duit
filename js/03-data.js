@@ -166,8 +166,8 @@ if (db && db.auth) {
       setAuthMessage('Masukkan kata sandi baru untuk akun Anda.');
       return;
     }
+    // Cache hanya dihapus pada logout eksplisit (handleLogout); sesi kedaluwarsa tetap menyimpan antrean offline
     if (event === 'SIGNED_OUT') {
-      clearCachedUserData();
       showLogin();
       return;
     }

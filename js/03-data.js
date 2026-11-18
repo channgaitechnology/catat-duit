@@ -3,14 +3,17 @@
 
 function addToOfflineQueue(action) {
   const queue = getCachedData(STORAGE_KEY_QUEUE, []);
-  queue.push({ ...action, timestamp: Date.now() });
+  queue.push({ ...action, owner: activeUser?.id, timestamp: Date.now() });
   setCachedData(STORAGE_KEY_QUEUE, queue);
 }
 
 let isSyncing = false;
 async function syncOfflineQueue() {
   if (!navigator.onLine || !db || !activeUser || isSyncing) return;
-  const queue = getCachedData(STORAGE_KEY_QUEUE, []);
+  const storedQueue = getCachedData(STORAGE_KEY_QUEUE, []);
+  // Hanya putar ulang operasi milik akun yang sedang masuk; buang sisanya
+  const queue = storedQueue.filter(action => (action.owner ?? action.data?.user_id) === activeUser.id);
+  if (queue.length !== storedQueue.length) setCachedData(STORAGE_KEY_QUEUE, queue);
   if (!queue.length) return;
 
   isSyncing = true;
@@ -161,6 +164,11 @@ if (db && db.auth) {
       if (authView) authView.hidden = false;
       setAuthMode('reset');
       setAuthMessage('Masukkan kata sandi baru untuk akun Anda.');
+      return;
+    }
+    // Cache hanya dihapus pada logout eksplisit (handleLogout); sesi kedaluwarsa tetap menyimpan antrean offline
+    if (event === 'SIGNED_OUT') {
+      showLogin();
       return;
     }
     if (session) showApp(session.user);

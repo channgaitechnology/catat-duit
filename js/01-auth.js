@@ -159,8 +159,14 @@ document.querySelector('#auth-back-choice')?.addEventListener('click', () => set
 
 async function handleLogout() {
   cleanupRealtime();
+  clearCachedUserData();
   const { error } = await db.auth.signOut();
-  if (error) setAuthMessage(translateAuthError(error), 'error');
+  if (error) {
+    // Tetap hapus sesi lokal walau server tidak terjangkau (mis. offline)
+    await db.auth.signOut({ scope: 'local' });
+    showLogin();
+    setAuthMessage(translateAuthError(error), 'error');
+  }
 }
 
 document.querySelector('#auth-logout')?.addEventListener('click', handleLogout);

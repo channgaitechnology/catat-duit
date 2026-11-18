@@ -38,6 +38,25 @@ function getCachedData(key, fallback = []) {
   }
 }
 
+const CACHE_KEY_PREFIX = 'catatduit_';
+
+// Hapus semua data keuangan tersimpan di perangkat (dipakai saat keluar akun)
+function clearCachedUserData() {
+  try {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(CACHE_KEY_PREFIX)) keys.push(key);
+    }
+    keys.forEach(key => localStorage.removeItem(key));
+  } catch (e) {
+    console.warn('LocalStorage error:', e);
+  }
+  records = [];
+  assets = [];
+  customCategories = [];
+}
+
 function setCachedData(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));

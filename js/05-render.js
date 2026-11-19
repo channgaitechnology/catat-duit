@@ -106,7 +106,16 @@ function render() {
   renderRows();
   // Tampilan Analitik punya render sendiri; jangan ditimpa setiap data berubah (mis. realtime)
   if (workspace && !workspace.hidden && workspace.dataset.view !== 'analytics') renderWorkspace(workspace.dataset.view || 'transactions');
+
+  // Jika modal rincian kategori sedang terbuka saat data berubah, perbarui isinya secara otomatis
+  const catDetailDialog = document.querySelector('#category-detail-dialog');
+  if (catDetailDialog && catDetailDialog.open && currentDetailCategory) {
+    openCategoryDetail(currentDetailCategory, currentDetailPeriod);
+  }
 }
+
+let currentDetailCategory = null;
+let currentDetailPeriod = 'month';
 
 function renderSpendingBarChart(totalExpense) {
   const chartHost = document.querySelector('#horizontal-bar-chart');
@@ -128,19 +137,204 @@ function renderSpendingBarChart(totalExpense) {
     const percentage = ((amount / totalExpense) * 100).toFixed(1);
     const color = barColors[index % barColors.length];
     return `
-      <div class="h-bar-item">
+      <div class="h-bar-item" data-category="${escapeHtml(catName)}" data-color="${color}" role="button" tabindex="0" title="Klik untuk melihat seluruh rincian transaksi ${escapeHtml(catName)}">
         <div class="h-bar-top">
-          <span style="font-weight: 500; color: #27382f;">${escapeHtml(catName)}</span>
+          <span class="h-bar-title-wrap">
+            <i class="h-bar-color-dot" style="background: ${color};"></i>
+            <span style="font-weight: 500; color: #27382f;">${escapeHtml(catName)}</span>
+          </span>
           <b style="font-family: var(--mono); color: #27382f;">${rupiah(amount)}</b>
         </div>
         <div class="h-bar-track">
           <div class="h-bar-fill" style="width: ${percentage}%; background: ${color};"></div>
         </div>
         <div class="h-bar-bottom">
-          <span class="h-bar-label">${escapeHtml(catName)}</span>
+          <span class="h-bar-label">${escapeHtml(catName)} <span class="h-bar-view-hint">· Lihat rincian ↗</span></span>
           <span class="h-bar-percentage">${percentage}% dari total pengeluaran</span>
         </div>
       </div>
     `;
   }).join('');
+
+  // Event listener klik & keyboard pada tiap bar kategori untuk membuka rincian
+  chartHost.querySelectorAll('.h-bar-item').forEach(item => {
+    const catName = item.dataset.category;
+    item.addEventListener('click', () => openCategoryDetail(catName, 'month'));
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openCategoryDetail(catName, 'month');
+      }
+    });
+  });
 }
+
+function openCategoryDetail(catName, period = 'month') {
+  currentDetailCategory = catName;
+  currentDetailPeriod = period;
+
+  const dialog = document.querySelector('#category-detail-dialog');
+  if (!dialog) return;
+
+  const currentKey = monthKey(today());
+  let filtered = [];
+  if (period === 'month') {
+    filtered = records.filter(r => r.kind === 'expense' && r.category === catName && monthKey(r.record_date) === currentKey);
+  } else {
+    filtered = records.filter(r => r.kind === 'expense' && r.category === catName);
+  }
+
+  // Urutkan transaksi terbaru lebih dahulu (tanggal dan created_at)
+  filtered.sort((a, b) => b.record_date.localeCompare(a.record_date) || (new Date(b.created_at || 0) - new Date(a.created_at || 0)));
+
+  const totalCat = filtered.reduce((s, r) => s + Number(r.amount), 0);
+
+  // Total pengeluaran pada periode yang dipilih untuk persentase
+  let periodTotalExpense = 0;
+  if (period === 'month') {
+    periodTotalExpense = records.filter(r => r.kind === 'expense' && monthKey(r.record_date) === currentKey).reduce((s, r) => s + Number(r.amount), 0);
+  } else {
+    periodTotalExpense = records.filter(r => r.kind === 'expense').reduce((s, r) => s + Number(r.amount), 0);
+  }
+  const pct = periodTotalExpense > 0 ? ((totalCat / periodTotalExpense) * 100).toFixed(1) : '0.0';
+
+  // Dapatkan warna bar yang sesuai untuk kategori ini
+  const barEl = document.querySelector(`.h-bar-item[data-category="${CSS.escape(catName)}"]`);
+  const catColor = (barEl && barEl.dataset.color) ? barEl.dataset.color : '#5a8c43';
+
+  // Isi teks header modal
+  const titleEl = document.querySelector('#cat-detail-title');
+  if (titleEl) titleEl.textContent = catName;
+
+  const colorPill = document.querySelector('#cat-detail-color-pill');
+  if (colorPill) colorPill.style.background = catColor;
+
+  const totalEl = document.querySelector('#cat-detail-total');
+  if (totalEl) totalEl.textContent = rupiah(totalCat);
+
+  const metaEl = document.querySelector('#cat-detail-meta');
+  if (metaEl) {
+    metaEl.textContent = `${filtered.length} transaksi · ${pct}% dari total pengeluaran ${period === 'month' ? 'bulan ini' : 'sepanjang waktu'}`;
+  }
+
+  // Update status tab aktif
+  const monthTab = document.querySelector('#tab-cat-month');
+  const allTab = document.querySelector('#tab-cat-all');
+  if (monthTab) monthTab.classList.toggle('active', period === 'month');
+  if (allTab) allTab.classList.toggle('active', period === 'all');
+
+  // Render daftar item transaksi kategori
+  const listEl = document.querySelector('#cat-detail-tx-list');
+  if (listEl) {
+    if (!filtered.length) {
+      listEl.innerHTML = `<div class="empty-state" style="padding:32px 16px;">Belum ada catatan transaksi untuk kategori <b>${escapeHtml(catName)}</b> ${period === 'month' ? 'di bulan ini' : 'sepanjang waktu'}.</div>`;
+    } else {
+      listEl.innerHTML = filtered.map(tx => {
+        let dateFormatted = tx.record_date;
+        try {
+          dateFormatted = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(tx.record_date + 'T00:00:00'));
+        } catch (e) {}
+        return `
+          <div class="cat-tx-row">
+            <div class="cat-tx-info">
+              <span class="cat-tx-icon">↗</span>
+              <div>
+                <strong class="cat-tx-title">${escapeHtml(tx.title)}</strong>
+                <span class="cat-tx-date">${escapeHtml(dateFormatted)}</span>
+              </div>
+            </div>
+            <div class="cat-tx-meta-right">
+              <strong class="cat-tx-amount">− ${rupiah(tx.amount)}</strong>
+              <div class="cat-tx-actions">
+                <button type="button" class="text-button" data-edit-detail-tx="${tx.id}">Edit</button>
+                <button type="button" class="text-button danger" data-delete-detail-tx="${tx.id}">Hapus</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Hubungkan tombol edit
+      listEl.querySelectorAll('[data-edit-detail-tx]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          dialog.close();
+          if (typeof openEditTransaction === 'function') {
+            openEditTransaction(btn.dataset.editDetailTx);
+          }
+        });
+      });
+
+      // Hubungkan tombol hapus
+      listEl.querySelectorAll('[data-delete-detail-tx]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const txId = btn.dataset.deleteDetailTx;
+          if (typeof deleteRecord === 'function') {
+            await deleteRecord(txId);
+            if (currentDetailCategory && dialog.open) {
+              openCategoryDetail(currentDetailCategory, currentDetailPeriod);
+            }
+          }
+        });
+      });
+    }
+  }
+
+  // Hubungkan event klik Tab
+  if (monthTab && !monthTab._boundCat) {
+    monthTab._boundCat = true;
+    monthTab.addEventListener('click', () => {
+      if (currentDetailCategory) openCategoryDetail(currentDetailCategory, 'month');
+    });
+  }
+  if (allTab && !allTab._boundCat) {
+    allTab._boundCat = true;
+    allTab.addEventListener('click', () => {
+      if (currentDetailCategory) openCategoryDetail(currentDetailCategory, 'all');
+    });
+  }
+
+  // Hubungkan tombol tambah transaksi baru di kategori ini
+  const addTxBtn = document.querySelector('#cat-detail-add-tx');
+  if (addTxBtn && !addTxBtn._boundCat) {
+    addTxBtn._boundCat = true;
+    addTxBtn.addEventListener('click', () => {
+      dialog.close();
+      if (typeof openAddTransactionDialog === 'function') {
+        openAddTransactionDialog();
+        const catSelect = document.querySelector('#transaction-category-select');
+        if (catSelect && currentDetailCategory) {
+          catSelect.value = currentDetailCategory;
+        }
+      }
+    });
+  }
+
+  // Hubungkan tombol filter di tabel utama
+  const filterTableBtn = document.querySelector('#cat-detail-filter-table');
+  if (filterTableBtn && !filterTableBtn._boundCat) {
+    filterTableBtn._boundCat = true;
+    filterTableBtn.addEventListener('click', () => {
+      dialog.close();
+      const searchInput = document.querySelector('#tx-search-input');
+      if (searchInput && currentDetailCategory) {
+        searchInput.value = currentDetailCategory;
+        txSearchQuery = currentDetailCategory;
+        if (typeof renderRows === 'function') renderRows();
+        document.querySelector('.transactions-panel')?.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
+  // Hubungkan tombol tutup dialog
+  dialog.querySelectorAll('.close-cat-dialog, .close-button').forEach(btn => {
+    if (!btn._boundCatClose) {
+      btn._boundCatClose = true;
+      btn.addEventListener('click', () => dialog.close());
+    }
+  });
+
+  if (!dialog.open) {
+    dialog.showModal();
+  }
+}
+

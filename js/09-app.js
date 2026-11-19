@@ -108,7 +108,8 @@ window.catatduit = {
   updateCustomCategory,
   deleteCustomCategory,
   getCustomCategories: () => customCategories,
-  syncOfflineQueue
+  syncOfflineQueue,
+  openCategoryDetail
 };
 
 // Inisialisasi awal: jika offline dan ada user di cache, langsung buka app

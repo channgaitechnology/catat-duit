@@ -266,6 +266,48 @@
     </div>
   </dialog>
 
+  <!-- Modal Rincian Transaksi per Kategori -->
+  <dialog id="category-detail-dialog">
+    <div style="padding:24px;">
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow" id="cat-detail-eyebrow">RINCIAN PENGELUARAN</span>
+          <h2 id="cat-detail-title">Kategori</h2>
+        </div>
+        <button type="button" class="close-button" aria-label="Tutup">×</button>
+      </div>
+
+      <div class="cat-detail-header-card">
+        <div class="cat-detail-header-info">
+          <span class="cat-detail-color-pill" id="cat-detail-color-pill"></span>
+          <div>
+            <div class="cat-detail-total" id="cat-detail-total">Rp 0</div>
+            <div class="cat-detail-meta" id="cat-detail-meta">0 transaksi · 0% dari total pengeluaran</div>
+          </div>
+        </div>
+        <button type="button" class="secondary-button" id="cat-detail-add-tx">
+          ＋ Catat di Kategori Ini
+        </button>
+      </div>
+
+      <div class="cat-detail-period-tabs">
+        <button type="button" class="cat-period-tab active" data-period="month" id="tab-cat-month">Bulan Ini</button>
+        <button type="button" class="cat-period-tab" data-period="all" id="tab-cat-all">Semua Waktu</button>
+      </div>
+
+      <div class="cat-detail-tx-container" id="cat-detail-tx-list"></div>
+
+      <div class="cat-detail-footer">
+        <button type="button" class="text-button" id="cat-detail-filter-table">
+          🔍 Filter di Tabel Transaksi Utama
+        </button>
+        <button type="button" class="primary-button close-cat-dialog" style="padding:8px 18px;">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="asset-dialog"><form id="asset-form" method="dialog"><div class="dialog-heading"><div><span class="eyebrow">MANAJEMEN ASET</span><h2>Catat aset</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div>
     <div class="form-row">
       <label>Kelompok aset

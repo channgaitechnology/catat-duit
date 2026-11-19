@@ -249,6 +249,39 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.h-bar-item:hover {
+  background: #f4f7f2;
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.h-bar-item:focus-visible {
+  outline: 2px solid #88af64;
+  outline-offset: 1px;
+}
+.h-bar-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.h-bar-color-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.h-bar-view-hint {
+  font-size: 10px;
+  color: #718a59;
+  font-weight: 500;
+  margin-left: 4px;
+  opacity: 0.85;
 }
 .h-bar-top {
   display: flex;
@@ -595,7 +628,7 @@
 .app-toast.warning { border-left: 4px solid #f0b5a8; }
 .app-toast.info { border-left: 4px solid #7da7d8; }
 
-/* ========================================================
+/* =================================================
    AUTH — MOBILE / TOUCH LAYOUT
    Aktif di layar sempit ATAU perangkat sentuh dengan layar kecil
    (termasuk saat Chrome HP memakai "Situs desktop" / viewport 980px).
@@ -727,4 +760,159 @@ html.desktop-site-mode .auth-screen {
 .an-note[hidden] { display: none; }
 @media (max-width: 640px) {
   .an-stats { grid-template-columns: repeat(2, 1fr); }
+=======
+
+/* ========================================================
+   CATEGORY TRANSACTION DETAIL DIALOG
+   ======================================================== */
+#category-detail-dialog {
+  max-width: 580px;
+  width: calc(100% - 32px);
+}
+.cat-detail-header-card {
+  background: #f6f9f4;
+  border: 1px solid #e3eae0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 16px;
+}
+.cat-detail-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cat-detail-color-pill {
+  width: 6px;
+  height: 38px;
+  border-radius: 4px;
+  background: #75a339;
+  flex-shrink: 0;
+}
+.cat-detail-total {
+  font: 700 22px var(--display);
+  letter-spacing: -0.5px;
+  color: #1d3328;
+}
+.cat-detail-meta {
+  font: 500 11px var(--mono);
+  color: #637769;
+  margin-top: 2px;
+}
+.cat-detail-period-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.cat-period-tab {
+  background: #fff;
+  border: 1px solid #dce4d9;
+  color: #55665a;
+  font: 600 11px var(--sans);
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-period-tab:hover {
+  background: #f2f6ee;
+}
+.cat-period-tab.active {
+  background: #223829;
+  color: #fff;
+  border-color: #223829;
+}
+.cat-detail-tx-container {
+  max-height: 380px;
+  overflow-y: auto;
+  border: 1px solid #ebede9;
+  border-radius: 9px;
+  background: #fff;
+}
+.cat-tx-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 14px;
+  border-bottom: 1px solid #f1f3f0;
+  transition: background 0.15s;
+}
+.cat-tx-row:last-child {
+  border-bottom: 0;
+}
+.cat-tx-row:hover {
+  background: #fafbf9;
+}
+.cat-tx-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+.cat-tx-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: #fff0ec;
+  color: #df816d;
+  font-size: 13px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.cat-tx-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #223429;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+.cat-tx-date {
+  display: block;
+  font: 10px var(--mono);
+  color: #8b998f;
+  margin-top: 1px;
+}
+.cat-tx-meta-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.cat-tx-amount {
+  font: 600 13px var(--mono);
+  color: #23362a;
+}
+.cat-tx-actions {
+  display: flex;
+  gap: 6px;
+}
+.cat-tx-actions .text-button {
+  font-size: 10px;
+  padding: 2px 4px;
+}
+.cat-detail-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #ebede9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+@media (max-width: 600px) {
+  .cat-detail-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .cat-tx-title {
+    max-width: 150px;
+  }
 }

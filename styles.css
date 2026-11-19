@@ -112,10 +112,38 @@
   box-shadow: 0 0 0 3px #a5c38326;
 }
 
-.tx-heading-controls {
+.tx-panel-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
+  margin-bottom: 12px;
+}
+.tx-search-wrap {
+  flex: 1;
+  min-width: 200px;
+}
+.tx-search-wrap .tx-search {
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .tx-panel-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tx-heading-controls {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+  .tx-heading-controls button {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
 }
 .tx-search {
   padding: 6px 12px;
@@ -914,5 +942,313 @@ html.desktop-site-mode .auth-screen {
   }
   .cat-tx-title {
     max-width: 150px;
+  }
+}
+
+/* ========================================================
+   BOTTOM TABBAR & VIEW-PER-TAB ARCHITECTURE (DOKTER LAUNDRY PATTERN)
+   ======================================================== */
+
+body {
+  padding-bottom: 84px !important;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* App Bar */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: linear-gradient(135deg, #18231e 0%, #22382c 100%);
+  color: #ffffff;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(24, 35, 30, 0.12);
+  border-radius: 0 0 18px 18px;
+  max-width: min(94vw, 1200px);
+  margin: 0 auto;
+  width: 100%;
+}
+.appbar .brand {
+  margin: 0;
+  color: #ffffff;
+  font-size: 19px;
+  letter-spacing: -0.8px;
+}
+.appbar .brand-mark {
+  color: #c4ef6d;
+}
+.appbar .brand-dot {
+  color: #c4ef6d;
+}
+.appbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.appbar-crumb {
+  background: rgba(255, 255, 255, 0.14);
+  color: #d1f28d;
+  font: 600 11px var(--mono);
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  display: inline-block;
+}
+.appbar-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.10);
+  padding: 4px 10px 4px 4px;
+  border-radius: 30px;
+}
+.appbar-user-email {
+  font: 500 11px var(--mono);
+  color: #e2ece5;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar-logout {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s;
+}
+.topbar-logout:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Main Content & Views */
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: min(94vw, 1200px);
+  margin: 0 auto;
+  padding: 16px 14px 28px;
+}
+
+.view {
+  display: none;
+  animation: fadeView 0.18s ease forwards;
+}
+.view.active {
+  display: block;
+}
+@keyframes fadeView {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Bottom Tabbar (Dokter Laundry Pattern) */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: #ffffff;
+  border-top: 1px solid #e2e6df;
+  display: flex;
+  padding: 6px 10px calc(8px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 20px rgba(24, 35, 30, 0.08);
+}
+@media (min-width: 640px) {
+  .tabbar {
+    max-width: min(94vw, 1200px);
+    margin: 0 auto;
+    border-radius: 18px 18px 0 0;
+    border-left: 1px solid #e2e6df;
+    border-right: 1px solid #e2e6df;
+  }
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  border-radius: 12px;
+  color: #7b8a80;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab svg {
+  width: 21px;
+  height: 21px;
+}
+.tab span {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--sans);
+  line-height: 1.2;
+}
+.tab-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.tab.active {
+  color: #1d3328;
+}
+.tab.active .tab-icon-wrap {
+  background: #eaf1e2;
+  border-color: #8ab445;
+}
+.tab.active span {
+  color: #1d3328;
+  font-weight: 700;
+}
+.tab:active .tab-icon-wrap {
+  transform: scale(0.92);
+}
+
+/* Quick Action Cards in Overview */
+.overview-quick-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+.quick-link-card {
+  background: #ffffff;
+  border: 1px solid #e5e8e2;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.quick-link-card:hover {
+  background: #f7faf4;
+  border-color: #c4dcaf;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 35, 30, 0.05);
+}
+.quick-link-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #eef4e8;
+  color: #4c6c31;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.quick-link-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #223429;
+}
+.quick-link-text small {
+  display: block;
+  font-size: 11px;
+  color: #79877d;
+  margin-top: 2px;
+}
+
+/* Filter Bars & Pills */
+.tx-filter-bar,
+.debts-filter-bar {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 0 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.tx-filter-pill,
+.debts-filter-pill {
+  background: #ffffff;
+  border: 1px solid #dce2d9;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font: 600 11px var(--sans);
+  color: #55665a;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.tx-filter-pill:hover,
+.debts-filter-pill:hover {
+  background: #f4f7f2;
+}
+.tx-filter-pill.active,
+.debts-filter-pill.active {
+  background: #1d3328;
+  color: #ffffff;
+  border-color: #1d3328;
+}
+
+/* Debts & Assets Stat Grids */
+.debts-stat-grid,
+.assets-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 15px;
+}
+
+/* Badges for Debts */
+.debt-badge-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--mono);
+}
+.debt-badge-status.settled {
+  background: #eaf1e2;
+  color: #3b6329;
+}
+.debt-badge-status.unsettled {
+  background: #fff0ec;
+  color: #c95138;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .appbar {
+    padding: 10px 14px;
+    border-radius: 0 0 14px 14px;
+  }
+  .appbar-user-email {
+    display: none;
+  }
+  .debts-stat-grid,
+  .assets-stat-grid,
+  .overview-quick-links {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .main-content {
+    padding: 12px 10px 24px;
   }
 }

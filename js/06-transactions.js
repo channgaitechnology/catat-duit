@@ -1,5 +1,7 @@
 // js/06-transactions.js
-// Manajemen daftar transaksi, accordion per tanggal, pencarian, input modal, edit, dan navigasi keyboard
+// Manajemen daftar transaksi, accordion per tanggal, pencarian, filter, input modal, edit, dan navigasi keyboard
+
+let txKindFilter = 'all';
 
 function toggleDateCollapse(dateKey) {
   if (collapsedDates.has(dateKey)) {
@@ -12,10 +14,22 @@ function toggleDateCollapse(dateKey) {
 
 function renderRows() {
   let rows = records.filter(r => ['income', 'expense'].includes(r.kind));
+
+  if (txKindFilter === 'income') {
+    rows = rows.filter(r => r.kind === 'income');
+  } else if (txKindFilter === 'expense') {
+    rows = rows.filter(r => r.kind === 'expense');
+  }
+
   if (txSearchQuery) {
     const q = txSearchQuery.toLowerCase().trim();
     rows = rows.filter(r => (r.title && r.title.toLowerCase().includes(q)) || (r.category && r.category.toLowerCase().includes(q)) || (r.record_date && r.record_date.includes(q)));
   }
+
+  document.querySelectorAll('.tx-filter-pill').forEach(pill => {
+    pill.classList.toggle('active', (pill.dataset.txFilter || 'all') === txKindFilter);
+  });
+
   const host = document.querySelector('#transaction-rows');
   if (!host) return;
 
@@ -329,3 +343,18 @@ if (searchInput) {
     renderRows();
   });
 }
+
+document.querySelector('#add-transaction-tx-view')?.addEventListener('click', () => {
+  openAddTransactionDialog();
+});
+
+document.querySelector('#open-manage-categories-btn')?.addEventListener('click', () => {
+  if (typeof openManageCategoriesModal === 'function') openManageCategoriesModal();
+});
+
+document.querySelectorAll('.tx-filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    txKindFilter = pill.dataset.txFilter || 'all';
+    renderRows();
+  });
+});

@@ -104,6 +104,8 @@ function render() {
 
   renderSpendingBarChart(expense);
   renderRows();
+  if (typeof renderDebtsView === 'function') renderDebtsView();
+  if (typeof renderAssetsView === 'function') renderAssetsView();
   // Tampilan Analitik punya render sendiri; jangan ditimpa setiap data berubah (mis. realtime)
   if (workspace && !workspace.hidden && workspace.dataset.view !== 'analytics') renderWorkspace(workspace.dataset.view || 'transactions');
 
@@ -319,8 +321,10 @@ function openCategoryDetail(catName, period = 'month') {
       if (searchInput && currentDetailCategory) {
         searchInput.value = currentDetailCategory;
         txSearchQuery = currentDetailCategory;
+        if (typeof switchTab === 'function') {
+          switchTab('transactions');
+        }
         if (typeof renderRows === 'function') renderRows();
-        document.querySelector('.transactions-panel')?.scrollIntoView({ behavior: 'smooth' });
       }
     });
   }

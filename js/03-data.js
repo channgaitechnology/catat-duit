@@ -101,6 +101,10 @@ async function showApp(user) {
   // Menu Analitik hanya untuk admin platform; penentuan admin dilakukan server (tidak memblokir aplikasi)
   if (typeof checkPlatformAdmin === 'function') checkPlatformAdmin();
   await refreshData();
+  if (typeof switchTab === 'function') {
+    const saved = localStorage.getItem('catatduit_active_tab') || 'overview';
+    switchTab(saved);
+  }
 }
 
 async function refreshData() {

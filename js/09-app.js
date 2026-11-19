@@ -7,29 +7,92 @@ if (todayEl) {
   todayEl.textContent = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 }
 
-// Navigasi view/tab
-document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => {
-  document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.view === button.dataset.view));
-  const view = button.dataset.view;
-  if (view === 'overview') {
-    if (workspace) workspace.hidden = true;
-    document.querySelector('.runway-card')?.scrollIntoView({ behavior: 'smooth' });
-    return;
+// Navigasi view/tab (Dokter Laundry pattern: pisah halaman per tab dengan bottom tab bar)
+let currentActiveTab = 'overview';
+
+function switchTab(name) {
+  if (!name) name = 'overview';
+  currentActiveTab = name;
+
+  const viewMap = {
+    overview: 'view-overview',
+    transactions: 'view-transactions',
+    debts: 'view-debts',
+    assets: 'view-assets'
+  };
+
+  const targetId = viewMap[name] || 'view-overview';
+
+  // 1. Tampilkan hanya view yang aktif, sembunyikan yang lain
+  document.querySelectorAll('.view').forEach(v => {
+    v.classList.remove('active');
+  });
+  const targetView = document.getElementById(targetId);
+  if (targetView) {
+    targetView.classList.add('active');
   }
-  if (view === 'analytics') {
-    if (typeof renderAnalyticsView === 'function') renderAnalyticsView();
-    workspace?.scrollIntoView({ behavior: 'smooth' });
-    return;
+  // 2. Tandai tab bar bawah aktif
+  document.querySelectorAll('.tabbar .tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+
+  // 3. Sinkronkan navigasi menu lain bila ada
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.view === name);
+  });
+
+  // 4. Update judul di appbar / breadcrumb
+  const crumbEl = document.querySelector('#appbar-current-view');
+  if (crumbEl) {
+    const titles = {
+      overview: 'Ringkasan',
+      transactions: 'Transaksi',
+      debts: 'Utang & Piutang',
+      assets: 'Aset',
+      analytics: 'Analitik'
+    };
+    crumbEl.textContent = titles[name] || 'Ringkasan';
   }
-  if (view === 'transactions') {
-    // Kalau panel Analitik sedang terbuka, tutup supaya tidak tertinggal di bawah daftar transaksi
-    if (workspace && workspace.dataset.view === 'analytics') { workspace.hidden = true; workspace.dataset.view = ''; }
-    document.querySelector('.transactions-panel')?.scrollIntoView({ behavior: 'smooth' });
-  } else {
-    renderWorkspace(view);
-    workspace?.scrollIntoView({ behavior: 'smooth' });
+
+  // 5. Render data spesifik tab
+  if (name === 'overview') {
+    if (typeof render === 'function') render();
+  } else if (name === 'transactions') {
+    if (typeof renderRows === 'function') renderRows();
+  } else if (name === 'debts') {
+    if (typeof renderDebtsView === 'function') renderDebtsView();
+  } else if (name === 'assets') {
+    if (typeof renderAssetsView === 'function') renderAssetsView();
   }
-}));
+
+  // 6. Scroll langsung ke atas view yang baru dibuka
+  window.scrollTo({ top: 0, behavior: 'instant' });
+
+  // 7. Simpan state tab terakhir
+  try {
+    localStorage.setItem('catatduit_active_tab', name);
+  } catch (e) {}
+}
+
+// Event listener klik pada bottom tab bar
+document.querySelectorAll('.tabbar .tab').forEach(button => {
+  button.addEventListener('click', () => {
+    switchTab(button.dataset.tab);
+  });
+});
+
+// Event listener untuk elemen shortcut navigasi [data-view]
+document.querySelectorAll('[data-view]').forEach(button => {
+  button.addEventListener('click', () => {
+    switchTab(button.dataset.view);
+  });
+  button.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      switchTab(button.dataset.view);
+    }
+  });
+});
 
 // PWA Service Worker Registration & Auto-Update
 if ('serviceWorker' in navigator) {
@@ -96,6 +159,9 @@ badgeObserver.observe(document.documentElement, { childList: true, subtree: true
 window.catatduit = {
   showApp,
   render,
+  switchTab,
+  renderDebtsView,
+  renderAssetsView,
   getRecords: () => records,
   setRecords: (r) => { records = r; },
   getAssets: () => assets,
@@ -118,4 +184,12 @@ if (!navigator.onLine && cachedUser) {
   showApp(cachedUser);
 } else {
   showLogin();
+}
+
+// Inisialisasi status tab aktif dari storage atau default 'overview'
+try {
+  const initialTab = localStorage.getItem('catatduit_active_tab') || 'overview';
+  switchTab(initialTab);
+} catch (e) {
+  switchTab('overview');
 }

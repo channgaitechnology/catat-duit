@@ -1,44 +1,177 @@
 // js/07-assets-debts.js
 // Pengelolaan workspace, pencatatan & pelunasan utang-piutang, serta aset cair & tetap (dengan dukungan offline)
 
-function renderWorkspace(view) {
-  if (!workspace) return;
-  workspace.dataset.view = view;
-  workspace.hidden = false;
-  const debts = records.filter(r => r.kind.startsWith('debt_'));
+let currentDebtFilter = 'all';
 
-  if (view === 'assets') {
-    const liquidList = assets.filter(a => parseAssetName(a.name).isLiquid);
-    const nonLiquidList = assets.filter(a => !parseAssetName(a.name).isLiquid);
-    workspace.innerHTML = `
-      <div class="panel-heading"><div><h3>Semua Aset</h3><p>Daftar aset cair (likuid) dan aset tidak cair (tetap/investasi).</p></div><button class="primary-button" id="add-asset">＋ Catat aset</button></div>
-      <div style="margin-top:20px;">
-        <h4 style="font-size:12px;margin:0 0 10px;color:#496333;">◈ Aset Cair (Likuid) — Menopang Runway</h4>
-        <div class="workspace-list" style="margin-top:0;">${liquidList.length ? liquidList.map(a => { const p = parseAssetName(a.name); return `<div class="workspace-row"><span class="debt-kind">${escapeHtml(p.category)}</span><b>${escapeHtml(p.displayName)}</b><strong>${rupiah(a.amount)}</strong><button data-delete-asset="${a.id}" class="text-button">Hapus</button></div>`; }).join('') : '<div class="empty-state">Belum ada aset cair (cash, tabungan, emas).</div>'}</div>
-      </div>
-      <div style="margin-top:25px;">
-        <h4 style="font-size:12px;margin:0 0 10px;color:#708072;">❖ Aset Tidak Cair (Non-Likuid) — Kekayaan Tetap</h4>
-        <div class="workspace-list" style="margin-top:0;">${nonLiquidList.length ? nonLiquidList.map(a => { const p = parseAssetName(a.name); return `<div class="workspace-row"><span class="debt-kind">${escapeHtml(p.category)}</span><b>${escapeHtml(p.displayName)}</b><strong>${rupiah(a.amount)}</strong><button data-delete-asset="${a.id}" class="text-button">Hapus</button></div>`; }).join('') : '<div class="empty-state">Belum ada aset tidak cair (kendaraan, tanah, bangunan).</div>'}</div>
-      </div>
-    `;
-  } else if (view === 'debts') {
-    workspace.innerHTML = `<div class="panel-heading"><div><h3>Utang & piutang</h3><p>Catatan kewajiban dan uang yang akan diterima.</p></div><button class="primary-button" id="add-debt">＋ Catat utang/piutang</button></div><div class="workspace-list">${debts.length ? debts.map(d => `<div class="workspace-row"><span class="debt-kind">${d.kind === 'debt_payable' ? 'Utang' : 'Piutang'}</span><b>${escapeHtml(d.title)}</b><strong>${rupiah(d.amount)}</strong><button data-toggle-debt="${d.id}" data-settled="${d.settled}" class="text-button">${d.settled ? 'Tandai belum lunas' : 'Tandai lunas'}</button><button data-delete-record="${d.id}" class="text-button">Hapus</button></div>`).join('') : '<div class="empty-state">Belum ada catatan utang atau piutang.</div>'}</div>`;
-  } else {
-    workspace.innerHTML = `<div class="panel-heading"><div><h3>Semua transaksi</h3><p>Uang masuk dan uang keluar Anda.</p></div><button class="primary-button" id="add-workspace-transaction">＋ Catat transaksi</button></div><div class="workspace-list">${records.filter(r => ['income', 'expense'].includes(r.kind)).length ? records.filter(r => ['income', 'expense'].includes(r.kind)).map(r => `<div class="workspace-row"><span class="debt-kind">${r.kind === 'income' ? 'Masuk' : 'Keluar'}</span><b>${escapeHtml(r.title)}</b><span>${escapeHtml(r.category)}</span><strong>${rupiah(r.amount)}</strong><time>${escapeHtml(r.record_date)}</time><div class="tx-actions"><button data-edit-tx="${r.id}" class="text-button">Edit</button><button data-delete-record="${r.id}" class="text-button danger">Hapus</button></div></div>`).join('') : '<div class="empty-state">Belum ada transaksi.</div>'}</div>`;
+function renderDebtsView(filter = currentDebtFilter) {
+  currentDebtFilter = filter;
+  const listEl = document.querySelector('#debts-view-list');
+  const allDebts = records.filter(r => r.kind.startsWith('debt_'));
+
+  const payables = allDebts.filter(r => r.kind === 'debt_payable');
+  const receivables = allDebts.filter(r => r.kind === 'debt_receivable');
+  const unsettledPayables = payables.filter(r => !r.settled);
+  const unsettledReceivables = receivables.filter(r => !r.settled);
+
+  const totalPayable = unsettledPayables.reduce((s, r) => s + Number(r.amount), 0);
+  const totalReceivable = unsettledReceivables.reduce((s, r) => s + Number(r.amount), 0);
+  const netDebt = totalReceivable - totalPayable;
+
+  // Update summary stats
+  const payVal = document.querySelector('#debts-payable-value');
+  const paySub = document.querySelector('#debts-payable-sub');
+  if (payVal) payVal.textContent = rupiah(totalPayable);
+  if (paySub) paySub.textContent = `${unsettledPayables.length} belum lunas (dari ${payables.length} utang)`;
+
+  const recVal = document.querySelector('#debts-receivable-value');
+  const recSub = document.querySelector('#debts-receivable-sub');
+  if (recVal) recVal.textContent = rupiah(totalReceivable);
+  if (recSub) recSub.textContent = `${unsettledReceivables.length} belum lunas (dari ${receivables.length} piutang)`;
+
+  const netVal = document.querySelector('#debts-net-value');
+  const netSub = document.querySelector('#debts-net-sub');
+  if (netVal) {
+    const sign = netDebt > 0 ? '+' : '';
+    netVal.textContent = `${sign}${rupiah(netDebt)}`;
+    netVal.style.color = netDebt > 0 ? '#497e29' : (netDebt < 0 ? '#cb5139' : 'inherit');
+  }
+  if (netSub) {
+    netSub.textContent = netDebt > 0 ? 'Surplus (piutang > utang)' : (netDebt < 0 ? 'Defisit kewajiban bayar' : 'Kondisi seimbang');
   }
 
-  workspace.querySelector('#add-asset')?.addEventListener('click', () => document.querySelector('#asset-dialog')?.showModal());
-  workspace.querySelector('#add-debt')?.addEventListener('click', () => {
-    const debtDateInput = document.querySelector('#debt-form [name=record_date]');
-    if (debtDateInput) debtDateInput.value = today();
-    document.querySelector('#debt-dialog')?.showModal();
+  // Update filter pills active state
+  document.querySelectorAll('.debts-filter-pill').forEach(pill => {
+    pill.classList.toggle('active', pill.dataset.debtFilter === filter);
   });
-  workspace.querySelector('#add-workspace-transaction')?.addEventListener('click', () => document.querySelector('#add-transaction')?.click());
-  workspace.querySelectorAll('[data-delete-asset]').forEach(b => b.addEventListener('click', () => deleteAsset(b.dataset.deleteAsset)));
-  workspace.querySelectorAll('[data-edit-tx]').forEach(b => b.addEventListener('click', () => openEditTransaction(b.dataset.editTx)));
-  workspace.querySelectorAll('[data-delete-record]').forEach(b => b.addEventListener('click', () => deleteRecord(b.dataset.deleteRecord)));
-  workspace.querySelectorAll('[data-toggle-debt]').forEach(b => b.addEventListener('click', () => toggleDebt(b.dataset.toggleDebt, b.dataset.settled === 'true')));
+
+  if (!listEl) return;
+
+  // Apply filter
+  let filtered = allDebts;
+  if (filter === 'unsettled') filtered = allDebts.filter(r => !r.settled);
+  else if (filter === 'settled') filtered = allDebts.filter(r => r.settled);
+  else if (filter === 'payable') filtered = payables;
+  else if (filter === 'receivable') filtered = receivables;
+
+  // Sort by date descending
+  filtered.sort((a, b) => (b.record_date || '').localeCompare(a.record_date || ''));
+
+  if (!filtered.length) {
+    listEl.innerHTML = `<div class="empty-state">Tidak ada catatan utang atau piutang ${filter !== 'all' ? 'pada filter ini' : 'tersimpan'}.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(d => {
+    const isPayable = d.kind === 'debt_payable';
+    const kindLabel = isPayable ? 'Utang' : 'Piutang';
+    const statusText = d.settled ? 'Lunas' : 'Belum Lunas';
+    const statusClass = d.settled ? 'settled' : 'unsettled';
+    return `
+      <div class="workspace-row">
+        <span class="debt-kind" style="font-weight:600;color:${isPayable ? '#d97736' : '#5a8c43'};">${kindLabel}</span>
+        <b>${escapeHtml(d.title)}</b>
+        <span class="debt-badge-status ${statusClass}">[${statusText}]</span>
+        <strong>${rupiah(d.amount)}</strong>
+        <time>${escapeHtml(d.record_date || '')}</time>
+        <div class="tx-actions">
+          <button data-toggle-debt="${d.id}" data-settled="${d.settled}" class="text-button">${d.settled ? 'Tandai belum lunas' : 'Tandai lunas'}</button>
+          <button data-delete-record="${d.id}" class="text-button danger">Hapus</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  listEl.querySelectorAll('[data-toggle-debt]').forEach(b => b.addEventListener('click', () => toggleDebt(b.dataset.toggleDebt, b.dataset.settled === 'true')));
+  listEl.querySelectorAll('[data-delete-record]').forEach(b => b.addEventListener('click', () => deleteRecord(b.dataset.deleteRecord)));
 }
+
+function renderAssetsView() {
+  const liquidList = assets.filter(a => parseAssetName(a.name).isLiquid);
+  const nonLiquidList = assets.filter(a => !parseAssetName(a.name).isLiquid);
+  const liquidTotal = liquidList.reduce((s, a) => s + Number(a.amount), 0);
+  const nonLiquidTotal = nonLiquidList.reduce((s, a) => s + Number(a.amount), 0);
+  const grandTotal = liquidTotal + nonLiquidTotal;
+
+  // Update summary stats
+  const totalVal = document.querySelector('#assets-total-view-val');
+  const liquidVal = document.querySelector('#assets-liquid-view-val');
+  const nonLiquidVal = document.querySelector('#assets-nonliquid-view-val');
+  if (totalVal) totalVal.textContent = rupiah(grandTotal);
+  if (liquidVal) liquidVal.textContent = rupiah(liquidTotal);
+  if (nonLiquidVal) nonLiquidVal.textContent = rupiah(nonLiquidTotal);
+
+  const totalSub = document.querySelector('#assets-total-view-sub');
+  if (totalSub) totalSub.textContent = `Cair: ${compact(liquidTotal)} · Tetap: ${compact(nonLiquidTotal)}`;
+
+  // Render liquid list
+  const liquidHost = document.querySelector('#assets-liquid-list');
+  if (liquidHost) {
+    liquidHost.innerHTML = liquidList.length ? liquidList.map(a => {
+      const p = parseAssetName(a.name);
+      return `
+        <div class="workspace-row">
+          <span class="debt-kind" style="font-weight:600;color:#496333;">${escapeHtml(p.category)}</span>
+          <b>${escapeHtml(p.displayName)}</b>
+          <span></span>
+          <strong>${rupiah(a.amount)}</strong>
+          <button data-delete-asset="${a.id}" class="text-button danger">Hapus</button>
+        </div>
+      `;
+    }).join('') : '<div class="empty-state">Belum ada aset cair (cash, tabungan, deposito, emas). Catat sekarang untuk menopang Runway.</div>';
+
+    liquidHost.querySelectorAll('[data-delete-asset]').forEach(b => b.addEventListener('click', () => deleteAsset(b.dataset.deleteAsset)));
+  }
+
+  // Render non-liquid list
+  const nonLiquidHost = document.querySelector('#assets-nonliquid-list');
+  if (nonLiquidHost) {
+    nonLiquidHost.innerHTML = nonLiquidList.length ? nonLiquidList.map(a => {
+      const p = parseAssetName(a.name);
+      return `
+        <div class="workspace-row">
+          <span class="debt-kind" style="font-weight:600;color:#708072;">${escapeHtml(p.category)}</span>
+          <b>${escapeHtml(p.displayName)}</b>
+          <span></span>
+          <strong>${rupiah(a.amount)}</strong>
+          <button data-delete-asset="${a.id}" class="text-button danger">Hapus</button>
+        </div>
+      `;
+    }).join('') : '<div class="empty-state">Belum ada aset tetap (kendaraan, rumah, tanah, properti) yang dicatat.</div>';
+
+    nonLiquidHost.querySelectorAll('[data-delete-asset]').forEach(b => b.addEventListener('click', () => deleteAsset(b.dataset.deleteAsset)));
+  }
+}
+
+// Fallback legacy workspace handler
+function renderWorkspace(view) {
+  if (view === 'assets') {
+    renderAssetsView();
+    if (typeof switchTab === 'function') switchTab('assets');
+  } else if (view === 'debts') {
+    renderDebtsView();
+    if (typeof switchTab === 'function') switchTab('debts');
+  } else {
+    if (typeof switchTab === 'function') switchTab('transactions');
+  }
+}
+
+// Event listener tombol tambah hutang/piutang dan aset dari header view
+document.querySelector('#btn-add-debt-main')?.addEventListener('click', () => {
+  const debtDateInput = document.querySelector('#debt-form [name=record_date]');
+  if (debtDateInput) debtDateInput.value = today();
+  document.querySelector('#debt-dialog')?.showModal();
+});
+
+document.querySelector('#btn-add-asset-main')?.addEventListener('click', () => {
+  document.querySelector('#asset-dialog')?.showModal();
+});
+
+// Event listener filter chips pada tab utang & piutang
+document.querySelectorAll('.debts-filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    renderDebtsView(pill.dataset.debtFilter);
+  });
+});
 
 async function deleteAsset(id) {
   if (!confirm('Hapus aset ini?')) return;

@@ -62,7 +62,7 @@ function renderRows() {
     const isCollapsed = collapsedDates.has(dateKey);
     const dayIncome = items.filter(r => r.kind === 'income').reduce((s, r) => s + Number(r.amount), 0);
     const dayExpense = items.filter(r => r.kind === 'expense').reduce((s, r) => s + Number(r.amount), 0);
-    const dateFormatted = new Intl.DateTimeFormat('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${dateKey}T00:00:00`));
+    const dateFormatted = new Intl.DateTimeFormat(APP_LOCALE, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(`${dateKey}T00:00:00`));
 
     return `
       <div class="tx-date-group" data-date="${dateKey}">
@@ -84,7 +84,7 @@ function renderRows() {
             <div class="transaction-row">
               <div class="tx-name"><span class="tx-icon ${r.kind === 'income' ? 'income' : ''}">${r.kind === 'income' ? '↙' : '↗'}</span>${escapeHtml(r.title)}</div>
               <span class="tx-category">${escapeHtml(r.category)}</span>
-              <span class="tx-date">${new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short' }).format(new Date(`${r.record_date}T00:00:00`))}</span>
+              <span class="tx-date">${new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'short' }).format(new Date(`${r.record_date}T00:00:00`))}</span>
               <span class="tx-amount ${r.kind === 'income' ? 'positive' : ''}">${r.kind === 'income' ? '+' : '−'} ${rupiah(r.amount)}</span>
               <div class="tx-actions">
                 <button class="text-button" data-edit-tx="${r.id}">Edit</button>

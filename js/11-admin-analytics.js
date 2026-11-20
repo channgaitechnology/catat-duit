@@ -33,7 +33,7 @@ async function checkPlatformAdmin() {
 }
 
 /* ---------- helper ---------- */
-function anNum(n) { return Number(n || 0).toLocaleString('id-ID'); }
+function anNum(n) { return Number(n || 0).toLocaleString(APP_LOCALE); }
 
 // Tanggal lokal (YYYY-MM-DD) agar "hari ini" sesuai zona waktu pengguna, bukan UTC
 function anLocalDay(iso) {
@@ -45,7 +45,7 @@ function anLocalDay(iso) {
 function anDate(iso) {
   const d = new Date(iso);
   if (!iso || isNaN(d)) return '-';
-  return new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
+  return new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
 }
 
 function anAgo(iso) {

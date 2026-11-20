@@ -43,6 +43,10 @@
 </head>
 <body>
   <section id="auth-view" class="auth-screen" hidden>
+    <div class="auth-lang-switch" role="group" aria-label="Bahasa / Language">
+      <button type="button" class="auth-lang-btn" id="auth-lang-id" onclick="setLanguage('id')">🇮🇩 ID</button>
+      <button type="button" class="auth-lang-btn" id="auth-lang-en" onclick="setLanguage('en')">🇬🇧 EN</button>
+    </div>
     <div class="auth-container">
       <!-- Panel Informasi Aplikasi -->
       <div class="auth-info-pane">
@@ -147,6 +151,7 @@
         <button class="nav-item" data-view="analytics" id="nav-analytics" hidden><span class="nav-icon">▤</span> Analitik</button>
       </nav>
       <div class="sidebar-bottom">
+        <button class="nav-item settings-nav" id="open-settings" type="button"><span class="nav-icon">⚙</span> Pengaturan</button>
         <div class="side-label">RUANG PERSONAL</div>
         <div class="profile"><div class="avatar" id="profile-avatar">R</div><div><strong id="profile-email">Akun</strong><small>Catat Duit</small></div><button id="auth-logout" class="logout-button" type="button">Keluar</button></div>
         <div class="privacy-note"><span>⌑</span><div><strong>Data tersimpan aman</strong><small>Tersinkron antar perangkat</small></div></div>
@@ -162,6 +167,7 @@
         <div class="top-actions">
           <span id="network-badge" class="network-badge online" title="Status koneksi">● Online</span>
           <span class="today" id="today"></span>
+          <button id="open-settings-top" class="settings-button" type="button" aria-label="Pengaturan" title="Pengaturan">⚙</button>
           <button id="auth-logout-top" class="logout-button topbar-logout" type="button">Keluar</button>
           <div class="avatar small" id="profile-avatar-small">R</div>
         </div>
@@ -496,6 +502,67 @@
 
   <dialog id="edit-transaction-dialog"><form method="dialog" id="edit-transaction-form"><input type="hidden" name="id" id="edit-tx-id" /><div class="dialog-heading"><div><span class="eyebrow">PERBARUI ENERGI</span><h2>Edit Transaksi</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Nama transaksi<input name="name" id="edit-tx-name" required /></label><div class="form-row"><label>Jenis<select name="type" id="edit-tx-type"><option value="expense">Uang keluar</option><option value="income">Uang masuk</option></select></label><label>Kategori<select name="category" id="edit-tx-category"><option>Makan & minum</option><option>Tempat tinggal</option><option>Transportasi</option><option>Gaji</option><option>Freelance</option><option>Lainnya</option><option value="__add_new__">+ Tambah kategori baru...</option></select></label></div><div class="form-row"><label>Jumlah (Rp)<input name="amount" id="edit-tx-amount" type="number" min="1" required /></label><label>Tanggal<input name="date" id="edit-tx-date" type="date" required /></label></div><button class="primary-button submit-button" value="default">Simpan Perubahan <span>✓</span></button></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Panel Pengaturan (pola Dokter Laundry): grid kategori -> panel per kategori -->
+  <dialog id="settings-dialog">
+    <div class="settings-body">
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow">PANEL</span>
+          <h2 id="settings-title">Pengaturan</h2>
+        </div>
+        <button type="button" class="close-button" id="settings-close" aria-label="Tutup">×</button>
+      </div>
+
+      <div id="settings-home">
+        <div class="settings-grid">
+          <button type="button" class="settings-tile" data-settings-sub="umum">
+            <span class="settings-tile-emoji">⚙️</span><span class="settings-tile-label">Pengaturan</span>
+          </button>
+          <button type="button" class="settings-tile" data-settings-sub="keamanan">
+            <span class="settings-tile-emoji">🔒</span><span class="settings-tile-label">Keamanan Akun</span>
+          </button>
+          <button type="button" class="settings-tile" data-settings-sub="bahasa">
+            <span class="settings-tile-emoji">🌐</span><span class="settings-tile-label">Bahasa</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="settings-subview" hidden>
+        <button type="button" class="settings-sub-back" id="settings-back">‹ Kembali</button>
+
+        <div class="settings-sub-panel" id="settings-sub-umum">
+          <p class="settings-hint">Atur kategori transaksi dan preferensi umum aplikasi.</p>
+          <div class="settings-account-box">
+            <small>Akun yang sedang masuk</small>
+            <strong id="settings-account-email">-</strong>
+          </div>
+          <button type="button" class="secondary-button settings-wide-btn" id="settings-open-categories">⚙ Kelola Kategori</button>
+        </div>
+
+        <div class="settings-sub-panel" id="settings-sub-keamanan">
+          <label for="settings-new-email">Ganti Email</label>
+          <div class="settings-inline">
+            <input id="settings-new-email" type="email" autocomplete="email" placeholder="email baru">
+            <button type="button" class="secondary-button" id="settings-change-email">Ganti</button>
+          </div>
+          <label for="settings-new-password">Ganti Kata Sandi</label>
+          <div class="settings-inline">
+            <input id="settings-new-password" type="password" autocomplete="new-password" minlength="6" placeholder="kata sandi baru (min. 6 karakter)">
+            <button type="button" class="secondary-button" id="settings-change-password">Ganti</button>
+          </div>
+          <div id="settings-account-msg" class="settings-msg" role="status" aria-live="polite"></div>
+          <button type="button" class="secondary-button settings-wide-btn settings-danger" id="settings-logout">🚪 Keluar dari Akun</button>
+        </div>
+
+        <div class="settings-sub-panel" id="settings-sub-bahasa">
+          <p class="settings-hint">Pilih bahasa tampilan aplikasi.</p>
+          <button type="button" class="secondary-button settings-wide-btn settings-lang-btn" id="lang-btn-id" onclick="setLanguage('id')">🇮🇩 Bahasa Indonesia</button>
+          <button type="button" class="secondary-button settings-wide-btn settings-lang-btn" id="lang-btn-en" onclick="setLanguage('en')">🇬🇧 English</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="manage-categories-dialog">
     <div style="padding:24px;">
       <div class="dialog-heading">
@@ -640,6 +707,7 @@
 
     <div id="app-toast" class="app-toast" hidden></div>
 
+  <script src="js/00-i18n.js"></script>
   <script src="js/00-globals.js"></script>
   <script src="js/01-auth.js"></script>
   <script src="js/02-realtime.js"></script>
@@ -652,5 +720,6 @@
   <script src="js/09-app.js"></script>
   <script src="js/10-visitor-tracker.js"></script>
   <script src="js/11-admin-analytics.js"></script>
+  <script src="js/12-settings.js"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 // Tanggal hari ini di header
 const todayEl = document.querySelector('#today');
 if (todayEl) {
-  todayEl.textContent = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+  todayEl.textContent = new Intl.DateTimeFormat(APP_LOCALE, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 }
 
 // Navigasi view/tab (Dokter Laundry pattern: pisah halaman per tab dengan bottom tab bar)

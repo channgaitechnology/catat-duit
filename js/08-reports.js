@@ -43,7 +43,7 @@ function getFilteredTransactionsForReport() {
     const m = reportMonthInput ? reportMonthInput.value : today().slice(0, 7);
     filtered = filtered.filter(r => monthKey(r.record_date) === m);
     const dateObj = new Date(`${m}-01T00:00:00`);
-    periodLabel = isNaN(dateObj.getTime()) ? m : new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(dateObj);
+    periodLabel = isNaN(dateObj.getTime()) ? m : new Intl.DateTimeFormat(APP_LOCALE, { month: 'long', year: 'numeric' }).format(dateObj);
   } else {
     const start = reportStartDate ? reportStartDate.value : '';
     const end = reportEndDate ? reportEndDate.value : '';
@@ -114,22 +114,22 @@ function exportToExcel(reportData) {
   </head>
   <body>
     <table>
-      <tr><td colspan="5" class="header-title">LAPORAN KEUANGAN - CATAT DUIT</td></tr>
-      <tr><td colspan="5" class="header-sub">Akun: ${escapeHtml(userEmail)} | Periode: ${escapeHtml(periodLabel)}</td></tr>
-      <tr><td colspan="5" class="header-sub">Dibuat pada: ${new Date().toLocaleString('id-ID')}</td></tr>
+      <tr><td colspan="5" class="header-title">${t('LAPORAN KEUANGAN - CATAT DUIT')}</td></tr>
+      <tr><td colspan="5" class="header-sub">${t('Akun:')} ${escapeHtml(userEmail)} | ${t('Periode:')} ${escapeHtml(periodLabel)}</td></tr>
+      <tr><td colspan="5" class="header-sub">${t('Dibuat pada:')} ${new Date().toLocaleString(APP_LOCALE)}</td></tr>
       <tr><td colspan="5"></td></tr>
 
-      <tr><th colspan="5" class="section-title">1. RINGKASAN & RANKING PENGELUARAN TERBESAR</th></tr>
+      <tr><th colspan="5" class="section-title">${t('1. RINGKASAN & RANKING PENGELUARAN TERBESAR')}</th></tr>
       <tr>
-        <th>Peringkat</th>
-        <th colspan="2">Kategori Pengeluaran</th>
-        <th class="text-right">Total Jumlah (Rp)</th>
-        <th class="text-right">Persentase</th>
+        <th>${t('Peringkat')}</th>
+        <th colspan="2">${t('Kategori Pengeluaran')}</th>
+        <th class="text-right">${t('Total Jumlah (Rp)')}</th>
+        <th class="text-right">${t('Persentase')}</th>
       </tr>
   `;
 
   if (!categoryRanking.length) {
-    html += `<tr><td colspan="5" style="text-align:center;">Tidak ada data pengeluaran pada periode ini.</td></tr>`;
+    html += `<tr><td colspan="5" style="text-align:center;">${t('Tidak ada data pengeluaran pada periode ini.')}</td></tr>`;
   } else {
     categoryRanking.forEach(c => {
       html += `
@@ -145,44 +145,44 @@ function exportToExcel(reportData) {
 
   html += `
       <tr>
-        <td colspan="3" style="font-weight:bold;">Total Pengeluaran</td>
+        <td colspan="3" style="font-weight:bold;">${t('Total Pengeluaran')}</td>
         <td class="text-right num-fmt expense" style="font-weight:bold;">${totalExpense}</td>
         <td class="text-right">100%</td>
       </tr>
       <tr>
-        <td colspan="3" style="font-weight:bold;">Total Pemasukan</td>
+        <td colspan="3" style="font-weight:bold;">${t('Total Pemasukan')}</td>
         <td class="text-right num-fmt income" style="font-weight:bold;">${totalIncome}</td>
         <td></td>
       </tr>
       <tr>
-        <td colspan="3" style="font-weight:bold;">Sisa Bersih (Net Cashflow)</td>
+        <td colspan="3" style="font-weight:bold;">${t('Sisa Bersih (Net Cashflow)')}</td>
         <td class="text-right num-fmt" style="font-weight:bold;">${totalIncome - totalExpense}</td>
         <td></td>
       </tr>
       <tr><td colspan="5"></td></tr>
 
-      <tr><th colspan="5" class="section-title">2. RINCIAN SEMUA TRANSAKSI</th></tr>
+      <tr><th colspan="5" class="section-title">${t('2. RINCIAN SEMUA TRANSAKSI')}</th></tr>
       <tr>
-        <th>Tanggal</th>
-        <th>Nama Transaksi</th>
-        <th>Jenis</th>
-        <th>Kategori</th>
-        <th class="text-right">Nominal (Rp)</th>
+        <th>${t('Tanggal')}</th>
+        <th>${t('Nama Transaksi')}</th>
+        <th>${t('Jenis')}</th>
+        <th>${t('Kategori')}</th>
+        <th class="text-right">${t('Nominal (Rp)')}</th>
       </tr>
   `;
 
   if (!transactions.length) {
-    html += `<tr><td colspan="5" style="text-align:center;">Tidak ada transaksi ditemukan pada periode ini.</td></tr>`;
+    html += `<tr><td colspan="5" style="text-align:center;">${t('Tidak ada transaksi ditemukan pada periode ini.')}</td></tr>`;
   } else {
-    transactions.forEach(t => {
-      const isInc = t.kind === 'income';
+    transactions.forEach(rec => {
+      const isInc = rec.kind === 'income';
       html += `
         <tr>
-          <td>${t.record_date}</td>
-          <td>${escapeHtml(t.title)}</td>
-          <td class="${isInc ? 'income' : 'expense'}">${isInc ? 'Uang Masuk' : 'Uang Keluar'}</td>
-          <td>${escapeHtml(t.category)}</td>
-          <td class="text-right num-fmt ${isInc ? 'income' : 'expense'}">${isInc ? t.amount : -t.amount}</td>
+          <td>${rec.record_date}</td>
+          <td>${escapeHtml(rec.title)}</td>
+          <td class="${isInc ? 'income' : 'expense'}">${isInc ? t('Uang Masuk') : t('Uang Keluar')}</td>
+          <td>${escapeHtml(rec.category)}</td>
+          <td class="text-right num-fmt ${isInc ? 'income' : 'expense'}">${isInc ? rec.amount : -rec.amount}</td>
         </tr>
       `;
     });
@@ -252,37 +252,37 @@ function exportToPDF(reportData) {
     <div class="header">
       <div>
         <h1>Catat Duit.</h1>
-        <p>Laporan Rekapitulasi Keuangan & Transaksi</p>
+        <p>${t('Laporan Rekapitulasi Keuangan & Transaksi')}</p>
       </div>
       <div style="text-align: right;">
-        <p><strong>Periode:</strong> ${escapeHtml(periodLabel)}</p>
-        <p><strong>Akun:</strong> ${escapeHtml(userEmail)}</p>
+        <p><strong>${t('Periode:')}</strong> ${escapeHtml(periodLabel)}</p>
+        <p><strong>${t('Akun:')}</strong> ${escapeHtml(userEmail)}</p>
       </div>
     </div>
 
     <div class="summary-cards">
       <div class="card">
-        <div class="card-label">Total Uang Masuk</div>
+        <div class="card-label">${t('Total Uang Masuk')}</div>
         <div class="card-val inc">${rupiah(totalIncome)}</div>
       </div>
       <div class="card">
-        <div class="card-label">Total Uang Keluar</div>
+        <div class="card-label">${t('Total Uang Keluar')}</div>
         <div class="card-val exp">${rupiah(totalExpense)}</div>
       </div>
       <div class="card">
-        <div class="card-label">Arus Kas Bersih</div>
+        <div class="card-label">${t('Arus Kas Bersih')}</div>
         <div class="card-val">${rupiah(totalIncome - totalExpense)}</div>
       </div>
     </div>
 
-    <div class="section-heading">Ranking Pengeluaran Berdasarkan Kategori (Terbesar ke Terkecil)</div>
+    <div class="section-heading">${t('Ranking Pengeluaran Berdasarkan Kategori (Terbesar ke Terkecil)')}</div>
     <table>
       <thead>
         <tr>
           <th style="width: 40px;">No</th>
-          <th>Kategori</th>
-          <th class="text-right" style="width: 140px;">Jumlah</th>
-          <th class="text-right" style="width: 160px;">Porsi Pengeluaran</th>
+          <th>${t('Kategori')}</th>
+          <th class="text-right" style="width: 140px;">${t('Jumlah')}</th>
+          <th class="text-right" style="width: 160px;">${t('Porsi Pengeluaran')}</th>
         </tr>
       </thead>
       <tbody>
@@ -296,39 +296,39 @@ function exportToPDF(reportData) {
               ${c.percentage}%
             </td>
           </tr>
-        `).join('') : '<tr><td colspan="4" style="text-align:center;">Tidak ada pengeluaran pada periode ini.</td></tr>'}
+        `).join('') : `<tr><td colspan="4" style="text-align:center;">${t('Tidak ada pengeluaran pada periode ini.')}</td></tr>`}
       </tbody>
     </table>
 
-    <div class="section-heading">Daftar Lengkap Transaksi</div>
+    <div class="section-heading">${t('Daftar Lengkap Transaksi')}</div>
     <table>
       <thead>
         <tr>
-          <th style="width: 85px;">Tanggal</th>
-          <th>Nama Transaksi</th>
-          <th style="width: 80px;">Jenis</th>
-          <th>Kategori</th>
-          <th class="text-right" style="width: 130px;">Jumlah (Rp)</th>
+          <th style="width: 85px;">${t('Tanggal')}</th>
+          <th>${t('Nama Transaksi')}</th>
+          <th style="width: 80px;">${t('Jenis')}</th>
+          <th>${t('Kategori')}</th>
+          <th class="text-right" style="width: 130px;">${t('Jumlah (Rp)')}</th>
         </tr>
       </thead>
       <tbody>
-        ${transactions.length ? transactions.map(t => {
-          const isInc = t.kind === 'income';
+        ${transactions.length ? transactions.map(rec => {
+          const isInc = rec.kind === 'income';
           return `
             <tr>
-              <td>${t.record_date}</td>
-              <td>${escapeHtml(t.title)}</td>
+              <td>${rec.record_date}</td>
+              <td>${escapeHtml(rec.title)}</td>
               <td class="${isInc ? 'tag-inc' : 'tag-exp'}">${isInc ? 'Masuk' : 'Keluar'}</td>
-              <td>${escapeHtml(t.category)}</td>
-              <td class="text-right mono ${isInc ? 'tag-inc' : 'tag-exp'}">${isInc ? '+' : '-'} ${rupiah(t.amount)}</td>
+              <td>${escapeHtml(rec.category)}</td>
+              <td class="text-right mono ${isInc ? 'tag-inc' : 'tag-exp'}">${isInc ? '+' : '-'} ${rupiah(rec.amount)}</td>
             </tr>
           `;
-        }).join('') : '<tr><td colspan="5" style="text-align:center;">Tidak ada transaksi ditemukan pada periode ini.</td></tr>'}
+        }).join('') : `<tr><td colspan="5" style="text-align:center;">${t('Tidak ada transaksi ditemukan pada periode ini.')}</td></tr>`}
       </tbody>
     </table>
 
     <div class="footer-note">
-      Dicetak secara otomatis dari Catat Duit • Uang adalah energi hidupmu.
+      ${t('Dicetak secara otomatis dari Catat Duit • Uang adalah energi hidupmu.')}
     </div>
 
     <script>
@@ -373,11 +373,11 @@ function exportToJPG(reportData) {
 
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText('Catat Duit — Laporan Keuangan', 40, 52);
+  ctx.fillText(t('Catat Duit — Laporan Keuangan'), 40, 52);
 
   ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillStyle = '#d2e3d3';
-  ctx.fillText(`Periode: ${periodLabel}   |   Akun: ${userEmail}   |   Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 40, 84);
+  ctx.fillText(`${t('Periode:')} ${periodLabel}   |   ${t('Akun:')} ${userEmail}   |   ${currentLang==='en'?'Printed':'Tanggal Cetak'}: ${new Date().toLocaleDateString(APP_LOCALE)}`, 40, 84);
 
   // Summary Cards
   const cardY = 135;
@@ -402,16 +402,16 @@ function exportToJPG(reportData) {
     ctx.fillText(val, x + 16, cardY + 54);
   };
 
-  drawCard(40, 'Total Uang Masuk', rupiah(totalIncome), '#2f6e4a');
-  drawCard(390, 'Total Uang Keluar', rupiah(totalExpense), '#b24c3d');
-  drawCard(740, 'Arus Kas Bersih', rupiah(totalIncome - totalExpense), '#27382f');
+  drawCard(40, t('Total Uang Masuk'), rupiah(totalIncome), '#2f6e4a');
+  drawCard(390, t('Total Uang Keluar'), rupiah(totalExpense), '#b24c3d');
+  drawCard(740, t('Arus Kas Bersih'), rupiah(totalIncome - totalExpense), '#27382f');
 
   let curY = 245;
 
   // 1. Ranking Section
   ctx.fillStyle = '#27382f';
   ctx.font = 'bold 18px sans-serif';
-  ctx.fillText('1. Ranking Pengeluaran Berdasarkan Kategori', 40, curY);
+  ctx.fillText(t('1. Ranking Pengeluaran Berdasarkan Kategori'), 40, curY);
   curY += 15;
 
   // Table header Ranking
@@ -420,15 +420,15 @@ function exportToJPG(reportData) {
   ctx.fillStyle = '#223829';
   ctx.font = 'bold 12px sans-serif';
   ctx.fillText('NO', 55, curY + 20);
-  ctx.fillText('KATEGORI PENGELUARAN', 130, curY + 20);
-  ctx.fillText('JUMLAH (RP)', 700, curY + 20);
-  ctx.fillText('PERSENTASE', 900, curY + 20);
+  ctx.fillText(t('KATEGORI PENGELUARAN'), 130, curY + 20);
+  ctx.fillText(t('JUMLAH (RP)'), 700, curY + 20);
+  ctx.fillText(t('PERSENTASE'), 900, curY + 20);
   curY += 30;
 
   ctx.font = '13px sans-serif';
   if (!categoryRanking.length) {
     ctx.fillStyle = '#839688';
-    ctx.fillText('Belum ada pengeluaran pada periode ini.', 55, curY + 22);
+    ctx.fillText(t('Belum ada pengeluaran pada periode ini.'), 55, curY + 22);
     curY += rowHeight;
   } else {
     categoryRanking.forEach((c, i) => {
@@ -455,7 +455,7 @@ function exportToJPG(reportData) {
   // 2. Daftar Transaksi
   ctx.fillStyle = '#27382f';
   ctx.font = 'bold 18px sans-serif';
-  ctx.fillText('2. Daftar Lengkap Transaksi', 40, curY);
+  ctx.fillText(t('2. Daftar Lengkap Transaksi'), 40, curY);
   curY += 15;
 
   // Table header Transaksi
@@ -463,20 +463,20 @@ function exportToJPG(reportData) {
   ctx.fillRect(40, curY, 1020, 30);
   ctx.fillStyle = '#223829';
   ctx.font = 'bold 12px sans-serif';
-  ctx.fillText('TANGGAL', 55, curY + 20);
-  ctx.fillText('NAMA TRANSAKSI', 180, curY + 20);
-  ctx.fillText('JENIS', 530, curY + 20);
-  ctx.fillText('KATEGORI', 650, curY + 20);
-  ctx.fillText('NOMINAL (RP)', 880, curY + 20);
+  ctx.fillText(t('TANGGAL'), 55, curY + 20);
+  ctx.fillText(t('NAMA TRANSAKSI'), 180, curY + 20);
+  ctx.fillText(t('JENIS'), 530, curY + 20);
+  ctx.fillText(t('KATEGORI'), 650, curY + 20);
+  ctx.fillText(t('NOMINAL (RP)'), 880, curY + 20);
   curY += 30;
 
   if (!transactions.length) {
     ctx.fillStyle = '#839688';
-    ctx.fillText('Tidak ada transaksi ditemukan pada periode ini.', 55, curY + 22);
+    ctx.fillText(t('Tidak ada transaksi ditemukan pada periode ini.'), 55, curY + 22);
     curY += rowHeight;
   } else {
-    transactions.forEach((t, i) => {
-      const isInc = t.kind === 'income';
+    transactions.forEach((rec, i) => {
+      const isInc = rec.kind === 'income';
       ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#fafbfa';
       ctx.fillRect(40, curY, 1020, rowHeight);
       ctx.strokeStyle = '#e6ede3';
@@ -484,11 +484,11 @@ function exportToJPG(reportData) {
 
       ctx.fillStyle = '#495a4f';
       ctx.font = '12px sans-serif';
-      ctx.fillText(t.record_date, 55, curY + 21);
+      ctx.fillText(rec.record_date, 55, curY + 21);
 
       ctx.fillStyle = '#1e2d24';
       ctx.font = '13px sans-serif';
-      const truncatedTitle = t.title.length > 38 ? t.title.slice(0, 35) + '...' : t.title;
+      const truncatedTitle = rec.title.length > 38 ? rec.title.slice(0, 35) + '...' : rec.title;
       ctx.fillText(truncatedTitle, 180, curY + 21);
 
       ctx.fillStyle = isInc ? '#2f6e4a' : '#b24c3d';
@@ -497,11 +497,11 @@ function exportToJPG(reportData) {
 
       ctx.fillStyle = '#495a4f';
       ctx.font = '12px sans-serif';
-      ctx.fillText(t.category || '-', 650, curY + 21);
+      ctx.fillText(rec.category || '-', 650, curY + 21);
 
       ctx.fillStyle = isInc ? '#2f6e4a' : '#b24c3d';
       ctx.font = 'bold 13px monospace';
-      ctx.fillText(`${isInc ? '+' : '-'} ${rupiah(t.amount)}`, 880, curY + 21);
+      ctx.fillText(`${isInc ? '+' : '-'} ${rupiah(rec.amount)}`, 880, curY + 21);
 
       curY += rowHeight;
     });
@@ -511,7 +511,7 @@ function exportToJPG(reportData) {
   curY += 25;
   ctx.fillStyle = '#829488';
   ctx.font = '12px sans-serif';
-  ctx.fillText('Dicetak secara otomatis dari Catat Duit • Uang adalah energi hidupmu.', 40, curY);
+  ctx.fillText(t('Dicetak secara otomatis dari Catat Duit • Uang adalah energi hidupmu.'), 40, curY);
 
   // Convert to JPG download
   const dataUrl = canvas.toDataURL('image/jpeg', 0.95);

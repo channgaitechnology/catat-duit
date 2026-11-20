@@ -81,7 +81,7 @@ let toastTimer = null;
 function showToast(message, type = 'info', duration = 3500) {
   const toast = document.querySelector('#app-toast');
   if (!toast) return;
-  toast.textContent = message;
+  toast.textContent = t(message);
   toast.className = `app-toast ${type}`;
   toast.hidden = false;
   if (toastTimer) clearTimeout(toastTimer);

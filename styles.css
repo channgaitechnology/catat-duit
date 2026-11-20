@@ -1152,3 +1152,62 @@ html.desktop-site-mode .auth-screen {
 /* Form Catat sebagai halaman (bukan popup) */
 .catat-panel { padding: 0; }
 .catat-panel #transaction-form { padding: 24px; }
+
+/* ---- Tombol bahasa di halaman login ---- */
+.auth-screen { position: relative; }
+.auth-lang-switch { position: absolute; top: 16px; right: 16px; display: flex; gap: 6px; z-index: 5; }
+.auth-lang-btn {
+  background: #fff; border: 1.5px solid #dfe5da; color: #4d5a50;
+  border-radius: 16px; padding: 6px 11px; font: 700 11.5px var(--sans); cursor: pointer;
+}
+.auth-lang-btn.active { background: var(--deep); color: #fff; border-color: var(--deep); }
+
+/* ---- Tombol Pengaturan (topbar & sidebar) ---- */
+.settings-button {
+  border: 1px solid #e7ece6; background: #fff; color: #5d6b61; border-radius: 50%;
+  width: 31px; height: 31px; font-size: 16px; line-height: 1; cursor: pointer; display: grid; place-items: center;
+}
+.settings-button:hover { background: #f1f4ee; }
+.sidebar-bottom .settings-nav { width: 100%; margin-bottom: 14px; }
+
+/* ---- Panel Pengaturan (pola Dokter Laundry) ---- */
+#settings-dialog { width: min(440px, calc(100% - 24px)); }
+.settings-body { padding: 24px; }
+.settings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 4px; }
+.settings-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
+  background: #fcfdfb; border: 1.5px solid #e4e9e2; border-radius: 14px; padding: 16px 6px;
+  color: var(--ink); text-align: center; cursor: pointer; font-family: var(--sans);
+}
+.settings-tile:hover, .settings-tile:active { background: #eef4e6; border-color: #9bb87c; }
+.settings-tile-emoji { font-size: 26px; line-height: 1; }
+.settings-tile-label { font-size: 11px; font-weight: 700; line-height: 1.25; }
+.settings-sub-back {
+  display: flex; align-items: center; gap: 4px; background: none; border: none; cursor: pointer;
+  color: #5f8a2c; font: 700 13px var(--sans); padding: 0; margin-bottom: 12px;
+}
+.settings-sub-panel { display: none; }
+.settings-sub-panel.active { display: block; }
+.settings-hint { font-size: 12px; color: #6d7d71; margin: 0 0 12px; }
+.settings-account-box { background: #f4f6f1; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+.settings-account-box small { display: block; font-size: 10px; color: #829087; }
+.settings-account-box strong { font-size: 13px; word-break: break-all; }
+.settings-sub-panel label { display: block; font-size: 11px; color: #738075; margin: 4px 0 6px; }
+.settings-inline { display: flex; gap: 8px; margin-bottom: 14px; }
+.settings-inline input {
+  flex: 1; min-width: 0; height: 39px; border: 1px solid #e4e9e2; border-radius: 6px; padding: 0 10px;
+  font: 12px var(--sans); color: var(--ink); background: #fff; outline: none;
+}
+.settings-inline input:focus { border-color: #9bb87c; box-shadow: 0 0 0 3px #a5c38326; }
+.settings-wide-btn { width: 100%; margin-top: 8px; justify-content: center; }
+.settings-danger { color: #b24c3d; border-color: #efc9c1; }
+.settings-lang-btn.active { background: #eef4e6; border-color: #8ab445; font-weight: 700; }
+.settings-msg { font-size: 12px; min-height: 16px; margin: -6px 0 6px; color: #6d7d71; }
+.settings-msg.error { color: #b24c3d; }
+.settings-msg.success { color: #3f7d2c; }
+@media (max-width: 800px) {
+  .topbar .settings-button { width: 31px; height: 31px; }
+  .topbar .topbar-logout { display: none; }
+}
+.auth-screen { padding-top: 60px; }
+.auth-lang-switch { top: 14px; right: 14px; }

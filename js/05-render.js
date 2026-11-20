@@ -79,7 +79,7 @@ function render() {
 
   // Banner Runway Keuangan
   const runwayMonths = document.querySelector('#runway-months');
-  if (runwayMonths) runwayMonths.textContent = runway.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  if (runwayMonths) runwayMonths.textContent = runway.toLocaleString(APP_LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   const runwayDays = document.querySelector('#runway-days');
   if (runwayDays) runwayDays.textContent = `${Math.round(runway * 30)} hari`;
@@ -233,7 +233,7 @@ function openCategoryDetail(catName, period = 'month') {
       listEl.innerHTML = filtered.map(tx => {
         let dateFormatted = tx.record_date;
         try {
-          dateFormatted = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(tx.record_date + 'T00:00:00'));
+          dateFormatted = new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(tx.record_date + 'T00:00:00'));
         } catch (e) {}
         return `
           <div class="cat-tx-row">

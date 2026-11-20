@@ -12,10 +12,12 @@ let currentActiveTab = 'overview';
 
 function switchTab(name) {
   if (!name) name = 'overview';
+  if (name === 'analytics' && !isPlatformAdmin) name = 'overview';
   currentActiveTab = name;
 
   const viewMap = {
     overview: 'view-overview',
+    catat: 'view-catat',
     transactions: 'view-transactions',
     debts: 'view-debts',
     assets: 'view-assets'
@@ -46,6 +48,7 @@ function switchTab(name) {
   if (crumbEl) {
     const titles = {
       overview: 'Ringkasan',
+      catat: 'Catat transaksi',
       transactions: 'Transaksi',
       debts: 'Utang & Piutang',
       assets: 'Aset',
@@ -63,6 +66,12 @@ function switchTab(name) {
     if (typeof renderDebtsView === 'function') renderDebtsView();
   } else if (name === 'assets') {
     if (typeof renderAssetsView === 'function') renderAssetsView();
+  } else if (name === 'catat') {
+    if (typeof populateCategorySelects === 'function') populateCategorySelects();
+    const di = document.querySelector('#transaction-form [name=date]');
+    if (di && !di.value) di.value = today();
+  } else if (name === 'analytics') {
+    if (typeof renderAnalyticsView === 'function') renderAnalyticsView();
   }
 
   // 6. Scroll langsung ke atas view yang baru dibuka

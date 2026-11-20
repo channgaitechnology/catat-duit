@@ -106,8 +106,7 @@ function render() {
   renderRows();
   if (typeof renderDebtsView === 'function') renderDebtsView();
   if (typeof renderAssetsView === 'function') renderAssetsView();
-  // Tampilan Analitik punya render sendiri; jangan ditimpa setiap data berubah (mis. realtime)
-  if (workspace && !workspace.hidden && workspace.dataset.view !== 'analytics') renderWorkspace(workspace.dataset.view || 'transactions');
+  if (workspace && !workspace.hidden) renderWorkspace(workspace.dataset.view || 'transactions');
 
   // Jika modal rincian kategori sedang terbuka saat data berubah, perbarui isinya secara otomatis
   const catDetailDialog = document.querySelector('#category-detail-dialog');

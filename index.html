@@ -134,60 +134,39 @@
     </div>
   </section>
   <div class="app-shell" id="app-shell" hidden>
-    <!-- Topbar / Appbar (Dokter Laundry pattern) -->
-    <header class="appbar">
-      <div class="appbar-brand">
-        <a class="brand" href="#"><span class="brand-mark">◉</span><span>catat duit<span class="brand-dot">.</span></span></a>
-        <span class="appbar-crumb" id="appbar-current-view">Ringkasan</span>
-      </div>
-      <div class="top-actions">
-        <span id="network-badge" class="network-badge online" title="Status koneksi">● Online</span>
-        <span class="today" id="today"></span>
-        <div class="appbar-user-pill" title="Profil Akun">
-          <div class="avatar small" id="profile-avatar-small">C</div>
-          <span class="appbar-user-email" id="profile-email">Akun</span>
-        </div>
-        <button id="auth-logout-top" class="logout-button topbar-logout" type="button" title="Keluar">Keluar</button>
-      </div>
-    </header>
-
-    <!-- Compatibility hidden elements for legacy selectors -->
-    <div style="display:none;" aria-hidden="true">
-      <div id="profile-avatar">C</div>
-      <button id="auth-logout" type="button">Keluar</button>
-      <nav>
-        <button class="nav-item" data-view="overview"></button>
-        <button class="nav-item" data-view="transactions"></button>
-        <button class="nav-item" data-view="debts"></button>
-        <button class="nav-item" data-view="assets"></button>
-        <button class="nav-item" data-view="analytics" id="nav-analytics" hidden></button>
+    <!-- Sidebar: navigasi layar lebar (desktop). Di HP diganti tab bar bawah. -->
+    <aside class="sidebar">
+      <a class="brand" href="#"><span class="brand-mark">◉</span><span>catat duit<span class="brand-dot">.</span></span></a>
+      <div class="side-label">MENU</div>
+      <nav class="nav-list" aria-label="Menu utama">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">▦</span> Ringkasan</button>
+        <button class="nav-item" data-view="catat"><span class="nav-icon">＋</span> Catat transaksi</button>
+        <button class="nav-item" data-view="transactions"><span class="nav-icon">↕</span> Riwayat</button>
+        <button class="nav-item" data-view="debts"><span class="nav-icon">⇄</span> Utang &amp; piutang</button>
+        <button class="nav-item" data-view="assets"><span class="nav-icon">◈</span> Aset</button>
+        <button class="nav-item" data-view="analytics" id="nav-analytics" hidden><span class="nav-icon">▤</span> Analitik</button>
       </nav>
-    </div>
+      <div class="sidebar-bottom">
+        <div class="side-label">RUANG PERSONAL</div>
+        <div class="profile"><div class="avatar" id="profile-avatar">R</div><div><strong id="profile-email">Akun</strong><small>Catat Duit</small></div><button id="auth-logout" class="logout-button" type="button">Keluar</button></div>
+        <div class="privacy-note"><span>⌑</span><div><strong>Data tersimpan aman</strong><small>Tersinkron antar perangkat</small></div></div>
       </div>
-      <div class="top-actions">
-        <span id="network-badge" class="network-badge online" title="Status koneksi">● Online</span>
-        <span class="today" id="today"></span>
-        <div class="appbar-user-pill" title="Profil Akun">
-          <div class="avatar small" id="profile-avatar-small">C</div>
-          <span class="appbar-user-email" id="profile-email">Akun</span>
-        </div>
-        <button id="auth-logout-top" class="logout-button topbar-logout" type="button" title="Keluar">Keluar</button>
-      </div>
-    </header>
-
-    <!-- Compatibility hidden elements for legacy selectors -->
-    <div style="display:none;" aria-hidden="true">
-      <div id="profile-avatar">C</div>
-      <button id="auth-logout" type="button">Keluar</button>
-      <nav>
-        <button class="nav-item" data-view="overview"></button>
-        <button class="nav-item" data-view="transactions"></button>
-        <button class="nav-item" data-view="debts"></button>
-        <button class="nav-item" data-view="assets"></button>
-      </nav>
-    </div>
+    </aside>
 
     <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <a class="topbar-brand" href="#" aria-label="Catat Duit"><span class="brand-mark">◉</span></a>
+          <div class="breadcrumb">Catat Duit <span>/</span> <strong id="appbar-current-view">Ringkasan</strong></div>
+        </div>
+        <div class="top-actions">
+          <span id="network-badge" class="network-badge online" title="Status koneksi">● Online</span>
+          <span class="today" id="today"></span>
+          <button id="auth-logout-top" class="logout-button topbar-logout" type="button">Keluar</button>
+          <div class="avatar small" id="profile-avatar-small">R</div>
+        </div>
+      </header>
+
       <!-- VIEW 1: RINGKASAN (Overview) -->
       <section class="view active" id="view-overview">
         <div class="page-heading">
@@ -438,57 +417,82 @@
         </div>
       </section>
 
+      <!-- VIEW: CATAT (hanya form catat transaksi) -->
+      <section class="view" id="view-catat">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow"><span class="eyebrow-line"></span> CATAT ENERGI</div>
+            <h1>Catat transaksi</h1>
+            <p class="subtitle">Catat uang masuk atau uang keluar, selesai dalam beberapa detik.</p>
+          </div>
+        </div>
+        <div class="panel catat-panel">
+          <form id="transaction-form" class="catat-form" autocomplete="off">
+            <label>Nama transaksi<input name="name" placeholder="Contoh: Belanja mingguan" required /></label>
+            <div class="form-row">
+              <label>Jenis
+                <select name="type">
+                  <option value="expense">Uang keluar</option>
+                  <option value="income">Uang masuk</option>
+                </select>
+              </label>
+              <label>Kategori
+                <select name="category" id="transaction-category-select">
+                  <option>Makan &amp; minum</option>
+                  <option>Tempat tinggal</option>
+                  <option>Transportasi</option>
+                  <option>Gaji</option>
+                  <option>Freelance</option>
+                  <option>Lainnya</option>
+                  <option value="__add_new__">+ Tambah kategori baru...</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label>Jumlah (Rp)<input name="amount" type="number" min="1" inputmode="numeric" placeholder="150000" required /></label>
+              <label>Tanggal<input name="date" type="date" required /></label>
+            </div>
+            <button class="primary-button submit-button" type="submit">Simpan transaksi <span>→</span></button>
+          </form>
+        </div>
+      </section>
+
+      <!-- VIEW: ANALITIK (khusus admin platform; diisi oleh js/11-admin-analytics.js) -->
+      <section class="view" id="view-analytics"></section>
+
       <!-- Legacy workspace element for backwards safety -->
       <section id="finance-workspace" class="workspace panel" hidden></section>
       <footer class="footer"><span>catat duit. <i>Uang adalah energi hidupmu.</i></span><span>Dirancang untuk lebih sadar, bukan lebih cemas.</span></footer>
     </main>
 
-    <!-- Bottom Navigation Tab Bar (Dokter Laundry pattern) -->
+    <!-- Tab bar bawah (pola Dokter Laundry): tiap tab = satu halaman sesuai fungsinya -->
     <nav class="tabbar" id="bottom-tabbar" aria-label="Navigasi Bawah">
       <button class="tab active" data-tab="overview" type="button">
-        <div class="tab-icon-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
-            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
-            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
-          </svg>
-        </div>
+        <div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></div>
         <span>Ringkasan</span>
       </button>
+      <button class="tab" data-tab="catat" type="button">
+        <div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <span>Catat</span>
+      </button>
       <button class="tab" data-tab="transactions" type="button">
-        <div class="tab-icon-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M7 16V4M7 4L3 8M7 4L11 8M17 8V20M17 20L21 16M17 20L13 16"></path>
-          </svg>
-        </div>
-        <span>Transaksi</span>
+        <div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></div>
+        <span>Riwayat</span>
       </button>
       <button class="tab" data-tab="debts" type="button">
-        <div class="tab-icon-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 7v10M8.5 9.5h7a2 2 0 0 1 0 4h-7a2 2 0 0 0 0 4h7.5"></path>
-          </svg>
-        </div>
-        <span>Utang-Piutang</span>
+        <div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8.5 9.5h7a2 2 0 0 1 0 4h-7a2 2 0 0 0 0 4h7.5"/></svg></div>
+        <span>Utang</span>
       </button>
       <button class="tab" data-tab="assets" type="button">
-        <div class="tab-icon-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="6 3 18 3 22 9 12 21 2 9 6 3"></polygon>
-            <line x1="2" y1="9" x2="22" y2="9"></line>
-            <line x1="10" y1="3" x2="8" y2="9"></line>
-            <line x1="14" y1="3" x2="16" y2="9"></line>
-            <line x1="8" y1="9" x2="12" y2="21"></line>
-            <line x1="16" y1="9" x2="12" y2="21"></line>
-          </svg>
-        </div>
+        <div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 18 3 22 9 12 21 2 9 6 3"/><line x1="2" y1="9" x2="22" y2="9"/><line x1="10" y1="3" x2="8" y2="9"/><line x1="14" y1="3" x2="16" y2="9"/><line x1="8" y1="9" x2="12" y2="21"/><line x1="16" y1="9" x2="12" y2="21"/></svg></div>
         <span>Aset</span>
+      </button>
+      <button class="tab" data-tab="analytics" type="button" id="tab-analytics" hidden>
+        <div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <span>Analitik</span>
       </button>
     </nav>
   </div>
-  <dialog id="transaction-dialog"><form method="dialog" id="transaction-form"><div class="dialog-heading"><div><span class="eyebrow">CATAT ENERGI</span><h2>Transaksi baru</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Nama transaksi<input name="name" placeholder="Contoh: Belanja mingguan" required /></label><div class="form-row"><label>Jenis<select name="type"><option value="expense">Uang keluar</option><option value="income">Uang masuk</option></select></label><label>Kategori<select name="category" id="transaction-category-select"><option>Makan & minum</option><option>Tempat tinggal</option><option>Transportasi</option><option>Gaji</option><option>Freelance</option><option>Lainnya</option><option value="__add_new__">+ Tambah kategori baru...</option></select></label></div><div class="form-row"><label>Jumlah (Rp)<input name="amount" type="number" min="1" placeholder="150000" required /></label><label>Tanggal<input name="date" type="date" required /></label></div><button class="primary-button submit-button" value="default">Simpan transaksi <span>→</span></button></form></dialog>
 
   <dialog id="edit-transaction-dialog"><form method="dialog" id="edit-transaction-form"><input type="hidden" name="id" id="edit-tx-id" /><div class="dialog-heading"><div><span class="eyebrow">PERBARUI ENERGI</span><h2>Edit Transaksi</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Nama transaksi<input name="name" id="edit-tx-name" required /></label><div class="form-row"><label>Jenis<select name="type" id="edit-tx-type"><option value="expense">Uang keluar</option><option value="income">Uang masuk</option></select></label><label>Kategori<select name="category" id="edit-tx-category"><option>Makan & minum</option><option>Tempat tinggal</option><option>Transportasi</option><option>Gaji</option><option>Freelance</option><option>Lainnya</option><option value="__add_new__">+ Tambah kategori baru...</option></select></label></div><div class="form-row"><label>Jumlah (Rp)<input name="amount" id="edit-tx-amount" type="number" min="1" required /></label><label>Tanggal<input name="date" id="edit-tx-date" type="date" required /></label></div><button class="primary-button submit-button" value="default">Simpan Perubahan <span>✓</span></button></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

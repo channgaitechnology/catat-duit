@@ -15,9 +15,10 @@ function setPlatformAdmin(flag) {
   isPlatformAdmin = !!flag;
   const nav = document.querySelector('#nav-analytics');
   if (nav) nav.hidden = !isPlatformAdmin;
-  if (!isPlatformAdmin && workspace && workspace.dataset.view === 'analytics') {
-    workspace.hidden = true;
-    workspace.dataset.view = '';
+  const tab = document.querySelector('#tab-analytics');
+  if (tab) tab.hidden = !isPlatformAdmin;
+  if (!isPlatformAdmin && typeof currentActiveTab !== 'undefined' && currentActiveTab === 'analytics' && typeof switchTab === 'function') {
+    switchTab('overview');
   }
 }
 
@@ -214,10 +215,9 @@ async function loadAnalytics() {
 }
 
 function renderAnalyticsView() {
-  if (!workspace || !isPlatformAdmin) return;
-  workspace.dataset.view = 'analytics';
-  workspace.hidden = false;
-  workspace.innerHTML = `
+  const host = document.querySelector('#view-analytics');
+  if (!host || !isPlatformAdmin) return;
+  host.innerHTML = `<div class="panel">
     <div class="panel-heading">
       <div><h3>📊 Analitik Catat Duit</h3><p>Panel ini hanya terlihat oleh admin platform.</p></div>
       <button class="primary-button" id="an-refresh" type="button">🔄 Refresh</button>
@@ -257,8 +257,8 @@ function renderAnalyticsView() {
         <div><h5>📱 Perangkat Pengunjung</h5><div id="an-devices"></div></div>
         <div><h5>📄 Halaman Populer</h5><div id="an-pages"></div></div>
       </div>
-    </div>`;
-  workspace.querySelector('#an-refresh')?.addEventListener('click', loadAnalytics);
-  workspace.querySelector('#an-range')?.addEventListener('change', loadAnalytics);
+    </div></div>`;
+  host.querySelector('#an-refresh')?.addEventListener('click', loadAnalytics);
+  host.querySelector('#an-range')?.addEventListener('change', loadAnalytics);
   loadAnalytics();
 }

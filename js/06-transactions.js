@@ -209,19 +209,21 @@ async function deleteRecord(id) {
   }
 }
 
-function openAddTransactionDialog() {
+function resetCatatForm() {
   const form = document.querySelector('#transaction-form');
   if (form) form.reset();
   populateCategorySelects('Makan & minum');
   const dateInput = form ? form.querySelector('[name=date]') : null;
   if (dateInput) dateInput.value = today();
   const nameInput = form ? form.querySelector('[name=name]') : null;
-  if (nameInput) {
-    nameInput.value = '';
-    setTimeout(() => nameInput.focus(), 50);
-  }
-  const txDialog = document.querySelector('#transaction-dialog');
-  if (txDialog) txDialog.showModal();
+  if (nameInput) nameInput.value = '';
+}
+
+// Form catat transaksi kini halaman tersendiri (tab "Catat"), bukan popup
+function openAddTransactionDialog() {
+  resetCatatForm();
+  if (typeof switchTab === 'function') switchTab('catat');
+  setTimeout(() => document.querySelector('#transaction-form [name=name]')?.focus(), 80);
 }
 
 document.querySelector('#add-transaction')?.addEventListener('click', openAddTransactionDialog);
@@ -247,9 +249,7 @@ if (txForm) {
     setCachedData(STORAGE_KEY_RECORDS, records);
     render();
 
-    const txDialog = document.querySelector('#transaction-dialog');
-    if (txDialog) txDialog.close();
-    e.currentTarget.reset();
+    resetCatatForm();
 
     if (!navigator.onLine || !db) {
       addToOfflineQueue({ type: 'insert_record', data: {

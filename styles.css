@@ -1211,3 +1211,21 @@ html.desktop-site-mode .auth-screen {
 }
 .auth-screen { padding-top: 60px; }
 .auth-lang-switch { top: 14px; right: 14px; }
+
+/* ---- Tab bawah juga di layar lebar (sama seperti HP) ---- */
+@media (min-width: 801px) {
+  body { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .sidebar { display: none; }
+  .tabbar {
+    display: flex;
+    left: 50%; right: auto; transform: translateX(-50%);
+    width: min(640px, calc(100% - 32px));
+    bottom: 14px;
+    border: 1px solid #e2e6df; border-radius: 22px;
+    padding: 6px 8px;
+  }
+  .topbar-brand { display: inline-flex; }
+  .topbar .topbar-logout { display: none; }
+  .topbar .avatar.small { display: grid; }
+  .app-toast { bottom: 96px; }
+}

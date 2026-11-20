@@ -20,7 +20,8 @@ function switchTab(name) {
     catat: 'view-catat',
     transactions: 'view-transactions',
     debts: 'view-debts',
-    assets: 'view-assets'
+    assets: 'view-assets',
+    analytics: 'view-analytics'
   };
 
   const targetId = viewMap[name] || 'view-overview';

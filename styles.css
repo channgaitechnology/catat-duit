@@ -1286,3 +1286,17 @@ html.desktop-site-mode .auth-screen {
 .share-item[hidden] { display: none; }
 .share-emoji { font-size: 24px; line-height: 1; }
 @media (max-width: 420px) { .share-grid { grid-template-columns: repeat(3, 1fr); } }
+.share-top-button .settings-button-text { max-width: 66px; text-align: center; font-size: 8.5px; line-height: 1.15; }
+.share-top-button .settings-button-icon { font-size: 24px; }
+@media (max-width: 800px) {
+  .topbar .top-actions { gap: 2px; }
+  .topbar .settings-button { padding: 2px 4px; }
+  .network-badge { padding-left: 7px; padding-right: 7px; }
+}
+.network-badge { white-space: nowrap; }
+@media (max-width: 800px) {
+  .crumb-root { display: none; }
+  .topbar { height: auto; min-height: 62px; padding-top: 6px; padding-bottom: 6px; }
+  .share-top-button .settings-button-text { max-width: 78px; }
+  .network-badge { font-size: 9px; }
+}

@@ -162,11 +162,12 @@
       <header class="topbar">
         <div class="topbar-left">
           <a class="topbar-brand" href="#" aria-label="Catat Duit"><span class="brand-mark">◉</span></a>
-          <div class="breadcrumb">Catat Duit <span>/</span> <strong id="appbar-current-view">Ringkasan</strong></div>
+          <div class="breadcrumb"><span class="crumb-root">Catat Duit <span>/</span></span> <strong id="appbar-current-view">Ringkasan</strong></div>
         </div>
         <div class="top-actions">
           <span id="network-badge" class="network-badge online" title="Status koneksi">● Online</span>
           <span class="today" id="today"></span>
+          <button id="open-share-top" class="settings-button share-top-button" type="button" aria-label="Bantu keluarga & teman" title="Bantu keluarga & teman"><span class="settings-button-icon">🤝</span><span class="settings-button-text">Bantu keluarga &amp; teman</span></button>
           <button id="open-settings-top" class="settings-button" type="button" aria-label="Pengaturan" title="Pengaturan"><span class="settings-button-icon">⚙</span><span class="settings-button-text">Pengaturan</span></button>
           <button id="auth-logout-top" class="logout-button topbar-logout" type="button">Keluar</button>
           <div class="avatar small" id="profile-avatar-small">R</div>
@@ -277,11 +278,6 @@
             </div>
           </div>
         </div>
-        <button type="button" class="help-friends-card" id="open-share-overview">
-          <span class="help-friends-emoji">🤝</span>
-          <span class="help-friends-text"><strong>Bantu keluarga &amp; teman</strong><small>Ada yang sedang kesulitan mengatur uang?</small></span>
-          <span class="help-friends-arrow">›</span>
-        </button>
       </section>
 
       <!-- VIEW 2: TRANSAKSI (Transactions) -->
@@ -522,9 +518,6 @@
         <div class="settings-grid">
           <button type="button" class="settings-tile" data-settings-sub="profil">
             <span class="settings-tile-emoji">👤</span><span class="settings-tile-label">Profil</span>
-          </button>
-          <button type="button" class="settings-tile" id="open-share-tile">
-            <span class="settings-tile-emoji">🤝</span><span class="settings-tile-label">Bantu keluarga &amp; teman</span>
           </button>
           <button type="button" class="settings-tile" data-settings-sub="keamanan">
             <span class="settings-tile-emoji">🔒</span><span class="settings-tile-label">Keamanan Akun</span>

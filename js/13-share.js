@@ -54,8 +54,7 @@ async function copyShareLink() {
   }
 }
 
-document.querySelector('#open-share-overview')?.addEventListener('click', openShareDialog);
-document.querySelector('#open-share-tile')?.addEventListener('click', openShareDialog);
+document.querySelector('#open-share-top')?.addEventListener('click', openShareDialog);
 document.querySelector('#share-close')?.addEventListener('click', () => shareDialog.close());
 document.querySelector('#share-copy')?.addEventListener('click', copyShareLink);
 document.querySelector('#share-native')?.addEventListener('click', async () => {

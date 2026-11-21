@@ -192,8 +192,23 @@ window.catatduit = {
 const cachedUser = getCachedData(STORAGE_KEY_USER, null);
 if (!navigator.onLine && cachedUser) {
   showApp(cachedUser);
-} else {
-  showLogin();
+} else if (!activeUser) {
+  // Jangan langsung showLogin(): sesi tersimpan bisa saja sedang/ sudah dipulihkan oleh
+  // onAuthStateChange (event ini kadang terpicu SEBELUM file ini selesai dimuat, terutama di HP
+  // dengan jaringan lambat). Cek dulu sesi yang tersimpan; login hanya jika memang tidak ada sesi.
+  const showLoginIfStillSignedOut = () => { if (!activeUser) showLogin(); };
+  if (db && db.auth) {
+    db.auth.getSession().then(({ data }) => {
+      if (activeUser) return;
+      if (data && data.session) showApp(data.session.user);
+      else showLoginIfStillSignedOut();
+    }).catch(() => {
+      if (!activeUser && cachedUser && !navigator.onLine) showApp(cachedUser);
+      else showLoginIfStillSignedOut();
+    });
+  } else {
+    showLoginIfStillSignedOut();
+  }
 }
 
 // Inisialisasi status tab aktif dari storage atau default 'overview'

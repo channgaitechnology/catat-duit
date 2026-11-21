@@ -4,7 +4,7 @@
   "description": "Aplikasi keuangan pribadi dengan Runway Keuangan — uang sebagai energi hidup",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#f4f4f0",
   "theme_color": "#18231e",
   "icons": [

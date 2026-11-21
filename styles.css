@@ -1244,3 +1244,19 @@ html.desktop-site-mode .auth-screen {
 .settings-grid { grid-template-columns: repeat(3, 1fr); }
 .settings-tile-emoji { font-size: 34px; }
 #settings-save-name.saved, #settings-save-name:disabled { background: #eef4e6; color: #3f7d2c; border-color: #cfe0bd; cursor: default; opacity: 1; }
+
+/* Kartu runway: tinggi mengikuti isi (teks bahasa Inggris lebih panjang), catatan tidak lagi menimpa angka */
+.runway-card { height: auto; min-height: 233px; flex-direction: column; }
+.runway-help { position: relative; left: auto; right: auto; bottom: auto; margin-top: auto; padding-top: 16px; z-index: 2; }
+.runway-foot { margin-top: 2px; }
+
+/* Layar landscape (HP diputar): tab bawah lebih ramping, ruang konten tidak tertutup */
+@media (orientation: landscape) and (max-height: 520px) {
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .tabbar { padding-top: 3px; padding-bottom: calc(3px + env(safe-area-inset-bottom)); bottom: 0; border-radius: 16px 16px 0 0; width: min(560px, 100%); }
+  .tab { flex-direction: row; justify-content: center; gap: 6px; padding: 4px 6px; }
+  .tab-icon-wrap { width: 28px; height: 28px; }
+  .tab svg { width: 17px; height: 17px; }
+  .topbar { position: static; height: 48px; }
+  .runway-card { min-height: 0; }
+}

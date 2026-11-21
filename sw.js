@@ -1,4 +1,4 @@
-const CACHE_NAME = 'catatduit-v14';
+const CACHE_NAME = 'catatduit-v15';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

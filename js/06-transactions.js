@@ -349,7 +349,7 @@ document.querySelector('#add-transaction-tx-view')?.addEventListener('click', ()
 });
 
 document.querySelector('#open-manage-categories-btn')?.addEventListener('click', () => {
-  if (typeof openManageCategoriesModal === 'function') openManageCategoriesModal();
+  if (typeof openCategoryManagerDialog === 'function') openCategoryManagerDialog();
 });
 
 document.querySelectorAll('.tx-filter-pill').forEach(pill => {

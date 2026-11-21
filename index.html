@@ -167,7 +167,7 @@
         <div class="top-actions">
           <span id="network-badge" class="network-badge online" title="Status koneksi">● Online</span>
           <span class="today" id="today"></span>
-          <button id="open-settings-top" class="settings-button" type="button" aria-label="Pengaturan" title="Pengaturan">⚙</button>
+          <button id="open-settings-top" class="settings-button" type="button" aria-label="Pengaturan" title="Pengaturan"><span class="settings-button-icon">⚙</span><span class="settings-button-text">Pengaturan</span></button>
           <button id="auth-logout-top" class="logout-button topbar-logout" type="button">Keluar</button>
           <div class="avatar small" id="profile-avatar-small">R</div>
         </div>
@@ -297,7 +297,6 @@
             </div>
             <div class="tx-heading-controls">
               <button class="secondary-button" id="open-report-btn">📥 Unduh Laporan</button>
-              <button class="secondary-button" id="open-manage-categories-btn">⚙ Kelola Kategori</button>
             </div>
           </div>
 
@@ -461,6 +460,7 @@
             <button class="primary-button submit-button" type="submit">Simpan transaksi <span>→</span></button>
           </form>
         </div>
+        <button type="button" class="secondary-button catat-manage-btn" id="open-manage-categories-btn">⚙ Kelola Kategori</button>
       </section>
 
       <!-- VIEW: ANALITIK (khusus admin platform; diisi oleh js/11-admin-analytics.js) -->
@@ -515,9 +515,6 @@
 
       <div id="settings-home">
         <div class="settings-grid">
-          <button type="button" class="settings-tile" data-settings-sub="umum">
-            <span class="settings-tile-emoji">⚙️</span><span class="settings-tile-label">Pengaturan</span>
-          </button>
           <button type="button" class="settings-tile" data-settings-sub="keamanan">
             <span class="settings-tile-emoji">🔒</span><span class="settings-tile-label">Keamanan Akun</span>
           </button>
@@ -530,16 +527,11 @@
       <div id="settings-subview" hidden>
         <button type="button" class="settings-sub-back" id="settings-back">‹ Kembali</button>
 
-        <div class="settings-sub-panel" id="settings-sub-umum">
-          <p class="settings-hint">Atur kategori transaksi dan preferensi umum aplikasi.</p>
+        <div class="settings-sub-panel" id="settings-sub-keamanan">
           <div class="settings-account-box">
             <small>Akun yang sedang masuk</small>
             <strong id="settings-account-email">-</strong>
           </div>
-          <button type="button" class="secondary-button settings-wide-btn" id="settings-open-categories">⚙ Kelola Kategori</button>
-        </div>
-
-        <div class="settings-sub-panel" id="settings-sub-keamanan">
           <label for="settings-new-email">Ganti Email</label>
           <div class="settings-inline">
             <input id="settings-new-email" type="email" autocomplete="email" placeholder="email baru">

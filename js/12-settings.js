@@ -8,7 +8,6 @@ const settingsSubview = document.querySelector('#settings-subview');
 const settingsTitle = document.querySelector('#settings-title');
 
 const SETTINGS_TITLES = {
-  umum: '⚙️ Pengaturan',
   keamanan: '🔒 Keamanan Akun',
   bahasa: '🌐 Bahasa / Language'
 };
@@ -35,7 +34,7 @@ function openSettingsSub(name) {
     p.classList.toggle('active', p.id === `settings-sub-${name}`);
   });
   if (settingsTitle) settingsTitle.textContent = t(SETTINGS_TITLES[name]);
-  if (name === 'umum') {
+  if (name === 'keamanan') {
     const emailEl = document.querySelector('#settings-account-email');
     if (emailEl) emailEl.textContent = (activeUser && activeUser.email) || '-';
   }
@@ -59,11 +58,6 @@ document.querySelector('#settings-close')?.addEventListener('click', closeSettin
 document.querySelector('#settings-back')?.addEventListener('click', showSettingsHome);
 document.querySelectorAll('[data-settings-sub]').forEach(btn => {
   btn.addEventListener('click', () => openSettingsSub(btn.dataset.settingsSub));
-});
-
-document.querySelector('#settings-open-categories')?.addEventListener('click', () => {
-  closeSettings();
-  if (typeof openManageCategoriesModal === 'function') openManageCategoriesModal();
 });
 
 document.querySelector('#settings-logout')?.addEventListener('click', () => {

@@ -277,6 +277,11 @@
             </div>
           </div>
         </div>
+        <button type="button" class="help-friends-card" id="open-share-overview">
+          <span class="help-friends-emoji">🤝</span>
+          <span class="help-friends-text"><strong>Bantu keluarga &amp; teman</strong><small>Ada yang sedang kesulitan mengatur uang?</small></span>
+          <span class="help-friends-arrow">›</span>
+        </button>
       </section>
 
       <!-- VIEW 2: TRANSAKSI (Transactions) -->
@@ -518,6 +523,9 @@
           <button type="button" class="settings-tile" data-settings-sub="profil">
             <span class="settings-tile-emoji">👤</span><span class="settings-tile-label">Profil</span>
           </button>
+          <button type="button" class="settings-tile" id="open-share-tile">
+            <span class="settings-tile-emoji">🤝</span><span class="settings-tile-label">Bantu keluarga &amp; teman</span>
+          </button>
           <button type="button" class="settings-tile" data-settings-sub="keamanan">
             <span class="settings-tile-emoji">🔒</span><span class="settings-tile-label">Keamanan Akun</span>
           </button>
@@ -572,6 +580,32 @@
           <button type="button" class="secondary-button settings-wide-btn settings-lang-btn" id="lang-btn-en" onclick="setLanguage('en')">🇬🇧 English</button>
         </div>
       </div>
+    </div>
+  </dialog>
+
+  <!-- Bagikan dengan nada membantu (bukan iklan) -->
+  <dialog id="share-dialog">
+    <div class="settings-body">
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow">BERBAGI KEBAIKAN</span>
+          <h2>Bantu keluarga &amp; teman</h2>
+        </div>
+        <button type="button" class="close-button" id="share-close" aria-label="Tutup">×</button>
+      </div>
+      <p class="share-lead">Apakah keluarga &amp; teman Anda sedang kesulitan keuangan?</p>
+      <p class="share-text">Bisa jadi penyebab kesulitan keuangan adalah catatan keuangan yang kacau. Bantu keluarga dan teman mengatur keuangan mereka dengan app ini.</p>
+      <div class="share-grid" id="share-grid">
+        <a class="share-item" data-share="whatsapp" target="_blank" rel="noopener noreferrer"><span class="share-emoji">💬</span><span>WhatsApp</span></a>
+        <a class="share-item" data-share="facebook" target="_blank" rel="noopener noreferrer"><span class="share-emoji">📘</span><span>Facebook</span></a>
+        <a class="share-item" data-share="telegram" target="_blank" rel="noopener noreferrer"><span class="share-emoji">✈️</span><span>Telegram</span></a>
+        <a class="share-item" data-share="x" target="_blank" rel="noopener noreferrer"><span class="share-emoji">𝕏</span><span>X</span></a>
+        <a class="share-item" data-share="linkedin" target="_blank" rel="noopener noreferrer"><span class="share-emoji">💼</span><span>LinkedIn</span></a>
+        <a class="share-item" data-share="email" target="_blank" rel="noopener noreferrer"><span class="share-emoji">✉️</span><span>Email</span></a>
+        <button type="button" class="share-item" id="share-native"><span class="share-emoji">📲</span><span>Instagram, Slack &amp; lainnya</span></button>
+        <button type="button" class="share-item" id="share-copy"><span class="share-emoji">🔗</span><span>Salin tautan</span></button>
+      </div>
+      <div id="share-msg" class="settings-msg" role="status" aria-live="polite"></div>
     </div>
   </dialog>
 
@@ -733,5 +767,6 @@
   <script src="js/10-visitor-tracker.js"></script>
   <script src="js/11-admin-analytics.js"></script>
   <script src="js/12-settings.js"></script>
+  <script src="js/13-share.js"></script>
 </body>
 </html>

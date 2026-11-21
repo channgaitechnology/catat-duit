@@ -364,6 +364,16 @@ const I18N_EN = {
   /* ---------- Panel Pengaturan ---------- */
   'Lunas': 'Settled',
   'Profil': 'Profile',
+  'Bantu keluarga & teman': 'Help family & friends',
+  'Ada yang sedang kesulitan mengatur uang?': 'Is someone struggling to manage their money?',
+  'BERBAGI KEBAIKAN': 'SHARE THE GOOD',
+  'Apakah keluarga & teman Anda sedang kesulitan keuangan?': 'Are your family & friends struggling financially?',
+  'Bisa jadi penyebab kesulitan keuangan adalah catatan keuangan yang kacau. Bantu keluarga dan teman mengatur keuangan mereka dengan app ini.':
+    'The cause of financial difficulty may be messy financial records. Help your family and friends manage their money with this app.',
+  'Instagram, Slack & lainnya': 'Instagram, Slack & more',
+  'Salin tautan': 'Copy link',
+  'Tautan disalin. Tinggal tempel di chat atau media sosial.': 'Link copied. Just paste it into a chat or social media.',
+  'Salin tautan ini:': 'Copy this link:',
   '✓ Tersimpan': '✓ Saved',
   '👤 Profil': '👤 Profile',
   'Email akun': 'Account email',

@@ -515,6 +515,9 @@
 
       <div id="settings-home">
         <div class="settings-grid">
+          <button type="button" class="settings-tile" data-settings-sub="profil">
+            <span class="settings-tile-emoji">👤</span><span class="settings-tile-label">Profil</span>
+          </button>
           <button type="button" class="settings-tile" data-settings-sub="keamanan">
             <span class="settings-tile-emoji">🔒</span><span class="settings-tile-label">Keamanan Akun</span>
           </button>
@@ -526,6 +529,23 @@
 
       <div id="settings-subview" hidden>
         <button type="button" class="settings-sub-back" id="settings-back">‹ Kembali</button>
+
+        <div class="settings-sub-panel" id="settings-sub-profil">
+          <div class="settings-account-box">
+            <small>Email akun</small>
+            <strong id="profile-panel-email">-</strong>
+          </div>
+          <div class="settings-account-box">
+            <small>Terdaftar sejak</small>
+            <strong id="profile-panel-since">-</strong>
+          </div>
+          <label for="settings-display-name">Nama pengguna</label>
+          <div class="settings-inline">
+            <input id="settings-display-name" type="text" maxlength="40" autocomplete="nickname" placeholder="Nama yang ditampilkan">
+            <button type="button" class="secondary-button" id="settings-save-name">Simpan</button>
+          </div>
+          <div id="settings-profile-msg" class="settings-msg" role="status" aria-live="polite"></div>
+        </div>
 
         <div class="settings-sub-panel" id="settings-sub-keamanan">
           <div class="settings-account-box">

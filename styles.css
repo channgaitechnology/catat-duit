@@ -1241,3 +1241,5 @@ html.desktop-site-mode .auth-screen {
 .catat-manage-btn { margin-top: 14px; width: 100%; max-width: 640px; justify-content: center; }
 .settings-grid { grid-template-columns: repeat(2, 1fr); }
 .settings-tile-emoji { font-size: 40px; }
+.settings-grid { grid-template-columns: repeat(3, 1fr); }
+.settings-tile-emoji { font-size: 34px; }

@@ -363,6 +363,15 @@ const I18N_EN = {
 
   /* ---------- Panel Pengaturan ---------- */
   'Lunas': 'Settled',
+  'Profil': 'Profile',
+  '👤 Profil': '👤 Profile',
+  'Email akun': 'Account email',
+  'Terdaftar sejak': 'Registered since',
+  'Nama pengguna': 'Username',
+  'Nama yang ditampilkan': 'Display name',
+  'Nama maksimal 40 karakter.': 'Name must be at most 40 characters.',
+  'Nama berhasil disimpan.': 'Name saved successfully.',
+  'Nama dikembalikan ke nama dari email.': 'Name reset to the one from your email.',
   'Pengaturan Akun': 'Account Settings',
   'Pengaturan Umum': 'General Settings',
   'Keamanan Akun': 'Account Security',

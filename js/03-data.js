@@ -76,26 +76,44 @@ async function syncOfflineQueue() {
   }
 }
 
-async function showApp(user) {
-  activeUser = user;
-  setCachedData(STORAGE_KEY_USER, { id: user.id, email: user.email });
+// Nama tampilan: pilihan pengguna (disimpan di metadata akun Supabase) atau bagian depan email.
+function getDisplayName(user) {
+  const custom = user && user.user_metadata && typeof user.user_metadata.display_name === 'string'
+    ? user.user_metadata.display_name.trim() : '';
+  if (custom) return custom;
+  if (user && user.name) return user.name; // dari cache offline
+  const email = (user && user.email) || '';
+  return email ? email.split('@')[0] : 'Akun Catat Duit';
+}
 
-  if (authView) authView.hidden = true;
-  if (appShell) appShell.hidden = false;
-  const email = user.email || 'Akun Catat Duit';
+function applyUserIdentity(user) {
+  const name = getDisplayName(user);
+  const email = user.email || '';
   const profileEmail = document.querySelector('#profile-email');
-  if (profileEmail) profileEmail.textContent = email;
-
-  const initial = (email[0] || 'C').toUpperCase();
+  if (profileEmail) profileEmail.textContent = name;
+  const initial = ((name[0] || email[0] || 'C')).toUpperCase();
   const avatarEl = document.querySelector('#profile-avatar');
   if (avatarEl) avatarEl.textContent = initial;
   const avatarSmallEl = document.querySelector('#profile-avatar-small');
   if (avatarSmallEl) avatarSmallEl.textContent = initial;
-
   const welcomeTitle = document.querySelector('#welcome-title');
   if (welcomeTitle) {
-    welcomeTitle.innerHTML = `Halo, ${escapeHtml(email.split('@')[0])} <span class="wave">✳</span>`;
+    welcomeTitle.innerHTML = `Halo, ${escapeHtml(name)} <span class="wave">✳</span>`;
   }
+}
+
+async function showApp(user) {
+  activeUser = user;
+  setCachedData(STORAGE_KEY_USER, {
+    id: user.id,
+    email: user.email,
+    name: getDisplayName(user) === (user.email || '').split('@')[0] ? '' : getDisplayName(user),
+    created_at: user.created_at || (getCachedData(STORAGE_KEY_USER, null) || {}).created_at || ''
+  });
+
+  if (authView) authView.hidden = true;
+  if (appShell) appShell.hidden = false;
+  applyUserIdentity(user);
 
   if (typeof setupRealtime === 'function') setupRealtime(user.id);
   // Menu Analitik hanya untuk admin platform; penentuan admin dilakukan server (tidak memblokir aplikasi)

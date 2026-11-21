@@ -364,6 +364,7 @@ const I18N_EN = {
   /* ---------- Panel Pengaturan ---------- */
   'Lunas': 'Settled',
   'Profil': 'Profile',
+  '✓ Tersimpan': '✓ Saved',
   '👤 Profil': '👤 Profile',
   'Email akun': 'Account email',
   'Terdaftar sejak': 'Registered since',

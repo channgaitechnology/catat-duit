@@ -1243,3 +1243,4 @@ html.desktop-site-mode .auth-screen {
 .settings-tile-emoji { font-size: 40px; }
 .settings-grid { grid-template-columns: repeat(3, 1fr); }
 .settings-tile-emoji { font-size: 34px; }
+#settings-save-name.saved, #settings-save-name:disabled { background: #eef4e6; color: #3f7d2c; border-color: #cfe0bd; cursor: default; opacity: 1; }

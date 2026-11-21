@@ -51,6 +51,19 @@ function formatRegisteredSince(iso) {
   return new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
 }
 
+// Tombol Simpan nama: aktif hanya bila ada perubahan; setelah tersimpan berubah jadi "✓ Tersimpan".
+let savedDisplayName = '';
+function updateNameButton(justSaved = false) {
+  const btn = document.querySelector('#settings-save-name');
+  const input = document.querySelector('#settings-display-name');
+  if (!btn || !input) return;
+  const clean = input.value.replace(/\s+/g, ' ').trim();
+  const unchanged = clean === savedDisplayName;
+  btn.disabled = unchanged;
+  btn.classList.toggle('saved', unchanged);
+  btn.textContent = t(unchanged ? '✓ Tersimpan' : 'Simpan');
+}
+
 function fillProfilePanel() {
   const cached = getCachedData(STORAGE_KEY_USER, null) || {};
   const user = activeUser || {};
@@ -62,7 +75,9 @@ function fillProfilePanel() {
   if (nameInput) {
     const custom = user.user_metadata && user.user_metadata.display_name;
     nameInput.value = custom || cached.name || '';
+    savedDisplayName = nameInput.value.trim();
   }
+  updateNameButton();
 }
 
 async function saveDisplayName() {
@@ -81,10 +96,17 @@ async function saveDisplayName() {
     const cached = getCachedData(STORAGE_KEY_USER, null) || {};
     setCachedData(STORAGE_KEY_USER, { ...cached, name });
   }
+  savedDisplayName = name;
+  if (input) input.value = name;
+  updateNameButton(true);
   msg(name ? 'Nama berhasil disimpan.' : 'Nama dikembalikan ke nama dari email.', 'success');
 }
 
 document.querySelector('#settings-save-name')?.addEventListener('click', saveDisplayName);
+document.querySelector('#settings-display-name')?.addEventListener('input', () => {
+  updateNameButton();
+  setSettingsMessage('', '', '#settings-profile-msg'); // pesan lama hilang saat mulai mengetik lagi
+});
 document.querySelector('#settings-display-name')?.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); saveDisplayName(); }
 });

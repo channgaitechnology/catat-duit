@@ -34,7 +34,7 @@ Dokumen ini menjelaskan cara menghubungkan layanan email [Resend](https://resend
 |---|---|---|
 | `RESEND_API_KEY` | `re_123456789...` | API Key dari dashboard Resend |
 | `ADMIN_NOTIFY_EMAIL` | `email-admin@domain.com` | Email akun Resend Anda (tujuan notifikasi) |
-| `NOTIFY_WEBHOOK_SECRET` | *(string acak bebas)* | Secret opsional untuk memvalidasi pemanggil webhook (header `X-Webhook-Secret`) |
+| `NOTIFY_WEBHOOK_SECRET` | *(string acak panjang)* | **Wajib.** Secret acak panjang (mis. `openssl rand -hex 32`) untuk memvalidasi pemanggil (header `X-Webhook-Secret`). Tanpa variabel ini fungsi menolak semua permintaan (HTTP 500). |
 | `RESEND_FROM_EMAIL` | *(opsional)* `Catat Duit <onboarding@resend.dev>` | Alamat pengirim (gunakan default jika belum punya custom domain) |
 
 ---

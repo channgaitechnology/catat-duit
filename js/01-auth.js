@@ -48,10 +48,10 @@ function setAuthMode(mode) {
   if (backChoice) backChoice.hidden = choose || reset;
 
   const authTitle = document.querySelector('#auth-title');
-  if (authTitle) authTitle.textContent = choose ? 'Selamat datang' : signup ? 'Buat akun Catat Duit' : forgot ? 'Reset kata sandi' : reset ? 'Buat kata sandi baru' : 'Masuk ke Catat Duit';
+  if (authTitle) authTitle.textContent = choose ? 'Selamat datang' : signup ? 'Buat akun Lacak Duit' : forgot ? 'Reset kata sandi' : reset ? 'Buat kata sandi baru' : 'Masuk ke Lacak Duit';
 
   const authDesc = document.querySelector('#auth-description');
-  if (authDesc) authDesc.textContent = choose ? 'Masuk atau daftar untuk mulai mencatat.' : reset ? 'Masukkan kata sandi baru untuk akun Anda.' : 'Gunakan akun Catat Duit Anda.';
+  if (authDesc) authDesc.textContent = choose ? 'Masuk atau daftar untuk mulai mencatat.' : reset ? 'Masukkan kata sandi baru untuk akun Anda.' : 'Gunakan akun Lacak Duit Anda.';
 
   const authSubmitBtn = document.querySelector('#auth-submit');
   if (authSubmitBtn) authSubmitBtn.textContent = signup ? 'Daftar' : forgot ? 'Kirim tautan reset' : reset ? 'Simpan kata sandi' : 'Masuk';

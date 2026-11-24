@@ -83,7 +83,7 @@ function getDisplayName(user) {
   if (custom) return custom;
   if (user && user.name) return user.name; // dari cache offline
   const email = (user && user.email) || '';
-  return email ? email.split('@')[0] : 'Akun Catat Duit';
+  return email ? email.split('@')[0] : 'Akun Lacak Duit';
 }
 
 function applyUserIdentity(user) {

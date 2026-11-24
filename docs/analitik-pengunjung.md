@@ -27,7 +27,7 @@ sama sekali). Isinya:
 
 ## Langkah pasang (sekali saja)
 
-Buka **Supabase → proyek Catat Duit → SQL Editor**, ganti
+Buka **Supabase → proyek Lacak Duit → SQL Editor**, ganti
 `EMAIL_ADMIN_ANDA@contoh.com` dengan email admin (huruf kecil semua), lalu
 jalankan **bagian 1** dan **bagian 2**.
 

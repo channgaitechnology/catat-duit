@@ -219,7 +219,7 @@ function renderAnalyticsView() {
   if (!host || !isPlatformAdmin) return;
   host.innerHTML = `<div class="panel">
     <div class="panel-heading">
-      <div><h3>📊 Analitik Catat Duit</h3><p>Panel ini hanya terlihat oleh admin platform.</p></div>
+      <div><h3>📊 Analitik Lacak Duit</h3><p>Panel ini hanya terlihat oleh admin platform.</p></div>
       <button class="primary-button" id="an-refresh" type="button">🔄 Refresh</button>
     </div>
 

@@ -90,12 +90,12 @@ exports.handler = async (event) => {
     };
   }
 
-  const subject = sanitizeSubject(body.subject) || 'Notifikasi Baru Catat Duit';
+  const subject = sanitizeSubject(body.subject) || 'Notifikasi Baru Lacak Duit';
   const message = typeof body.message === 'string' && body.message
     ? body.message
-    : (body.record ? describeRecord(body) : 'Ada aktivitas baru pada aplikasi Catat Duit.');
+    : (body.record ? describeRecord(body) : 'Ada aktivitas baru pada aplikasi Lacak Duit.');
   const safeMessage = message.slice(0, MAX_MESSAGE_LENGTH);
-  const fromAddress = process.env.RESEND_FROM_EMAIL || 'Catat Duit <onboarding@resend.dev>';
+  const fromAddress = process.env.RESEND_FROM_EMAIL || 'Lacak Duit <onboarding@resend.dev>';
 
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -111,10 +111,10 @@ exports.handler = async (event) => {
         text: safeMessage,
         html: `
           <div style="font-family: sans-serif; line-height: 1.5; color: #202b23; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #496333; margin-top: 0;">Catat Duit — Notifikasi Admin</h2>
+            <h2 style="color: #496333; margin-top: 0;">Lacak Duit — Notifikasi Admin</h2>
             <p>${escapeHtml(safeMessage).replace(/\n/g, '<br/>')}</p>
             <hr style="border: 0; border-top: 1px solid #e2e8e0; margin: 20px 0;" />
-            <small style="color: #889489;">Dikirim otomatis oleh Netlify Functions & Resend untuk Catat Duit.</small>
+            <small style="color: #889489;">Dikirim otomatis oleh Netlify Functions & Resend untuk Lacak Duit.</small>
           </div>
         `
       })

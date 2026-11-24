@@ -114,7 +114,7 @@ function exportToExcel(reportData) {
   </head>
   <body>
     <table>
-      <tr><td colspan="5" class="header-title">${t('LAPORAN KEUANGAN - CATAT DUIT')}</td></tr>
+      <tr><td colspan="5" class="header-title">${t('LAPORAN KEUANGAN - LACAK DUIT')}</td></tr>
       <tr><td colspan="5" class="header-sub">${t('Akun:')} ${escapeHtml(userEmail)} | ${t('Periode:')} ${escapeHtml(periodLabel)}</td></tr>
       <tr><td colspan="5" class="header-sub">${t('Dibuat pada:')} ${new Date().toLocaleString(APP_LOCALE)}</td></tr>
       <tr><td colspan="5"></td></tr>
@@ -198,7 +198,7 @@ function exportToExcel(reportData) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Laporan_Keuangan_CatatDuit_${periodLabel.replace(/\s+/g, '_')}.xls`;
+  a.download = `Laporan_Keuangan_LacakDuit_${periodLabel.replace(/\s+/g, '_')}.xls`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -251,7 +251,7 @@ function exportToPDF(reportData) {
   <body>
     <div class="header">
       <div>
-        <h1>Catat Duit.</h1>
+        <h1>Lacak Duit.</h1>
         <p>${t('Laporan Rekapitulasi Keuangan & Transaksi')}</p>
       </div>
       <div style="text-align: right;">
@@ -328,7 +328,7 @@ function exportToPDF(reportData) {
     </table>
 
     <div class="footer-note">
-      ${t('Dicetak secara otomatis dari Catat Duit • Uang adalah energi hidupmu.')}
+      ${t('Dicetak secara otomatis dari Lacak Duit • Uang adalah energi hidupmu.')}
     </div>
 
     <script>
@@ -373,7 +373,7 @@ function exportToJPG(reportData) {
 
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.fillText(t('Catat Duit — Laporan Keuangan'), 40, 52);
+  ctx.fillText(t('Lacak Duit — Laporan Keuangan'), 40, 52);
 
   ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   ctx.fillStyle = '#d2e3d3';
@@ -511,13 +511,13 @@ function exportToJPG(reportData) {
   curY += 25;
   ctx.fillStyle = '#829488';
   ctx.font = '12px sans-serif';
-  ctx.fillText(t('Dicetak secara otomatis dari Catat Duit • Uang adalah energi hidupmu.'), 40, curY);
+  ctx.fillText(t('Dicetak secara otomatis dari Lacak Duit • Uang adalah energi hidupmu.'), 40, curY);
 
   // Convert to JPG download
   const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
   const a = document.createElement('a');
   a.href = dataUrl;
-  a.download = `Laporan_Keuangan_CatatDuit_${periodLabel.replace(/\s+/g, '_')}.jpg`;
+  a.download = `Laporan_Keuangan_LacakDuit_${periodLabel.replace(/\s+/g, '_')}.jpg`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

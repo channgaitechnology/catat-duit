@@ -14,14 +14,14 @@ var APP_LOCALE = currentLang === 'en' ? 'en-GB' : 'id-ID';
 
 const I18N_EN = {
   /* ---------- Judul halaman ---------- */
-  'Catat Duit — uang sebagai energi hidup': 'Catat Duit — money as life energy',
+  'Lacak Duit — uang sebagai energi hidup': 'Lacak Duit — money as life energy',
 
   /* ---------- Halaman login: panel informasi ---------- */
   'KEUANGAN PRIBADI SADAR ENERGI': 'ENERGY-AWARE PERSONAL FINANCE',
   'Uang bukan sekadar angka,': 'Money is not just numbers,',
   'ia adalah energi hidupmu.': 'it is your life energy.',
-  'Catat Duit dirancang untuk membangun kesadaran finansial yang tenang, bukan menambah kecemasan. Pantau arus kas harian dan ketahui secara nyata seberapa jauh energi keuangan Anda mampu menopang ritme hidup.':
-    'Catat Duit is designed to build calm financial awareness, not add anxiety. Track your daily cash flow and see how far your financial energy can really sustain your lifestyle.',
+  'Lacak Duit dirancang untuk membangun kesadaran finansial yang tenang, bukan menambah kecemasan. Pantau arus kas harian dan ketahui secara nyata seberapa jauh energi keuangan Anda mampu menopang ritme hidup.':
+    'Lacak Duit is designed to build calm financial awareness, not add anxiety. Track your daily cash flow and see how far your financial energy can really sustain your lifestyle.',
   'Runway Keuangan': 'Financial Runway',
   'Estimasi cerdas berapa bulan dan hari dana likuid Anda mampu menopang gaya hidup berdasarkan rata-rata pengeluaran nyata.':
     'A smart estimate of how many months and days your liquid funds can sustain your lifestyle, based on your real average spending.',
@@ -60,12 +60,12 @@ const I18N_EN = {
   'Lupa kata sandi?': 'Forgot password?',
   'Kembali ke Masuk': 'Back to Sign in',
   'Data keuangan tersimpan aman & terisolasi pada akun Anda.': 'Your financial data is stored securely and isolated per account.',
-  'Buat akun Catat Duit': 'Create your Catat Duit account',
+  'Buat akun Lacak Duit': 'Create your Lacak Duit account',
   'Reset kata sandi': 'Reset password',
   'Buat kata sandi baru': 'Create a new password',
-  'Masuk ke Catat Duit': 'Sign in to Catat Duit',
+  'Masuk ke Lacak Duit': 'Sign in to Lacak Duit',
   'Masukkan kata sandi baru untuk akun Anda.': 'Enter a new password for your account.',
-  'Gunakan akun Catat Duit Anda.': 'Use your Catat Duit account.',
+  'Gunakan akun Lacak Duit Anda.': 'Use your Lacak Duit account.',
   'Kirim tautan reset': 'Send reset link',
   'Simpan kata sandi': 'Save password',
   'Memproses…': 'Processing…',
@@ -94,7 +94,7 @@ const I18N_EN = {
   'Analitik': 'Analytics',
   'RUANG PERSONAL': 'PERSONAL SPACE',
   'Akun': 'Account',
-  'Akun Catat Duit': 'Catat Duit account',
+  'Akun Lacak Duit': 'Lacak Duit account',
   'Keluar': 'Sign out',
   'Data tersimpan aman': 'Data stored securely',
   'Tersinkron antar perangkat': 'Synced across devices',
@@ -292,7 +292,7 @@ const I18N_EN = {
     'ℹ The report includes a recap of all transactions and a ranking of the biggest expenses by category.',
   'Unduh Sekarang': 'Download Now',
   'Popup diblokir oleh browser. Izinkan popup untuk mencetak/menyimpan PDF.': 'The popup was blocked by the browser. Allow popups to print/save the PDF.',
-  'Catat Duit — Laporan Keuangan': 'Catat Duit — Financial Report',
+  'Lacak Duit — Laporan Keuangan': 'Lacak Duit — Financial Report',
   'Total Uang Masuk': 'Total Money In',
   'Total Uang Keluar': 'Total Money Out',
   'Arus Kas Bersih': 'Net Cash Flow',
@@ -304,8 +304,8 @@ const I18N_EN = {
   'NAMA TRANSAKSI': 'TRANSACTION NAME',
   'NOMINAL (RP)': 'AMOUNT (RP)',
   'Tidak ada transaksi ditemukan pada periode ini.': 'No transactions found in this period.',
-  'Dicetak secara otomatis dari Catat Duit • Uang adalah energi hidupmu.': 'Automatically printed from Catat Duit • Money is your life energy.',
-  'LAPORAN KEUANGAN - CATAT DUIT': 'FINANCIAL REPORT - CATAT DUIT',
+  'Dicetak secara otomatis dari Lacak Duit • Uang adalah energi hidupmu.': 'Automatically printed from Lacak Duit • Money is your life energy.',
+  'LAPORAN KEUANGAN - LACAK DUIT': 'FINANCIAL REPORT - LACAK DUIT',
   '1. RINGKASAN & RANKING PENGELUARAN TERBESAR': '1. SUMMARY & TOP SPENDING RANKING',
   'Peringkat': 'Rank',
   'Kategori Pengeluaran': 'Spending Category',
@@ -424,7 +424,7 @@ const I18N_EN = {
   'Belum ada data halaman.': 'No page data yet.',
   'Sedang memuat data analitik...': 'Loading analytics data...',
   'Memuat daftar akun...': 'Loading account list...',
-  '📊 Analitik Catat Duit': '📊 Catat Duit Analytics',
+  '📊 Analitik Lacak Duit': '📊 Lacak Duit Analytics',
   'Panel ini hanya terlihat oleh admin platform.': 'This panel is only visible to platform admins.',
   '🔄 Refresh': '🔄 Refresh',
   'Pengguna Terdaftar': 'Registered Users',

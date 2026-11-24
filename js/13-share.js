@@ -4,10 +4,10 @@
 // Instagram & Slack tidak punya tautan berbagi web, jadi dilayani lewat menu berbagi bawaan HP
 // (navigator.share) atau "Salin tautan".
 
-const SHARE_URL = 'https://catat-duit-keuangan.netlify.app/';
-const SHARE_TITLE = 'Catat Duit';
-const SHARE_TEXT_ID = 'Lagi kesulitan mengatur uang? Bisa jadi penyebabnya catatan keuangan yang kacau. Coba pakai Catat Duit, aplikasi catatan keuangan yang simpel dan gratis. Semoga membantu:';
-const SHARE_TEXT_EN = 'Struggling with money? The cause might be messy financial records. Try Catat Duit, a simple, free finance tracker. Hope it helps:';
+const SHARE_URL = 'https://lacakduit.asia/';
+const SHARE_TITLE = 'Lacak Duit';
+const SHARE_TEXT_ID = 'Lagi kesulitan mengatur uang? Bisa jadi penyebabnya catatan keuangan yang kacau. Coba pakai Lacak Duit, aplikasi catatan keuangan yang simpel dan gratis. Semoga membantu:';
+const SHARE_TEXT_EN = 'Struggling with money? The cause might be messy financial records. Try Lacak Duit, a simple, free finance tracker. Hope it helps:';
 
 const shareDialog = document.querySelector('#share-dialog');
 

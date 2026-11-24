@@ -1,6 +1,6 @@
-# Panduan Integrasi Email Resend Catat Duit
+# Panduan Integrasi Email Resend Lacak Duit
 
-Dokumen ini menjelaskan cara menghubungkan layanan email [Resend](https://resend.com/) dengan aplikasi Catat Duit melalui Netlify Functions.
+Dokumen ini menjelaskan cara menghubungkan layanan email [Resend](https://resend.com/) dengan aplikasi Lacak Duit melalui Netlify Functions.
 
 ---
 
@@ -35,7 +35,7 @@ Dokumen ini menjelaskan cara menghubungkan layanan email [Resend](https://resend
 | `RESEND_API_KEY` | `re_123456789...` | API Key dari dashboard Resend |
 | `ADMIN_NOTIFY_EMAIL` | `email-admin@domain.com` | Email akun Resend Anda (tujuan notifikasi) |
 | `NOTIFY_WEBHOOK_SECRET` | *(string acak panjang)* | **Wajib.** Secret acak panjang (mis. `openssl rand -hex 32`) untuk memvalidasi pemanggil (header `X-Webhook-Secret`). Tanpa variabel ini fungsi menolak semua permintaan (HTTP 500). |
-| `RESEND_FROM_EMAIL` | *(opsional)* `Catat Duit <onboarding@resend.dev>` | Alamat pengirim (gunakan default jika belum punya custom domain) |
+| `RESEND_FROM_EMAIL` | *(opsional)* `Lacak Duit <onboarding@resend.dev>` | Alamat pengirim (gunakan default jika belum punya custom domain) |
 
 ---
 
@@ -43,10 +43,10 @@ Dokumen ini menjelaskan cara menghubungkan layanan email [Resend](https://resend
 
 ### Menggunakan cURL
 ```bash
-curl -X POST https://catat-duit-keuangan.netlify.app/.netlify/functions/notify-admin \
+curl -X POST https://lacakduit.asia/.netlify/functions/notify-admin \
   -H "Content-Type: application/json" \
   -H "X-Webhook-Secret: <NOTIFY_WEBHOOK_SECRET>" \
-  -d '{"subject": "Uji Coba Notifikasi", "message": "Email notifikasi Resend berhasil terkirim dari Catat Duit!"}'
+  -d '{"subject": "Uji Coba Notifikasi", "message": "Email notifikasi Resend berhasil terkirim dari Lacak Duit!"}'
 ```
 
 ### Menggunakan Supabase Database Webhook (Opsional)
@@ -54,5 +54,5 @@ Jika Anda ingin menerima email saat ada data transaksi baru masuk:
 1. Buka **Supabase Dashboard** > **Database** > **Webhooks**.
 2. Klik **Create a new webhook**.
 3. Pilih tabel `finance_records` dan event `Insert`.
-4. URL tujuan: `https://catat-duit-keuangan.netlify.app/.netlify/functions/notify-admin`.
+4. URL tujuan: `https://lacakduit.asia/.netlify/functions/notify-admin`.
 5. Tambahkan HTTP Header: `X-Webhook-Secret: <nilai NOTIFY_WEBHOOK_SECRET>`.

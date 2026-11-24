@@ -108,7 +108,7 @@ document.querySelectorAll('[data-view]').forEach(button => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then((reg) => {
-      console.log('Catat Duit PWA Service Worker registered:', reg.scope);
+      console.log('Lacak Duit PWA Service Worker registered:', reg.scope);
 
       // Cek pembaruan berkala dan saat halaman dimuat
       reg.update();

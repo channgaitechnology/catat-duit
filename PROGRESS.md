@@ -50,3 +50,9 @@ Catat Duit belum meniru konfigurasi tersebut. Untuk melayani email Auth ke pengg
 - Repo ini publik. Jangan menambahkan kata sandi, App Password, API key, service-role key, token, webhook secret, atau environment file.
 - Frontend hanya boleh memakai Supabase publishable key. Semua kredensial server harus tersimpan pada environment variable provider yang sesuai.
 - Database harus mempertahankan RLS yang membatasi baris ke pemiliknya.
+
+## 2026-11-24 — Ganti nama menjadi Lacak Duit & domain lacakduit.asia
+- Nama tampilan "Catat Duit" → "Lacak Duit" (HTML, manifest, kamus i18n, laporan, tautan bagikan, docs). Domain: `lacakduit.asia`.
+- Identifier internal sengaja tidak diubah (kunci localStorage `catatduit_*`, `window.catatduit`, nama repo) agar data lokal dan hook tes tetap aman.
+- Cache service worker: `lacakduit-v22`.
+- Langkah manual: lihat bagian 3 di `docs/setup-supabase-url.md` (Netlify domain, Supabase Site URL/Redirect URLs, Resend).

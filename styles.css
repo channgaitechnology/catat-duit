@@ -1300,3 +1300,4 @@ html.desktop-site-mode .auth-screen {
   .share-top-button .settings-button-text { max-width: 78px; }
   .network-badge { font-size: 9px; }
 }
+.share-label { font: 700 11px var(--sans); color: #738075; margin: 0 0 8px; }

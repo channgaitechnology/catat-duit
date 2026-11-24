@@ -372,6 +372,7 @@ const I18N_EN = {
     'The cause of financial difficulty may be messy financial records. Help your family and friends manage their money with this app.',
   'Instagram, Slack & lainnya': 'Instagram, Slack & more',
   'Salin tautan': 'Copy link',
+  'Bagikan ke:': 'Share to:',
   'Tautan disalin. Tinggal tempel di chat atau media sosial.': 'Link copied. Just paste it into a chat or social media.',
   'Salin tautan ini:': 'Copy this link:',
   '✓ Tersimpan': '✓ Saved',

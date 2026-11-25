@@ -13,6 +13,7 @@ const reportForm = document.querySelector('#report-form');
 
 if (openReportBtn && reportDialog) {
   openReportBtn.addEventListener('click', () => {
+    if (typeof requireProFeature === 'function' && !requireProFeature('export')) return;
     const curMonth = today().slice(0, 7);
     if (reportMonthInput) reportMonthInput.value = curMonth;
     if (reportStartDate) reportStartDate.value = `${curMonth}-01`;
@@ -526,6 +527,10 @@ function exportToJPG(reportData) {
 if (reportForm) {
   reportForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (typeof requireProFeature === 'function' && !requireProFeature('export')) {
+      if (reportDialog && reportDialog.open) reportDialog.close();
+      return;
+    }
     const format = document.querySelector('#report-format-select')?.value || 'excel';
     const reportData = getFilteredTransactionsForReport();
 

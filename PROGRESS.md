@@ -56,3 +56,8 @@ Catat Duit belum meniru konfigurasi tersebut. Untuk melayani email Auth ke pengg
 - Identifier internal sengaja tidak diubah (kunci localStorage `catatduit_*`, `window.catatduit`, nama repo) agar data lokal dan hook tes tetap aman.
 - Cache service worker: `lacakduit-v22`.
 - Langkah manual: lihat bagian 3 di `docs/setup-supabase-url.md` (Netlify domain, Supabase Site URL/Redirect URLs, Resend).
+
+## 2026-11-25 — Paywall Lacak Duit Pro
+- Tambah `js/14-subscription.js`, `docs/migrasi-langganan.sql`, panel Pembayaran Pro di Analitik, gate unduh laporan, banner trial. SW v24.
+- Panduan email: `docs/setup-email-auth.md`.
+- Menunggu: jalankan SQL migrasi, isi `app_config`, pasang SMTP.

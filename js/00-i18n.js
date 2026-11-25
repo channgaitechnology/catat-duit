@@ -13,6 +13,39 @@ var currentLang = (function () {
 var APP_LOCALE = currentLang === 'en' ? 'en-GB' : 'id-ID';
 
 const I18N_EN = {
+  /* ---------- Langganan Pro ---------- */
+  '⭐ Langganan': '⭐ Subscription',
+  'Langganan': 'Subscription',
+  'Coba Pro Gratis 30 Hari': 'Try Pro Free for 30 Days',
+  'Lihat paket': 'See plans',
+  'Aktifkan Pro': 'Activate Pro',
+  'Perpanjang': 'Renew',
+  'Lihat paket Pro': 'See Pro plans',
+  'Masa coba Pro sudah berakhir': 'Your Pro trial has ended',
+  'Semua fitur Pro terbuka selama masa coba. Mencatat tetap gratis selamanya.': 'All Pro features are open during the trial. Tracking stays free forever.',
+  'Mencatat dan melihat semua datamu tetap gratis. Unduh laporan butuh Pro.': 'Tracking and viewing all your data stays free. Downloading reports needs Pro.',
+  'Perpanjang supaya unduh laporan tetap terbuka.': 'Renew to keep report downloads unlocked.',
+  'Status': 'Status',
+  'Berlaku sampai': 'Valid until',
+  'LACAK DUIT PRO': 'LACAK DUIT PRO',
+  'Buka fitur Pro': 'Unlock Pro features',
+  'Lanjut ke pembayaran': 'Continue to payment',
+  'Salin': 'Copy',
+  'Cek status pembayaran': 'Check payment status',
+  'Ganti paket / batalkan tagihan': 'Change plan / cancel invoice',
+  'Transfer tepat sejumlah': 'Transfer exactly',
+  'Status: menunggu verifikasi admin': 'Status: waiting for admin verification',
+  'Saya sudah transfer: konfirmasi lewat WhatsApp': 'I have paid: confirm via WhatsApp',
+  'Mencatat transaksi, runway, utang-piutang, dan aset gratis selamanya. Pro membuka fitur tambahan seperti unduh laporan.': 'Tracking transactions, runway, debts and assets is free forever. Pro unlocks extras such as report downloads.',
+  '✓ Unduh laporan Excel, PDF & JPG': '✓ Download Excel, PDF & JPG reports',
+  '✓ Fitur Pro berikutnya ikut terbuka tanpa bayar lagi': '✓ Future Pro features unlock at no extra cost',
+  '✓ Mencatat, runway, utang-piutang & aset tetap gratis selamanya': '✓ Tracking, runway, debts & assets stay free forever',
+  'Pembayaran lewat transfer/QRIS. Pro aktif setelah pembayaranmu diverifikasi admin.': 'Pay by transfer/QRIS. Pro is activated once an admin verifies your payment.',
+  'Pembayaran Pro': 'Pro payments',
+  'Setujui': 'Approve',
+  'Tolak': 'Reject',
+  'Beri': 'Grant',
+
   /* ---------- Judul halaman ---------- */
   'Lacak Duit — uang sebagai energi hidup': 'Lacak Duit — money as life energy',
 

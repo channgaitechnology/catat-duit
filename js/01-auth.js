@@ -90,6 +90,7 @@ function showLogin() {
   cleanupRealtime();
   activeUser = null;
   if (typeof setPlatformAdmin === 'function') setPlatformAdmin(false);
+  if (typeof resetSubscriptionState === 'function') resetSubscriptionState();
   if (appShell) appShell.hidden = true;
   if (authView) authView.hidden = false;
   setAuthMode('choose');

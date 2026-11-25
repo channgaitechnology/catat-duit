@@ -96,6 +96,7 @@
           <div class="perk-pill">⚡ <span>Bisa Diakses Offline (PWA)</span></div>
           <div class="perk-pill">🔒 <span>Privasi Aman Terenkripsi RLS</span></div>
           <div class="perk-pill">🌿 <span>Bebas Iklan & Ringan</span></div>
+          <div class="perk-pill">🎁 <span>Coba Pro Gratis 30 Hari</span></div>
         </div>
       </div>
 
@@ -176,6 +177,7 @@
 
       <!-- VIEW 1: RINGKASAN (Overview) -->
       <section class="view active" id="view-overview">
+        <div id="sub-banner" class="sub-banner" hidden></div>
         <div class="page-heading">
           <div>
             <div class="eyebrow"><span class="eyebrow-line"></span> KEUANGAN SADAR ENERGI</div>
@@ -525,6 +527,9 @@
           <button type="button" class="settings-tile" data-settings-sub="bahasa">
             <span class="settings-tile-emoji">🌐</span><span class="settings-tile-label">Bahasa</span>
           </button>
+          <button type="button" class="settings-tile" data-settings-sub="langganan">
+            <span class="settings-tile-emoji">⭐</span><span class="settings-tile-label">Langganan</span>
+          </button>
         </div>
       </div>
 
@@ -546,6 +551,19 @@
             <button type="button" class="secondary-button" id="settings-save-name">Simpan</button>
           </div>
           <div id="settings-profile-msg" class="settings-msg" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="settings-sub-panel" id="settings-sub-langganan">
+          <div class="settings-account-box">
+            <small>Status</small>
+            <strong id="sub-status-text">-</strong>
+          </div>
+          <div class="settings-account-box">
+            <small>Berlaku sampai</small>
+            <strong id="sub-status-until">-</strong>
+          </div>
+          <p class="settings-hint">Mencatat transaksi, runway, utang-piutang, dan aset gratis selamanya. Pro membuka fitur tambahan seperti unduh laporan.</p>
+          <button type="button" class="primary-button settings-wide-btn" id="sub-open-paywall">Lihat paket Pro</button>
         </div>
 
         <div class="settings-sub-panel" id="settings-sub-keamanan">
@@ -694,6 +712,16 @@
   </form></dialog>
   <dialog id="debt-dialog"><form id="debt-form" method="dialog"><div class="dialog-heading"><div><span class="eyebrow">CATAT KEWAJIBAN</span><h2>Utang atau piutang</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Catatan<input name="title" required maxlength="120" placeholder="Pinjaman ke Budi" /></label><div class="form-row"><label>Jenis<select name="kind"><option value="debt_payable">Utang saya</option><option value="debt_receivable">Piutang saya</option></select></label><label>Jumlah (Rp)<input name="amount" type="number" min="1" required /></label></div><label>Tanggal<input name="record_date" type="date" required /></label><button class="primary-button submit-button" value="default">Simpan catatan</button></form></dialog>
 
+  <dialog id="paywall-dialog">
+    <div class="settings-body">
+      <div class="dialog-heading">
+        <div><span class="eyebrow">LACAK DUIT PRO</span><h2>Buka fitur Pro</h2></div>
+        <button type="button" class="close-button" id="paywall-close" aria-label="Tutup">×</button>
+      </div>
+      <div id="paywall-body"></div>
+    </div>
+  </dialog>
+
   <dialog id="report-dialog">
     <form id="report-form" method="dialog">
       <div class="dialog-heading">
@@ -762,5 +790,6 @@
   <script src="js/11-admin-analytics.js"></script>
   <script src="js/12-settings.js"></script>
   <script src="js/13-share.js"></script>
+  <script src="js/14-subscription.js"></script>
 </body>
 </html>

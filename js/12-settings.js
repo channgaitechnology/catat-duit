@@ -10,7 +10,8 @@ const settingsTitle = document.querySelector('#settings-title');
 const SETTINGS_TITLES = {
   profil: '👤 Profil',
   keamanan: '🔒 Keamanan Akun',
-  bahasa: '🌐 Bahasa / Language'
+  bahasa: '🌐 Bahasa / Language',
+  langganan: '⭐ Langganan'
 };
 
 function setSettingsMessage(text = '', type = '', target = '#settings-account-msg') {
@@ -41,6 +42,7 @@ function openSettingsSub(name) {
   }
   if (name === 'bahasa') highlightLanguageButtons();
   if (name === 'profil') fillProfilePanel();
+  if (name === 'langganan' && typeof fillSubscriptionPanel === 'function') fillSubscriptionPanel();
   setSettingsMessage();
   setSettingsMessage('', '', '#settings-profile-msg');
 }

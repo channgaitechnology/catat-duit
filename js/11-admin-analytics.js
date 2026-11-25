@@ -13,6 +13,8 @@ const ANALYTICS_MAX_PAGES = 20;     // batas atas 20.000 baris per pemuatan
 
 function setPlatformAdmin(flag) {
   isPlatformAdmin = !!flag;
+  if (isPlatformAdmin && typeof onPlatformAdminReady === 'function') onPlatformAdminReady();
+  else if (typeof renderSubscriptionUI === 'function') renderSubscriptionUI();
   const nav = document.querySelector('#nav-analytics');
   if (nav) nav.hidden = !isPlatformAdmin;
   const tab = document.querySelector('#tab-analytics');
@@ -260,5 +262,6 @@ function renderAnalyticsView() {
     </div></div>`;
   host.querySelector('#an-refresh')?.addEventListener('click', loadAnalytics);
   host.querySelector('#an-range')?.addEventListener('change', loadAnalytics);
+  if (typeof renderAdminPaymentsPanel === 'function') renderAdminPaymentsPanel(host);
   loadAnalytics();
 }

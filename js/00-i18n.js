@@ -375,6 +375,7 @@ const I18N_EN = {
   'Bagikan ke:': 'Share to:',
   'Tautan disalin. Tinggal tempel di chat atau media sosial.': 'Link copied. Just paste it into a chat or social media.',
   'Salin tautan ini:': 'Copy this link:',
+  'Bagikan ke:': 'Share via:',
   '✓ Tersimpan': '✓ Saved',
   '👤 Profil': '👤 Profile',
   'Email akun': 'Account email',

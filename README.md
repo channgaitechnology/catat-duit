@@ -49,3 +49,6 @@ Rata-rata menggunakan hingga tiga bulan pengeluaran terakhir yang tercatat. Angk
 
 Autentikasi dan database memakai proyek Supabase Lacak Duit, terpisah dari Dokter Laundry. Database menggunakan kebijakan Row Level Security per akun. Frontend memakai publishable key; jangan menambahkan `service_role` atau secret key ke kode browser.
 
+
+## Langganan Pro
+Paywall, bayar manual, dan panel admin: lihat `docs/langganan-pembayaran.md`. Setup email SMTP: `docs/setup-email-auth.md`.

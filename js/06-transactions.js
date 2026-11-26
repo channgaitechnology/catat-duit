@@ -82,7 +82,7 @@ function renderRows() {
         <div class="tx-group-items" ${isCollapsed ? 'hidden' : ''}>
           ${items.map(r => `
             <div class="transaction-row">
-              <div class="tx-name"><span class="tx-icon ${r.kind === 'income' ? 'income' : ''}">${r.kind === 'income' ? '↙' : '↗'}</span>${escapeHtml(r.title)}</div>
+              <div class="tx-name"><span class="tx-icon ${r.kind === 'income' ? 'income' : ''}">${r.kind === 'income' ? '↙' : '↗'}</span>${escapeHtml(r.title)}${txDetailHtml(r)}</div>
               <span class="tx-category">${escapeHtml(r.category)}</span>
               <span class="tx-date">${new Intl.DateTimeFormat(APP_LOCALE, { day: 'numeric', month: 'short' }).format(new Date(`${r.record_date}T00:00:00`))}</span>
               <span class="tx-amount ${r.kind === 'income' ? 'positive' : ''}">${r.kind === 'income' ? '+' : '−'} ${rupiah(r.amount)}</span>
@@ -123,11 +123,18 @@ function openEditTransaction(id) {
   const editCat = document.querySelector('#edit-tx-category');
   if (editCat) editCat.value = tx.category;
   const editAmount = document.querySelector('#edit-tx-amount');
-  if (editAmount) editAmount.value = tx.amount;
+  if (editAmount) editAmount.value = Number(tx.amount) + Number(tx.discount || 0);
+  const ef = document.querySelector('#edit-transaction-form');
+  if (ef) {
+    const set = (n, v) => { const el = ef.querySelector('[name=' + n + ']'); if (el) el.value = v == null ? '' : v; };
+    set('quantity', tx.quantity); set('unit', tx.unit); set('unit_price', tx.unit_price);
+    set('discount', tx.discount > 0 ? tx.discount : ''); set('discount_type', 'rp');
+  }
   const editDate = document.querySelector('#edit-tx-date');
   if (editDate) editDate.value = tx.record_date;
   const editDialog = document.querySelector('#edit-transaction-dialog');
   if (editDialog) editDialog.showModal();
+  if (ef) updatePricePreview(ef);
 }
 
 const editTxForm = document.querySelector('#edit-transaction-form');
@@ -136,6 +143,8 @@ if (editTxForm) {
     e.preventDefault();
     const d = new FormData(e.currentTarget);
     const id = d.get('id');
+    const pr = readPricing(e.currentTarget);
+    if (!validatePricing(pr)) return;
     const previousIndex = records.findIndex(r => String(r.id) === String(id));
     const previousRecord = previousIndex !== -1 ? { ...records[previousIndex] } : null;
 
@@ -145,7 +154,7 @@ if (editTxForm) {
         title: d.get('name'),
         kind: d.get('type'),
         category: d.get('category'),
-        amount: Number(d.get('amount')),
+        ...pricingFields(pr),
         record_date: d.get('date')
       };
       setCachedData(STORAGE_KEY_RECORDS, records);
@@ -160,7 +169,7 @@ if (editTxForm) {
       title: d.get('name'),
       kind: d.get('type'),
       category: d.get('category'),
-      amount: Number(d.get('amount')),
+      ...pricingFields(pr),
       record_date: d.get('date')
     };
 
@@ -209,6 +218,65 @@ async function deleteRecord(id) {
   }
 }
 
+// ===== Volume x harga satuan, diskon =====
+function readPricing(form) {
+  const num = n => { const v = parseFloat(form.querySelector('[name=' + n + ']')?.value); return Number.isFinite(v) ? v : null; };
+  const qty = num('quantity'), up = num('unit_price'), disc = num('discount');
+  const unit = (form.querySelector('[name=unit]')?.value || '').trim().slice(0, 20);
+  const auto = qty !== null && qty > 0 && up !== null && up >= 0;
+  const gross = auto ? Math.round(qty * up) : (num('amount') || 0);
+  let discount = 0;
+  if (disc && disc > 0) {
+    discount = form.querySelector('[name=discount_type]')?.value === 'pct' ? Math.round(gross * Math.min(disc, 100) / 100) : Math.round(disc);
+  }
+  const total = gross - discount;
+  return { auto, gross, discount, total, quantity: auto || (qty && qty > 0) ? qty : null, unit: unit || null, unit_price: up };
+}
+function pricingFields(pr) {
+  return {
+    amount: pr.total,
+    quantity: pr.quantity > 0 ? pr.quantity : null,
+    unit: pr.unit,
+    unit_price: pr.quantity > 0 && pr.unit_price !== null ? pr.unit_price : null,
+    discount: pr.discount > 0 ? pr.discount : null
+  };
+}
+function updatePricePreview(form) {
+  const pr = readPricing(form);
+  const amountEl = form.querySelector('[name=amount]');
+  if (amountEl) {
+    amountEl.readOnly = pr.auto;
+    if (pr.auto) amountEl.value = pr.gross;
+  }
+  const box = form.querySelector('[data-price-preview]');
+  if (!box) return;
+  if (pr.gross <= 0) { box.hidden = true; return; }
+  const q = pr.auto ? `${pr.quantity} ${pr.unit || ''} × ${rupiah(pr.unit_price)} = ${rupiah(pr.gross)}` : '';
+  const dsc = pr.discount > 0 ? `${t('Diskon')}: − ${rupiah(pr.discount)}` : '';
+  box.hidden = false;
+  box.innerHTML = (q ? `<div class="pp-line">${escapeHtml(q)}</div>` : '') + (dsc ? `<div class="pp-line pp-disc">${escapeHtml(dsc)}</div>` : '') +
+    `<div class="pp-total">${escapeHtml(t('Total'))}: <b>${rupiah(Math.max(pr.total, 0))}</b></div>`;
+}
+function txDetailHtml(r) {
+  const parts = [];
+  if (r.quantity && r.unit_price != null) parts.push(`${Number(r.quantity)} ${escapeHtml(r.unit || '')} × ${rupiah(r.unit_price)}`);
+  else if (r.quantity) parts.push(`${Number(r.quantity)} ${escapeHtml(r.unit || '')}`);
+  if (r.discount > 0) parts.push(`${escapeHtml(t('Diskon'))} ${rupiah(r.discount)}`);
+  return parts.length ? `<small class="tx-detail">${parts.join(' · ')}</small>` : '';
+}
+['#transaction-form', '#edit-transaction-form'].forEach(sel => {
+  const f = document.querySelector(sel);
+  if (!f) return;
+  ['input', 'change'].forEach(ev => f.addEventListener(ev, e => {
+    if (e.target.matches('[name=quantity],[name=unit_price],[name=discount],[name=discount_type],[name=amount]')) updatePricePreview(f);
+  }));
+});
+function validatePricing(pr) {
+  if (pr.gross <= 0) { showToast('Isi jumlah atau volume dan harga satuan.', 'warning'); return false; }
+  if (pr.total <= 0) { showToast('Diskon tidak boleh melebihi harga asal.', 'warning'); return false; }
+  return true;
+}
+
 function resetCatatForm() {
   const form = document.querySelector('#transaction-form');
   if (form) form.reset();
@@ -217,13 +285,21 @@ function resetCatatForm() {
   if (dateInput) dateInput.value = today();
   const nameInput = form ? form.querySelector('[name=name]') : null;
   if (nameInput) nameInput.value = '';
+  if (form) updatePricePreview(form);
 }
 
 // Form catat transaksi kini halaman tersendiri (tab "Catat"), bukan popup
+function focusCatatFirstField() {
+  [60, 250].forEach(ms => setTimeout(() => {
+    const el = document.querySelector('#view-catat.active #transaction-form [name=name]') || document.querySelector('#transaction-form [name=name]');
+    if (el && el.offsetParent !== null && !document.querySelector('dialog[open]')) el.focus({ preventScroll: true });
+  }, ms));
+}
+
 function openAddTransactionDialog() {
   resetCatatForm();
   if (typeof switchTab === 'function') switchTab('catat');
-  setTimeout(() => document.querySelector('#transaction-form [name=name]')?.focus(), 80);
+  focusCatatFirstField();
 }
 
 document.querySelector('#add-transaction')?.addEventListener('click', openAddTransactionDialog);
@@ -234,13 +310,15 @@ if (txForm) {
     e.preventDefault();
     const d = new FormData(e.currentTarget);
     const tempId = 'temp-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+    const pr = readPricing(e.currentTarget);
+    if (!validatePricing(pr)) return;
     const newRecord = {
       id: tempId,
       user_id: activeUser.id,
       title: d.get('name'),
       kind: d.get('type'),
       category: d.get('category'),
-      amount: Number(d.get('amount')),
+      ...pricingFields(pr),
       record_date: d.get('date'),
       settled: false,
       created_at: new Date().toISOString()
@@ -258,6 +336,10 @@ if (txForm) {
         kind: newRecord.kind,
         category: newRecord.category,
         amount: newRecord.amount,
+        quantity: newRecord.quantity,
+        unit: newRecord.unit,
+        unit_price: newRecord.unit_price,
+        discount: newRecord.discount,
         record_date: newRecord.record_date
       }, tempId });
       showToast('Transaksi tersimpan lokal (Mode Offline).', 'warning');
@@ -271,6 +353,10 @@ if (txForm) {
         kind: newRecord.kind,
         category: newRecord.category,
         amount: newRecord.amount,
+        quantity: newRecord.quantity,
+        unit: newRecord.unit,
+        unit_price: newRecord.unit_price,
+        discount: newRecord.discount,
         record_date: newRecord.record_date
       }).select();
 
@@ -289,6 +375,10 @@ if (txForm) {
         kind: newRecord.kind,
         category: newRecord.category,
         amount: newRecord.amount,
+        quantity: newRecord.quantity,
+        unit: newRecord.unit,
+        unit_price: newRecord.unit_price,
+        discount: newRecord.discount,
         record_date: newRecord.record_date
       }, tempId });
       showToast('Koneksi terputus. Transaksi disimpan lokal dan akan disinkronkan saat online.', 'warning');
@@ -297,38 +387,59 @@ if (txForm) {
 }
 
 // Keyboard navigation untuk form transaksi (Up, Down, Home, End, Enter)
+// - Kolom isian: ↑/↓ pindah kolom; Home/End lompat ke kolom pertama/terakhir saat kursor di awal/akhir teks
+// - Pilihan (kategori/jenis/diskon): ↑/↓/Home/End memilih opsi seperti biasa; Tab/Enter untuk pindah
 function setupFormKeyboardNavigation(formSelector) {
   const form = document.querySelector(formSelector);
   if (!form) return;
   form.addEventListener('keydown', (e) => {
-    const focusableSelectors = 'input:not([type="hidden"]), select, button[type="submit"], .submit-button';
-    const fields = Array.from(form.querySelectorAll(focusableSelectors)).filter(el => !el.disabled && el.offsetParent !== null);
-    const currentIndex = fields.indexOf(document.activeElement);
-    if (currentIndex === -1) return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const fields = Array.from(form.querySelectorAll('input:not([type="hidden"]), select, button[type="submit"], .submit-button')).filter(el => !el.disabled && el.offsetParent !== null);
+    const el = document.activeElement;
+    const idx = fields.indexOf(el);
+    if (idx === -1) return;
+    const tag = el.tagName.toLowerCase();
+    const type = (el.type || '').toLowerCase();
+    const go = (i) => { e.preventDefault(); const n = fields[(i + fields.length) % fields.length]; n.focus(); if (n.select && n.tagName === 'INPUT' && !['date'].includes(n.type)) { try { n.select(); } catch (_) {} } };
 
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      const nextIndex = (currentIndex + 1) % fields.length;
-      fields[nextIndex].focus();
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      const prevIndex = (currentIndex - 1 + fields.length) % fields.length;
-      fields[prevIndex].focus();
-    } else if (e.key === 'Home' && !['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
-      e.preventDefault();
-      fields[0].focus();
-    } else if (e.key === 'End' && !['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) {
-      e.preventDefault();
-      fields[fields.length - 1].focus();
-    } else if (e.key === 'Enter') {
-      if (document.activeElement.tagName.toLowerCase() === 'button' && document.activeElement.type === 'submit') {
-        return;
+    if (tag === 'select') {
+      if (e.key === 'Enter') { go(idx + 1); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End') {
+        // Memilih opsi (kategori/jenis); di opsi paling akhir/awal, panah lanjut ke kolom sebelah/berikutnya
+        const opts = Array.from(el.options).filter(o => !o.disabled && o.value !== '__add_new__' && o.value !== '__manage_categories__');
+        let i = opts.findIndex(o => o.value === el.value);
+        if (e.key === 'ArrowDown' && i >= opts.length - 1) { go(idx + 1); return; }
+        if (e.key === 'ArrowUp' && i <= 0) { go(idx - 1); return; }
+        e.preventDefault();
+        if (e.key === 'ArrowDown') i += 1; else if (e.key === 'ArrowUp') i -= 1; else if (e.key === 'Home') i = 0; else i = opts.length - 1;
+        if (opts[i] && opts[i].value !== el.value) { el.value = opts[i].value; el.dispatchEvent(new Event('change', { bubbles: true })); }
       }
-      if (currentIndex === fields.length - 2 || currentIndex === fields.length - 1) {
-        return;
-      }
-      e.preventDefault();
-      fields[currentIndex + 1].focus();
+      return;
+    }
+    if (tag === 'button') {
+      if (e.key === 'ArrowDown') go(idx + 1);
+      else if (e.key === 'ArrowUp') go(idx - 1);
+      else if (e.key === 'Home') go(0);
+      else if (e.key === 'End') go(fields.length - 1);
+      return;
+    }
+    // input
+    if (e.key === 'Enter') {
+      if (idx >= fields.length - 1) return;
+      go(idx + 1);
+      return;
+    }
+    if (e.key === 'ArrowDown') { if (type !== 'date') go(idx + 1); else if (e.shiftKey) go(idx + 1); return; }
+    if (e.key === 'ArrowUp') { if (type !== 'date') go(idx - 1); else if (e.shiftKey) go(idx - 1); return; }
+    if (e.key === 'Home' || e.key === 'End') {
+      if (type === 'date') return;
+      let atEdge = true;
+      try {
+        if (type === 'text' || type === '') {
+          atEdge = e.key === 'Home' ? (el.selectionStart === 0 && el.selectionEnd === 0) : (el.selectionStart === el.value.length);
+        }
+      } catch (_) {}
+      if (atEdge) go(e.key === 'Home' ? 0 : fields.length - 1);
     }
   });
 }

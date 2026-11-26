@@ -167,6 +167,7 @@
         <div class="top-actions">
           <span id="network-badge" class="network-badge online" title="Status koneksi">● Online</span>
           <span class="today" id="today"></span>
+          <button id="open-notes-top" class="settings-button" type="button" aria-label="Catatan" title="Catatan"><span class="settings-button-icon">📔</span><span class="settings-button-text">Catatan</span></button>
           <button id="open-share-top" class="settings-button share-top-button" type="button" aria-label="Bantu keluarga & teman" title="Bantu keluarga & teman"><span class="settings-button-icon">🤝</span><span class="settings-button-text">Bantu keluarga &amp; teman</span></button>
           <button id="open-settings-top" class="settings-button" type="button" aria-label="Pengaturan" title="Pengaturan"><span class="settings-button-icon">⚙</span><span class="settings-button-text">Pengaturan</span></button>
           <button id="auth-logout-top" class="logout-button topbar-logout" type="button">Keluar</button>
@@ -454,10 +455,10 @@
                 </select>
               </label>
             </div>
-            <div class="form-row">
-              <label>Jumlah (Rp)<input name="amount" type="number" min="1" inputmode="numeric" placeholder="150000" required /></label>
-              <label>Tanggal<input name="date" type="date" required /></label>
-            </div>
+            <div class="form-row form-row-3"><label>Volume (opsional)<input name="quantity" type="number" min="0" step="any" inputmode="decimal" placeholder="2" /></label><label>Satuan (opsional)<input name="unit" maxlength="20" placeholder="liter, kg, pcs" /></label><label>Harga satuan (Rp)<input name="unit_price" type="number" min="0" step="any" inputmode="numeric" placeholder="2000" /></label></div>
+            <div class="form-row"><label>Jumlah / harga asal (Rp)<input name="amount" type="number" min="1" step="any" inputmode="numeric" placeholder="150000" /></label><label>Diskon (opsional)<span class="discount-wrap"><input name="discount" type="number" min="0" step="any" inputmode="decimal" placeholder="0" /><select name="discount_type" aria-label="Jenis diskon"><option value="rp">Rp</option><option value="pct">%</option></select></span></label></div>
+            <div class="price-preview" data-price-preview hidden></div>
+            <label>Tanggal<input name="date" type="date" required /></label>
             <button class="primary-button submit-button" type="submit">Simpan transaksi <span>→</span></button>
           </form>
         </div>
@@ -501,8 +502,28 @@
     </nav>
   </div>
 
-  <dialog id="edit-transaction-dialog"><form method="dialog" id="edit-transaction-form"><input type="hidden" name="id" id="edit-tx-id" /><div class="dialog-heading"><div><span class="eyebrow">PERBARUI ENERGI</span><h2>Edit Transaksi</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Nama transaksi<input name="name" id="edit-tx-name" required /></label><div class="form-row"><label>Jenis<select name="type" id="edit-tx-type"><option value="expense">Uang keluar</option><option value="income">Uang masuk</option></select></label><label>Kategori<select name="category" id="edit-tx-category"><option>Makan & minum</option><option>Tempat tinggal</option><option>Transportasi</option><option>Gaji</option><option>Freelance</option><option>Lainnya</option><option value="__add_new__">+ Tambah kategori baru...</option></select></label></div><div class="form-row"><label>Jumlah (Rp)<input name="amount" id="edit-tx-amount" type="number" min="1" required /></label><label>Tanggal<input name="date" id="edit-tx-date" type="date" required /></label></div><button class="primary-button submit-button" value="default">Simpan Perubahan <span>✓</span></button></form></dialog>
+  <dialog id="edit-transaction-dialog"><form method="dialog" id="edit-transaction-form"><input type="hidden" name="id" id="edit-tx-id" /><div class="dialog-heading"><div><span class="eyebrow">PERBARUI ENERGI</span><h2>Edit Transaksi</h2></div><button type="button" class="close-button" formnovalidate aria-label="Tutup">×</button></div><label>Nama transaksi<input name="name" id="edit-tx-name" required /></label><div class="form-row"><label>Jenis<select name="type" id="edit-tx-type"><option value="expense">Uang keluar</option><option value="income">Uang masuk</option></select></label><label>Kategori<select name="category" id="edit-tx-category"><option>Makan & minum</option><option>Tempat tinggal</option><option>Transportasi</option><option>Gaji</option><option>Freelance</option><option>Lainnya</option><option value="__add_new__">+ Tambah kategori baru...</option></select></label></div><div class="form-row form-row-3"><label>Volume (opsional)<input name="quantity" type="number" min="0" step="any" inputmode="decimal" placeholder="2" /></label><label>Satuan (opsional)<input name="unit" maxlength="20" placeholder="liter, kg, pcs" /></label><label>Harga satuan (Rp)<input name="unit_price" type="number" min="0" step="any" inputmode="numeric" placeholder="2000" /></label></div><div class="form-row"><label>Jumlah / harga asal (Rp)<input name="amount" id="edit-tx-amount" type="number" min="1" step="any" /></label><label>Diskon (opsional)<span class="discount-wrap"><input name="discount" type="number" min="0" step="any" inputmode="decimal" placeholder="0" /><select name="discount_type" aria-label="Jenis diskon"><option value="rp">Rp</option><option value="pct">%</option></select></span></label></div><div class="price-preview" data-price-preview hidden></div><label>Tanggal<input name="date" id="edit-tx-date" type="date" required /></label><button class="primary-button submit-button" value="default">Simpan Perubahan <span>✓</span></button></form></dialog>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <dialog id="notes-dialog">
+    <div class="settings-body notes-body">
+      <div class="dialog-heading"><div><span class="eyebrow">BUKU CATATAN</span><h2>📔 Catatan</h2></div><button type="button" class="close-button" id="notes-close" aria-label="Tutup">×</button></div>
+      <div id="notes-home">
+        <button type="button" class="primary-button notes-new" id="notes-new-btn">+ Catatan Baru</button>
+        <div class="notes-grid" id="notes-grid"></div>
+      </div>
+      <div id="notes-editor-view" hidden>
+        <button type="button" class="settings-sub-back" id="notes-back-btn">‹ Kembali</button>
+        <label class="note-label">Judul<input id="note-judul" class="note-input" placeholder="cth. Daftar belanja, Ide usaha" maxlength="80" /></label>
+        <span class="note-label">Isi Catatan</span>
+        <div class="note-toolbar"><button type="button" class="note-tb-btn" data-note-cmd="bold" title="Tebal" aria-label="Tebal"><b>B</b></button><button type="button" class="note-tb-btn" data-note-cmd="italic" title="Miring" aria-label="Miring"><i>I</i></button><button type="button" class="note-tb-btn" data-note-cmd="underline" title="Garis Bawah" aria-label="Garis Bawah"><u>U</u></button><span class="note-tb-sep"></span><button type="button" class="note-tb-btn" data-note-cmd="insertUnorderedList" title="Bullet" aria-label="Bullet">• ≡</button><button type="button" class="note-tb-btn" data-note-cmd="insertOrderedList" title="Penomoran" aria-label="Penomoran">1. ≡</button><button type="button" class="note-tb-btn" data-note-cmd="check" title="Kotak Centang" aria-label="Kotak Centang">☑</button><span class="note-tb-sep"></span><button type="button" class="note-tb-btn" data-note-cmd="image" title="Tempel Foto" aria-label="Tempel Foto">📷</button></div>
+        <div class="note-toolbar"><span class="note-tb-hl-label">Stabilo:</span><button type="button" class="note-hl-swatch" style="background:#FFF176;" data-note-hl="#FFF176" title="Kuning" aria-label="Stabilo Kuning"></button><button type="button" class="note-hl-swatch" style="background:#AED581;" data-note-hl="#AED581" title="Hijau" aria-label="Stabilo Hijau"></button><button type="button" class="note-hl-swatch" style="background:#81D4FA;" data-note-hl="#81D4FA" title="Biru" aria-label="Stabilo Biru"></button><button type="button" class="note-hl-swatch" style="background:#F48FB1;" data-note-hl="#F48FB1" title="Pink" aria-label="Stabilo Pink"></button><button type="button" class="note-hl-swatch" style="background:#FFB74D;" data-note-hl="#FFB74D" title="Oranye" aria-label="Stabilo Oranye"></button><button type="button" class="note-hl-swatch note-hl-clear" data-note-hl="transparent" title="Hapus Stabilo" aria-label="Hapus Stabilo">✕</button></div>
+        <input type="file" id="note-image-input" accept="image/*" hidden />
+        <div id="note-isi" class="note-editor" contenteditable="true" data-placeholder="Tulis catatan di sini..."></div>
+        <div id="note-dates-info" class="note-dates"></div>
+        <div class="note-actions"><button type="button" class="primary-button" id="note-save-btn">Simpan</button><button type="button" class="secondary-button danger-ghost" id="note-delete-btn">🗑️ Hapus</button></div>
+      </div>
+    </div>
+  </dialog>
   <!-- Panel Pengaturan (pola Dokter Laundry): grid kategori -> panel per kategori -->
   <dialog id="settings-dialog">
     <div class="settings-body">
@@ -762,5 +783,6 @@
   <script src="js/11-admin-analytics.js"></script>
   <script src="js/12-settings.js"></script>
   <script src="js/13-share.js"></script>
+  <script src="js/14-notes.js"></script>
 </body>
 </html>

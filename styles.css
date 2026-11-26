@@ -1301,3 +1301,55 @@ html.desktop-site-mode .auth-screen {
   .network-badge { font-size: 9px; }
 }
 .share-label { font: 700 11px var(--sans); color: #738075; margin: 0 0 8px; }
+
+/* ===== Volume, harga satuan, diskon ===== */
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 12px; }
+.discount-wrap { display: flex; gap: 6px; align-items: center; }
+#transaction-form .discount-wrap input, #edit-transaction-form .discount-wrap input { flex: 1; min-width: 0; }
+#transaction-form .discount-wrap select, #edit-transaction-form .discount-wrap select { flex: 0 0 62px; width: 62px; }
+.price-preview { background: #f2f7ec; border: 1px solid #dbe8cc; border-radius: 10px; padding: 10px 12px; margin: 0 0 14px; font-size: 12.5px; color: #3d5442; line-height: 1.6; }
+.price-preview .pp-disc { color: #b24c3d; }
+.price-preview .pp-total { font-size: 14px; }
+.price-preview .pp-total b { font: 700 16px var(--display); color: var(--deep); }
+.tx-detail { display: block; font-weight: 500; font-size: 10px; color: #8a968c; margin-top: 2px; }
+.tx-name { flex-wrap: wrap; }
+#edit-transaction-form { padding: 26px; }
+#edit-transaction-form label { display: block; font-size: 10px; color: #738075; margin-bottom: 14px; }
+#edit-transaction-form input, #edit-transaction-form select { display: block; width: 100%; height: 39px; border: 1px solid #e4e9e2; border-radius: 6px; margin-top: 6px; padding: 0 10px; font: 12px var(--sans); background: #fff; }
+@media (max-width: 560px) { .form-row-3 { grid-template-columns: 1fr 1fr; } .form-row-3 label:last-child { grid-column: 1 / -1; } }
+
+/* ===== Catatan ===== */
+#notes-dialog { width: min(560px, calc(100% - 24px)); max-height: 92vh; }
+.notes-body { max-height: 88vh; overflow-y: auto; }
+.notes-new { width: 100%; margin: 4px 0 14px; }
+.notes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.note-book { aspect-ratio: 3/4; border-radius: 5px 12px 12px 5px; padding: 12px 12px 10px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; text-align: left; box-shadow: 2px 3px 8px rgba(29,51,40,.25), inset -4px 0 0 rgba(0,0,0,.16); border: 0; cursor: pointer; font-family: var(--sans); }
+.note-book:active { filter: brightness(.94); }
+.note-book-title { font-size: 13px; font-weight: 700; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
+.note-book-dates { font-size: 8.5px; line-height: 1.5; opacity: .9; }
+.notes-empty { font-size: 12.5px; color: #738075; text-align: center; padding: 18px 6px; grid-column: 1 / -1; }
+.note-label { display: block; font-size: 11px; color: #738075; margin: 10px 0 6px; }
+.note-input { display: block; width: 100%; height: 40px; border: 1px solid #e4e9e2; border-radius: 8px; margin-top: 6px; padding: 0 10px; font: 13px var(--sans); }
+.note-toolbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; padding: 6px; background: #f2f5ee; border-radius: 10px; }
+.note-tb-btn { min-width: 34px; height: 32px; padding: 0 8px; border: 1.5px solid #e4e9e2; background: #fff; border-radius: 8px; font-size: 13.5px; color: var(--ink); cursor: pointer; }
+.note-tb-btn:active { background: #eaf1e2; border-color: #9bb87c; }
+.note-tb-sep { width: 1px; align-self: stretch; background: #dfe5da; margin: 0 2px; }
+.note-tb-hl-label { font-size: 11px; color: #738075; font-weight: 700; margin-right: 2px; }
+.note-hl-swatch { width: 26px; height: 26px; border-radius: 6px; border: 1.5px solid rgba(0,0,0,.15); cursor: pointer; padding: 0; }
+.note-hl-clear { background: #fff; color: #738075; font-size: 12px; }
+.note-editor { min-height: 180px; max-height: 340px; overflow-y: auto; border: 1.5px solid #e4e9e2; border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.55; background: #fff; margin: 6px 0 4px; }
+.note-editor:focus { outline: none; border-color: #9bb87c; }
+.note-editor:empty:before { content: attr(data-placeholder); color: #9aa39c; }
+.note-editor img { max-width: 100%; border-radius: 8px; margin: 4px 0; display: block; }
+.note-editor ul, .note-editor ol { padding-left: 22px; margin: 4px 0; }
+.note-check-line { display: flex; align-items: flex-start; gap: 6px; margin: 2px 0; }
+.note-check-line input[type=checkbox] { width: 16px; height: 16px; margin: 3px 0 0; flex: 0 0 16px; }
+.note-dates { font-size: 11px; color: #738075; margin: 6px 0 12px; }
+.note-actions { display: flex; gap: 8px; }
+.note-actions .primary-button { flex: 2; }
+.note-actions .secondary-button { flex: 1; }
+
+/* ===== Tampilan lebih besar di web/desktop ===== */
+@media (min-width: 801px) { html { zoom: 1.2; } }
+@media (min-width: 1500px) { html { zoom: 1.35; } }
+@media (min-width: 1900px) { html { zoom: 1.55; } }

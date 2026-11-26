@@ -71,6 +71,7 @@ function switchTab(name) {
     if (typeof populateCategorySelects === 'function') populateCategorySelects();
     const di = document.querySelector('#transaction-form [name=date]');
     if (di && !di.value) di.value = today();
+    if (typeof focusCatatFirstField === 'function') focusCatatFirstField();
   } else if (name === 'analytics') {
     if (typeof renderAnalyticsView === 'function') renderAnalyticsView();
   }

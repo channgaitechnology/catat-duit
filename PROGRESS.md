@@ -56,3 +56,9 @@ Catat Duit belum meniru konfigurasi tersebut. Untuk melayani email Auth ke pengg
 - Identifier internal sengaja tidak diubah (kunci localStorage `catatduit_*`, `window.catatduit`, nama repo) agar data lokal dan hook tes tetap aman.
 - Cache service worker: `lacakduit-v22`.
 - Langkah manual: lihat bagian 3 di `docs/setup-supabase-url.md` (Netlify domain, Supabase Site URL/Redirect URLs, Resend).
+
+## 26 Nov 2026 — Catatan, volume/harga satuan/diskon, navigasi keyboard
+- Tabel `notes` (RLS per user, batas 200 catatan/user, isi maks 1,4 juta karakter) + `js/14-notes.js`.
+- Kolom baru `finance_records`: `quantity`, `unit`, `unit_price`, `discount` (`amount` tetap total akhir setelah diskon).
+- Form Catat: kursor otomatis di kolom pertama; panah atas/bawah, Home, End untuk pindah kolom & memilih kategori.
+- Desktop: tampilan diperbesar (CSS `zoom` di layar >= 801px).

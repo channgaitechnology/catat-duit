@@ -150,7 +150,7 @@ function renderSpendingBarChart(totalExpense) {
           <div class="h-bar-fill" style="width: ${percentage}%; background: ${color};"></div>
         </div>
         <div class="h-bar-bottom">
-          <span class="h-bar-label">${escapeHtml(catName)} <span class="h-bar-view-hint">· Lihat rincian ↗</span></span>
+          <span class="h-bar-label"><span class="h-bar-view-hint">· Lihat rincian ↗</span></span>
           <span class="h-bar-percentage">${percentage}% dari total pengeluaran</span>
         </div>
       </div>

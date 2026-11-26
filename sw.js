@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lacakduit-v24';
+const CACHE_NAME = 'lacakduit-v25';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

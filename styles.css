@@ -1353,3 +1353,12 @@ html.desktop-site-mode .auth-screen {
 @media (min-width: 801px) { html { zoom: 1.2; } }
 @media (min-width: 1500px) { html { zoom: 1.35; } }
 @media (min-width: 1900px) { html { zoom: 1.55; } }
+
+/* ===== Kolom cari kategori ===== */
+.cat-combo { position: relative; display: block; }
+#transaction-form .cat-combo-input, #edit-transaction-form .cat-combo-input { display: block; width: 100%; height: 39px; border: 1px solid #e4e9e2; border-radius: 6px; margin-top: 6px; padding: 0 10px; font: 12px var(--sans); background: #fff; }
+.cat-combo-list { position: absolute; z-index: 60; left: 0; right: 0; top: calc(100% + 2px); margin: 0; padding: 4px; list-style: none; max-height: 240px; overflow-y: auto; background: #fff; border: 1px solid #cfdcc3; border-radius: 10px; box-shadow: 0 10px 30px rgba(29,51,40,.18); }
+.cat-combo-list li { padding: 9px 10px; border-radius: 7px; font-size: 13px; color: var(--ink); cursor: pointer; }
+.cat-combo-list li.active { background: #eaf1e2; font-weight: 600; }
+.cat-combo-list li.special { color: #5f7a4a; border-top: 1px dashed #e4e9e2; }
+.cat-combo-list li.empty { color: #9aa39c; cursor: default; }

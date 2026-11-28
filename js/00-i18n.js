@@ -365,6 +365,8 @@ const I18N_EN = {
   'Lunas': 'Settled',
   'Profil': 'Profile',
   'Bantu keluarga & teman': 'Help family & friends',
+  'Ketik untuk mencari kategori...': 'Type to search categories...',
+  'Tidak ada kategori yang cocok': 'No matching category',
   'Catatan': 'Notes',
   'BUKU CATATAN': 'NOTEBOOK',
   '+ Catatan Baru': '+ New Note',

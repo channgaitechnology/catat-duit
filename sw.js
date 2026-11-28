@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lacakduit-v25';
+const CACHE_NAME = 'lacakduit-v26';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -19,6 +19,7 @@ const STATIC_ASSETS = [
   '/js/12-settings.js',
   '/js/13-share.js',
   '/js/14-notes.js',
+  '/js/15-category-combobox.js',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
